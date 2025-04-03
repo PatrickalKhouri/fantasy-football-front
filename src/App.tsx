@@ -1,14 +1,20 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import SignIn from './pages/SignIn';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="App">
-        <Navbar />
-            Fantasy Brasileirao
-      </div>
+      <Routes>
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/" element={
+          <div className="App">
+            <Navbar />
+            {/* Home page content will go here */}
+          </div>
+        } />
+      </Routes>
     </Router>
   );
 };
