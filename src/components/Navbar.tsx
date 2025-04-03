@@ -33,6 +33,8 @@ const Navbar: React.FC = () => {
         {/* Sign-in button on the right */}
         <Button 
           variant="outlined"
+          component={Link}
+          to="/signin"
           sx={{
             borderColor: '#1a1a1a',
             color: '#1a1a1a',
@@ -44,7 +46,7 @@ const Navbar: React.FC = () => {
             },
           }}
         >
-          SIGN IN
+          ENTRAR
         </Button>
       </Toolbar>
     </AppBar>
