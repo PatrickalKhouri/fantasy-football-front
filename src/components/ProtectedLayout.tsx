@@ -1,20 +1,21 @@
-import { Navigate, Outlet } from 'react-router-dom';
+// ProtectedLayout.tsx
 import { useAuth } from '../context/AuthContext';
-import Navbar from './Navbar';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 const ProtectedLayout = () => {
   const { user } = useAuth();
+  const location = useLocation();
 
   if (!user) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/signin" replace state={{ from: location }} />;
   }
 
-  return (
-    <div className="App">
-      <Navbar />
-      <Outlet /> {/* This renders the nested routes */}
-    </div>
-  );
+  // Redirect to /welcome if trying to access root
+  if (location.pathname === '/') {
+    return <Navigate to="/welcome" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedLayout;
