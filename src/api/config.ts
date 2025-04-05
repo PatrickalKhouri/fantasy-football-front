@@ -11,6 +11,9 @@ const endpoints = {
     profile: `${API_BASE_URL}/users/profile`,
     update: `${API_BASE_URL}/users/update`,
   },
+  fantasyLeagues: {
+    create: `${API_BASE_URL}/fantasy-leagues`
+  }
 };
 
 const headers = {

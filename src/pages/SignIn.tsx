@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useLogIn } from '../api/authQueries';
-import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
