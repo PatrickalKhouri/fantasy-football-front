@@ -4,18 +4,28 @@ import {
   TextField, 
   Button, 
   Typography, 
-  Link 
+  Link,
+  CircularProgress
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/pt-br';
+import { useMutation } from '@tanstack/react-query';
 import Navbar from '../components/Navbar';
+import { useSignUp } from '../api/authQueries';
 
-// Set Brazilian Portuguese locale
 dayjs.locale('pt-br');
+
+interface SignUpFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  birthDate: string;
+}
 
 const SignUp: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -23,7 +33,7 @@ const SignUp: React.FC = () => {
     password: '',
     firstName: '',
     lastName: '',
-    birthDate: null as dayjs.Dayjs | null,
+    birthDate: null as Dayjs | null,
   });
 
   const [errors, setErrors] = useState({
@@ -32,6 +42,32 @@ const SignUp: React.FC = () => {
     firstName: false,
     lastName: false,
     birthDate: false,
+  });
+
+  const navigate = useNavigate();
+  const { mutate: signUp, isPending, isError, error } = useSignUp();
+
+  const signUpMutation = useMutation({
+    mutationFn: async (userData: SignUpFormData) => {
+      const response = await fetch('http://localhost:4000/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      navigate('/signin', { 
+        state: { success: 'Registration successful! Please login.' } 
+      });
+    },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +79,7 @@ const SignUp: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate all fields
     const newErrors = {
       email: !formData.email,
       password: !formData.password,
@@ -54,10 +91,15 @@ const SignUp: React.FC = () => {
     setErrors(newErrors);
 
     if (Object.values(newErrors).some(error => error)) return;
-
-    console.log('Form submitted:', {
+    signUp({
       ...formData,
-      birthDate: formData.birthDate?.format('DD/MM/YYYY'),
+      birthDate: formData.birthDate?.format('YYYY-MM-DD') || '',
+    }, {
+      onSuccess: () => {
+        navigate('/signin', { 
+          state: { success: 'Registration successful! Please login.' } 
+        });
+      }
     });
   };
 
@@ -80,40 +122,15 @@ const SignUp: React.FC = () => {
             Crie sua conta
           </Typography>
           
-          <Typography variant="body1" sx={{ mb: 4, textAlign: 'center' }}>
-            Crie sua conta e participe do melhor jogo de Fantasy do Campeonato Brasileiro
-          </Typography>
+          {signUpMutation.isError && (
+            <Typography color="error" sx={{ mb: 2 }}>
+              {signUpMutation.error instanceof Error 
+                ? signUpMutation.error.message 
+                : 'Registration failed'}
+            </Typography>
+          )}
           
           <Box component="form" sx={{ width: '100%' }} onSubmit={handleSubmit}>
-            <TextField
-              name="email"
-              label="Email"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              placeholder="Digite seu email"
-              value={formData.email}
-              onChange={handleChange}
-              error={errors.email}
-              helperText={errors.email ? "Email é obrigatório" : ""}
-              required
-            />
-            
-            <TextField
-              name="password"
-              label="Senha"
-              type="password"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              placeholder="Digite sua senha"
-              value={formData.password}
-              onChange={handleChange}
-              error={errors.password}
-              helperText={errors.password ? "Senha é obrigatória" : ""}
-              required
-            />
-            
             <Box sx={{ display: 'flex', gap: 2 }}>
               <TextField
                 name="firstName"
@@ -144,6 +161,36 @@ const SignUp: React.FC = () => {
               />
             </Box>
             
+            <TextField
+              name="email"
+              label="Email"
+              type="email"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              placeholder="Digite seu email"
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+              helperText={errors.email ? "Email é obrigatório" : ""}
+              required
+            />
+            
+            <TextField
+              name="password"
+              label="Senha"
+              type="password"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              placeholder="Digite sua senha"
+              value={formData.password}
+              onChange={handleChange}
+              error={errors.password}
+              helperText={errors.password ? "Senha é obrigatória" : ""}
+              required
+            />
+            
             <DatePicker
               label="Data de Nascimento"
               value={formData.birthDate}
@@ -164,6 +211,7 @@ const SignUp: React.FC = () => {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={signUpMutation.isPending}
               sx={{
                 mt: 3,
                 mb: 2,
@@ -172,7 +220,11 @@ const SignUp: React.FC = () => {
                 '&:hover': { backgroundColor: '#333' }
               }}
             >
-              Criar Conta
+              {signUpMutation.isPending ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Criar Conta'
+              )}
             </Button>
           </Box>
           
