@@ -106,8 +106,6 @@ const SignUp: React.FC = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Navbar />
-        
         <Box sx={{
           display: 'flex',
           flexDirection: 'column',

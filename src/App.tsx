@@ -12,26 +12,26 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
-          {/* Public routes - only signin/signup */}
-          <Route element={<PublicRoute />}>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-          </Route>
+        <Navbar />
+          <Routes>
+            {/* Public routes - only signin/signup */}
+            <Route element={<PublicRoute />}>
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+            </Route>
 
-          <Route element={<ProtectedLayout />}>
-            <Route path="/" element={
-              <div className="App">
-                <Navbar />
-                {/* Home page content will go here */}
-              </div>
-            } />
-            <Route path="/welcome" element={<Welcome />} />
-          </Route>
+            <Route element={<ProtectedLayout />}>
+              <Route path="/" element={
+                <div className="App">
+                  {/* Home page content will go here */}
+                </div>
+              } />
+              <Route path="/welcome" element={<Welcome />} />
+            </Route>
 
-          {/* Fallback redirect */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Fallback redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
       </Router>
     </AuthProvider>
   );

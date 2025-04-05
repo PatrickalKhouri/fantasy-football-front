@@ -1,8 +1,6 @@
-import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 
 const Welcome = () => {
   const { user, logout } = useAuth();
