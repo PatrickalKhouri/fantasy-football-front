@@ -12,7 +12,9 @@ const endpoints = {
     update: `${API_BASE_URL}/users/update`,
   },
   fantasyLeagues: {
-    create: `${API_BASE_URL}/fantasy-leagues`
+    create: `${API_BASE_URL}/fantasy-leagues`,
+    get: `${API_BASE_URL}/fantasy-leagues`,
+    myLeagues: `${API_BASE_URL}/fantasy-leagues/my-leagues`
   }
 };
 

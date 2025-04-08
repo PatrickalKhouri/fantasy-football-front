@@ -1,18 +1,32 @@
+// pages/Welcome.tsx
 import { useState } from 'react';
-import { Box, Typography, Button, Stack } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateLeagueModal from '../components/CreateLeagueModal';
+import { UserLeaguesList } from '../components/UserLeaguesList';
+import { useGetMyLeagues } from '../api/leagueQueries';
 
 const Welcome = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Use the React Query hook
+  const { data: leagues, isLoading, isError, error } = useGetMyLeagues();
 
   if (!user) {
     navigate('/signin');
     return null;
   }
+
+  const handleLeagueSelect = (leagueId: number) => {
+    if (leagueId === 0) {
+      setIsModalOpen(true);
+    } else {
+      navigate(`/league/${leagueId}`);
+    }
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -22,12 +36,12 @@ const Welcome = () => {
         alignItems: 'center',
         justifyContent: 'center',
         flexGrow: 1,
-        p: 3,
-        maxWidth: 600,
+        p: { xs: 2, md: 3 },
+        maxWidth: 800,
         mx: 'auto',
         textAlign: 'center'
       }}>
-        <Typography variant="h3" component="h1" sx={{ mb: 3 }}>
+        <Typography variant="h3" component="h1" sx={{ mb: 3, fontSize: { xs: '2rem', md: '3rem' } }}>
           Bem-vindo, {user.firstName} {user.lastName}!
         </Typography>
         
@@ -35,37 +49,18 @@ const Welcome = () => {
           Você está logado com o email: {user.email}
         </Typography>
 
-        <Stack direction="column" spacing={2} sx={{ width: '100%', maxWidth: 300 }}>
-          <Button
-            variant="contained"
-            onClick={() => setIsModalOpen(true)}
-            sx={{
-              px: 4,
-              py: 2,
-              backgroundColor: '#1976d2',
-              '&:hover': { backgroundColor: '#1565c0' }
-            }}
-          >
-            Criar Nova Liga
-          </Button>
-          
-          <Button
-            variant="outlined"
-            onClick={logout}
-            sx={{
-              px: 4,
-              py: 2,
-              borderColor: '#1a1a1a',
-              color: '#1a1a1a',
-              '&:hover': { 
-                backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                borderColor: '#333'
-              }
-            }}
-          >
-            Sair
-          </Button>
-        </Stack>
+        {isLoading ? (
+          <CircularProgress />
+        ) : isError ? (
+          <Typography color="error">
+            {error instanceof Error ? error.message : 'Failed to load leagues'}
+          </Typography>
+        ) : (
+          <UserLeaguesList 
+            leagues={leagues || []} 
+            onLeagueSelect={handleLeagueSelect} 
+          />
+        )}
       </Box>
 
       <CreateLeagueModal 
