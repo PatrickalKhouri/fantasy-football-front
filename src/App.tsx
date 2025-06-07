@@ -7,8 +7,10 @@ import Navbar from './components/Navbar';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Welcome from './pages/Welcome';
-
+import League from './pages/League';
+import { useGetCurrentUser } from './api/authQueries';
 const App: React.FC = () => {
+  const { data: currentUser } = useGetCurrentUser();
   return (
     <AuthProvider>
       <Router>
@@ -27,6 +29,7 @@ const App: React.FC = () => {
                 </div>
               } />
               <Route path="/welcome" element={<Welcome />} />
+              <Route path="/league/:leagueId" element={<League currentUserId={currentUser?.id as number} />} />
             </Route>
 
             {/* Fallback redirect */}
