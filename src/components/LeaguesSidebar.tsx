@@ -10,6 +10,7 @@ type Props = {
 
 const LeagueSidebar: React.FC<Props> = ({ league, currentUserId, onInviteClick }) => {
   const isOwner = currentUserId === league.owner?.id;
+  console.log(isOwner);
 
   return (
     <aside style={{ padding: '1rem', width: '260px', borderRight: '1px solid #ddd' }}>

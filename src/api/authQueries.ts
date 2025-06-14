@@ -60,7 +60,7 @@ export const useGetCurrentUser = () => {
     queryKey: ['currentUser'],
     queryFn: async () => {
       const response = await axios.get(
-        apiConfig.endpoints.users.profile,
+        apiConfig.endpoints.auth.profile,
         {
           withCredentials: true,
           headers: {

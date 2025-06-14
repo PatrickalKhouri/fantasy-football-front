@@ -6,9 +6,9 @@ const endpoints = {
     signup: `${API_BASE_URL}/users/signup`,
     signin: `${API_BASE_URL}/users/signin`,
     refresh: `${API_BASE_URL}/auth/refresh`,
+    profile: `${API_BASE_URL}/auth/profile`,
   },
   users: {
-    profile: `${API_BASE_URL}/users/profile`,
     update: `${API_BASE_URL}/users/update`,
   },
   fantasyLeagues: {
