@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { apiConfig } from './config';
 import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { inviteUserToLeague } from './leagueMutations';
 
 export interface User {
   id: number;
@@ -66,3 +68,10 @@ export interface FantasyLeague {
       staleTime: 5 * 60 * 1000,
     })
 }
+
+export const useInviteUserToLeague = (leagueId: number) => {
+  return useMutation({
+    mutationFn: (email: string) =>
+      inviteUserToLeague({ email, leagueId }),
+  });
+};
