@@ -21,6 +21,7 @@ const App: React.FC = () => {
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/invite/accept" element={<AcceptInvite />} />
             </Route>
 
             <Route element={<ProtectedLayout />}>
@@ -31,7 +32,6 @@ const App: React.FC = () => {
               } />
               <Route path="/welcome" element={<Welcome />} /> 
               <Route path="/league/:leagueId" element={<League currentUserId={currentUser?.id as number} />} />
-              <Route path="/invite/accept" element={<AcceptInvite />} />
             </Route>
 
             {/* Fallback redirect */}

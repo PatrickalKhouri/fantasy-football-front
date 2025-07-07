@@ -1,19 +1,57 @@
 // pages/Welcome.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateLeagueModal from '../components/CreateLeagueModal';
 import { UserLeaguesList } from '../components/UserLeaguesList';
 import { useGetMyLeagues } from '../api/leagueQueries';
+import { apiConfig } from '../api/config';
+import { useMutation } from '@tanstack/react-query';
 
 const Welcome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Use the React Query hook
   const { data: leagues, isLoading, isError, error } = useGetMyLeagues();
+
+
+
+const acceptInviteMutation = useMutation({
+  mutationFn: async (token: string) => {
+    const res = await fetch(`${apiConfig.endpoints.leagueInvites.accept}?token=${token}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.detail || 'Failed to accept invite');
+    }
+
+    return res.json();
+  },
+  onSuccess: (data: any) => {
+    localStorage.removeItem('league_invite_token');
+    window.location.reload();
+  },
+  onError: (error: Error) => {
+    setErrorMessage(error.message);
+  },
+});
+
+  useEffect(() => {
+    const token = localStorage.getItem('league_invite_token');
+    if (token) {
+      localStorage.removeItem('league_invite_token');
+      acceptInviteMutation.mutate(token);
+    }
+  }, [acceptInviteMutation]);
 
   if (!user) {
     navigate('/signin');
@@ -67,6 +105,12 @@ const Welcome = () => {
         open={isModalOpen} 
         handleClose={() => setIsModalOpen(false)} 
       />
+
+      {errorMessage && (
+        <Typography color="error" sx={{ mt: 2 }}>
+          {errorMessage}
+        </Typography>
+      )}
     </Box>
   );
 };

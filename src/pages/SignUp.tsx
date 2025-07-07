@@ -14,7 +14,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { useMutation } from '@tanstack/react-query';
-import Navbar from '../components/Navbar';
 import { useSignUp } from '../api/authQueries';
 
 dayjs.locale('pt-br');
@@ -45,7 +44,7 @@ const SignUp: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const { mutate: signUp, isPending, isError, error } = useSignUp();
+  const { mutate: signUp,} = useSignUp();
 
   const signUpMutation = useMutation({
     mutationFn: async (userData: SignUpFormData) => {
