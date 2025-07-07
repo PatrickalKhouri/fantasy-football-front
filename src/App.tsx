@@ -7,8 +7,11 @@ import Navbar from './components/Navbar';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Welcome from './pages/Welcome';
-
+import League from './pages/League';
+import { useGetCurrentUser } from './api/authQueries';
+import AcceptInvite from './pages/AcceptInvite';
 const App: React.FC = () => {
+  const { data: currentUser } = useGetCurrentUser();
   return (
     <AuthProvider>
       <Router>
@@ -18,6 +21,7 @@ const App: React.FC = () => {
             <Route element={<PublicRoute />}>
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/invite/accept" element={<AcceptInvite />} />
             </Route>
 
             <Route element={<ProtectedLayout />}>
@@ -26,7 +30,8 @@ const App: React.FC = () => {
                   {/* Home page content will go here */}
                 </div>
               } />
-              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/welcome" element={<Welcome />} /> 
+              <Route path="/league/:leagueId" element={<League currentUserId={currentUser?.id as number} />} />
             </Route>
 
             {/* Fallback redirect */}

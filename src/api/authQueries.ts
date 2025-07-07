@@ -1,5 +1,7 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiConfig } from './config';
+import axios from 'axios';
+import { User } from './leagueQueries';
 
 interface SignUpData {
   firstName: string;
@@ -49,5 +51,25 @@ export const useLogIn = () => {
       }
       return response.json();
     },
+  });
+};
+
+
+export const useGetCurrentUser = () => {
+  return useQuery<User>({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const response = await axios.get(
+        apiConfig.endpoints.auth.profile,
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
   });
 };

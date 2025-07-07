@@ -6,15 +6,20 @@ const endpoints = {
     signup: `${API_BASE_URL}/users/signup`,
     signin: `${API_BASE_URL}/users/signin`,
     refresh: `${API_BASE_URL}/auth/refresh`,
+    profile: `${API_BASE_URL}/auth/profile`,
   },
   users: {
-    profile: `${API_BASE_URL}/users/profile`,
     update: `${API_BASE_URL}/users/update`,
   },
   fantasyLeagues: {
     create: `${API_BASE_URL}/fantasy-leagues`,
     get: `${API_BASE_URL}/fantasy-leagues`,
-    myLeagues: `${API_BASE_URL}/fantasy-leagues/my-leagues`
+    myLeagues: `${API_BASE_URL}/fantasy-leagues/my-leagues`,
+    getLeague: `${API_BASE_URL}/fantasy-leagues`,
+  },
+  leagueInvites: {
+    invite: `${API_BASE_URL}/league-invitations/invite-by-email`,
+    accept: `${API_BASE_URL}/league-invitations/accept`,
   }
 };
 

@@ -49,7 +49,16 @@ const SignIn: React.FC = () => {
     signIn(formData, {
       onSuccess: (data) => {
         login(data.access_token, data.user);
-        navigate('/welcome');
+      
+        const redirect = localStorage.getItem('postLoginRedirect');
+        console.log(redirect);
+
+        if (redirect) {
+          localStorage.removeItem('postLoginRedirect');
+          navigate(redirect);
+        } else {
+          navigate('/welcome');
+        }
       }
     });
   };
