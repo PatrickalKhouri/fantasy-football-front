@@ -6,6 +6,7 @@ import InviteToLeagueModal from '../components/InviteToLeagueModal';
 import { useInviteUserToLeague } from '../api/leagueQueries';
 import { Snackbar, Alert, Box, useMediaQuery, useTheme } from '@mui/material';
 import LeagueTabs from '../components/LeagueTabs';
+import ViewInvitesModal from '../components/ViewInvitesModal';
 
 const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -17,7 +18,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
     severity: 'success' as 'success' | 'error',
   });
   const [selectedTab, setSelectedTab] = useState('draft');
-
+  const [viewInvitesModalOpen, setViewInvitesModalOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -61,6 +62,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
           league={league}
           currentUserId={currentUserId}
           onInviteClick={() => setInviteModalOpen(true)}
+          onViewInvitesClick={() => setViewInvitesModalOpen(true)}
         />
       </Box>
 
@@ -86,6 +88,12 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         open={inviteModalOpen}
         onClose={() => setInviteModalOpen(false)}
         onSubmit={handleInvite}
+      />
+
+      <ViewInvitesModal
+        leagueId={Number(leagueId)}
+        open={viewInvitesModalOpen}
+        onClose={() => setViewInvitesModalOpen(false)}
       />
 
       <Snackbar

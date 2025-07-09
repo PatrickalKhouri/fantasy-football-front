@@ -1,77 +1,89 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  TextField,
-  Button,
   IconButton,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Button,
+  CircularProgress,
+  Box,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { useGetInvitesByLeague, useCancelInvite } from '../api/leagueInviteQueries';
 
-interface InviteToLeagueModalProps {
+interface ViewInvitesModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (email: string) => void;
+  leagueId: number;
 }
 
-const ViewInvitesModal: React.FC<InviteToLeagueModalProps> = ({ open, onClose, onSubmit }) => {
+const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, leagueId }) => { 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const [invites, setInvites] = useState<any[]>([]);
 
-  const [email, setEmail] = useState('');
-  const [touched, setTouched] = useState(false);
+  const { data: invitesData, isLoading } = useGetInvitesByLeague(leagueId, open);
+  const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite();
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  useEffect(() => {
+    if (invitesData) {
+      setInvites(invitesData);
+    }
+  }, [invitesData]);
 
-  const isEmailValid = isValidEmail(email);
-
-  const handleSubmit = () => {
-    if (!isEmailValid) return;
-    onSubmit(email);
-    setEmail('');
-    setTouched(false);
-    onClose();
+  const handleCancel = (inviteId: number) => {
+    cancelInvite(inviteId);
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullScreen={fullScreen} fullWidth maxWidth="sm">
-      <DialogTitle>
-        Convidar para a Liga
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{ position: 'absolute', right: 8, top: 8 }}
-        >
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        Convites Enviados
+        <IconButton edge="end" onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
       <DialogContent dividers>
-        <TextField
-          fullWidth
-          label="Email do usuário"
-          type="email"
-          variant="outlined"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onBlur={() => setTouched(true)}
-          error={touched && !isEmailValid}
-          helperText={touched && !isEmailValid ? 'Insira um e-mail válido.' : ''}
-          margin="normal"
-        />
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" mt={4}>
+            <CircularProgress />
+          </Box>
+        ) : invites?.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            Nenhum convite enviado ainda.
+          </Typography>
+        ) : (
+          <List>
+            {invites.map((invite: any) => (
+              <ListItem key={invite.id} divider>
+                <ListItemText
+                  primary={invite.recipientEmail}
+                  secondary={new Date(invite.createdAt).toLocaleString('pt-BR')}
+                />
+                <ListItemSecondaryAction>
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="outlined"
+                    onClick={() => handleCancel(invite.id)}
+                    disabled={isCancelling}
+                  >
+                    Cancelar
+                  </Button>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        )}
       </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={!isEmailValid}>
-          Enviar Convite
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };
