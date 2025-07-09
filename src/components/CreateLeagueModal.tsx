@@ -32,7 +32,7 @@ interface CreateLeagueModalProps {
 const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose }) => {
   const { user } = useAuth();
   const [leagueName, setLeagueName] = useState('');
-  const [numberOfTeams, setNumberOfTeams] = useState(12);
+  const [numberOfTeams, setNumberOfTeams] = useState(8);
   const { mutate: createLeague, isPending } = useCreateLeague();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -83,7 +83,7 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
               onChange={(e) => setNumberOfTeams(Number(e.target.value))}
               fullWidth
             >
-              {Array.from({ length: 19 }, (_, i) => i + 2).map((num) => (
+              {Array.from({ length: 13 }, (_, i) => i + 8).map((num) => (
                 <MenuItem key={num} value={num}>
                   {num}
                 </MenuItem>
