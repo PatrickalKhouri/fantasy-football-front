@@ -4,17 +4,22 @@ import { useGetLeague } from '../api/leagueQueries';
 import LeagueSidebar from '../components/LeaguesSidebar';
 import InviteToLeagueModal from '../components/InviteToLeagueModal';
 import { useInviteUserToLeague } from '../api/leagueQueries';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert, Box, useMediaQuery, useTheme } from '@mui/material';
+import LeagueTabs from '../components/LeagueTabs';
 
 const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { leagueId } = useParams<{ leagueId: string }>();
   const { data: league, isLoading, error } = useGetLeague(Number(leagueId));
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error';
-  }>({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error',
+  });
+  const [selectedTab, setSelectedTab] = useState('draft');
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { mutate: inviteUserToLeague } = useInviteUserToLeague(Number(leagueId));
   const handleInvite = (email: string) => {
@@ -35,24 +40,54 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
       },
     });
   };
+
   if (isLoading) return <p>Loading...</p>;
   if (error || !league) return <p>Something went wrong.</p>;
 
   return (
-    <div style={{ display: 'flex' }}>
-      <LeagueSidebar
-        league={league}
-        currentUserId={currentUserId}
-        onInviteClick={() => setInviteModalOpen(true)}
-      />
-      <main style={{ padding: '2rem' }}>
-        {/* League content here */}
-      </main>
-        <InviteToLeagueModal
-          open={inviteModalOpen}
-          onClose={() => setInviteModalOpen(false)}
-          onSubmit={handleInvite}
+    <Box
+      display="flex"
+      flexDirection={isMobile ? 'column' : 'row'}
+      width="100%"
+      minHeight="100vh"
+    >
+      <Box
+        flexShrink={0}
+        width={isMobile ? '100%' : 280}
+        px={isMobile ? 2 : 3}
+        py={2}
+      >
+        <LeagueSidebar
+          league={league}
+          currentUserId={currentUserId}
+          onInviteClick={() => setInviteModalOpen(true)}
         />
+      </Box>
+
+      <Box
+        component="main"
+        flexGrow={1}
+        px={isMobile ? 2 : 4}
+        py={isMobile ? 2 : 4}
+      >
+        <LeagueTabs selected={selectedTab} onChange={setSelectedTab} />
+
+        <Box mt={4}>
+          {selectedTab === 'draft' && <div>Draft content</div>}
+          {selectedTab === 'team' && <div>Team content</div>}
+          {selectedTab === 'league' && <div>League info content</div>}
+          {selectedTab === 'players' && <div>Players list</div>}
+          {selectedTab === 'trades' && <div>Trades UI</div>}
+          {selectedTab === 'scores' && <div>Scores table</div>}
+        </Box>
+      </Box>
+
+      <InviteToLeagueModal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        onSubmit={handleInvite}
+      />
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -67,7 +102,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-        </div>
+    </Box>
   );
 };
 
