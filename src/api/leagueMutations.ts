@@ -7,12 +7,18 @@ interface CreateLeagueData {
   numberOfTeams: number;
   ownerId: number;
   championshipId: number;
+  draftType: string;
 }
 
 export const useCreateLeague = () => {
   return useMutation({
     mutationFn: (leagueData: CreateLeagueData) => 
-      axios.post(apiConfig.endpoints.fantasyLeagues.create, leagueData),
+      axios.post(apiConfig.endpoints.fantasyLeagues.create, leagueData, {
+        headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    }),
   });
 };
 
