@@ -30,7 +30,7 @@ const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, leag
   const [invites, setInvites] = useState<any[]>([]);
 
   const { data: invitesData, isLoading } = useGetInvitesByLeague(leagueId, open);
-  const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite();
+  const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite(leagueId);
 
   useEffect(() => {
     if (invitesData) {

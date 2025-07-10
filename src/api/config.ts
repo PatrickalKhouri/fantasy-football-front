@@ -17,11 +17,12 @@ const endpoints = {
     myLeagues: `${API_BASE_URL}/fantasy-leagues/my-leagues`,
     getLeague: `${API_BASE_URL}/fantasy-leagues`,
     getInvitesByLeagueId: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/invites`,
+    getLeagueMembers: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/members`,
   },
   leagueInvites: {
     invite: `${API_BASE_URL}/league-invitations/invite-by-email`,
     accept: `${API_BASE_URL}/league-invitations/accept`,
-    cancel: (inviteId: number) => `${API_BASE_URL}/invites/${inviteId}`,
+    cancel: (inviteId: number) => `${API_BASE_URL}/league-invitations/${inviteId}`,
   }
 };
 

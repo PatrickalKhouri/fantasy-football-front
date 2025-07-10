@@ -17,7 +17,7 @@ export const useGetInvitesByLeague = (leagueId: number, enabled: boolean = true)
   });
 };
 
-export const useCancelInvite = () => {
+export const useCancelInvite = (leagueId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -28,8 +28,12 @@ export const useCancelInvite = () => {
         },
       });
     },
-    onSuccess: (_, __, context: any) => {
-      queryClient.invalidateQueries({ queryKey: ['league-invites', context?.leagueId] });
+    onMutate: async () => {
+      // Optional: optimistic update logic
+      await queryClient.cancelQueries({ queryKey: ['league-invites', leagueId] });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['league-invites', leagueId] });
     },
   });
 };

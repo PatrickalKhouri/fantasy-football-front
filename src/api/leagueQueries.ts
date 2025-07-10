@@ -75,3 +75,19 @@ export const useInviteUserToLeague = (leagueId: number) => {
       inviteUserToLeague({ email, leagueId }),
   });
 };
+
+
+export const useLeagueMembers = (leagueId: number) => {
+  return useQuery({
+    queryKey: ['league-members', leagueId],
+    queryFn: async () => {
+      const res = await axios.get(apiConfig.endpoints.fantasyLeagues.getLeagueMembers(leagueId), {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      return res.data;
+    },
+    enabled: !!leagueId,
+  });
+};

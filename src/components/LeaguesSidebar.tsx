@@ -43,11 +43,11 @@ const LeagueSidebar: React.FC<Props> = ({
       </Typography>
 
       <Typography variant="body2" sx={{ mb: 1 }}>
-        <strong>Owner:</strong> {league.owner?.firstName} {league.owner?.lastName}
+        <strong>Dono:</strong> {league.owner?.firstName} {league.owner?.lastName}
       </Typography>
 
       <Typography variant="body2" sx={{ mb: 2 }}>
-        <strong>Teams:</strong> {league.members.length}
+        <strong>Quantidade de times:</strong> {league.members.length}
       </Typography>
 
       <Divider sx={{ mb: 2 }} />
