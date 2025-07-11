@@ -3,7 +3,7 @@ import { Box, Button, Stack } from '@mui/material';
 
 const tabs = [
   { label: 'Draft', key: 'draft' },
-  { label: 'Time', key: 'team' },
+  { label: 'Times', key: 'team' },
   { label: 'Liga', key: 'league' },
   { label: 'Jogadores', key: 'players' },
   { label: 'Trocas', key: 'trades' },
