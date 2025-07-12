@@ -77,11 +77,11 @@ export const useInviteUserToLeague = (leagueId: number) => {
 };
 
 
-export const useLeagueMembers = (leagueId: number) => {
+export const useLeagueTeams = (leagueId: number) => {
   return useQuery({
     queryKey: ['league-members', leagueId],
     queryFn: async () => {
-      const res = await axios.get(apiConfig.endpoints.fantasyLeagues.getLeagueMembers(leagueId), {
+      const res = await axios.get(apiConfig.endpoints.fantasyLeagues.getLeagueTeams(leagueId), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

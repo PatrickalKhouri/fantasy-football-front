@@ -17,7 +17,7 @@ const endpoints = {
     myLeagues: `${API_BASE_URL}/fantasy-leagues/my-leagues`,
     getLeague: `${API_BASE_URL}/fantasy-leagues`,
     getInvitesByLeagueId: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/invites`,
-    getLeagueMembers: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/members`,
+    getLeagueTeams: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/teams`,
   },
   leagueInvites: {
     invite: `${API_BASE_URL}/league-invitations/invite-by-email`,

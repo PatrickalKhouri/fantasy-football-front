@@ -7,7 +7,7 @@ import { useInviteUserToLeague } from '../api/leagueQueries';
 import { Snackbar, Alert, Box, useMediaQuery, useTheme } from '@mui/material';
 import LeagueTabs from '../components/LeagueTabs';
 import ViewInvitesModal from '../components/ViewInvitesModal';
-import LeagueMembers from '../components/LeagueMembers';
+import LeagueTeams from '../components/LeagueTeams';
 
 const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -78,7 +78,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         <Box mt={4}>
           {selectedTab === 'draft' && <div>Draft content</div>}
           {selectedTab === 'team' && <div>Team content</div>}
-          {selectedTab === 'league' && <LeagueMembers leagueId={Number(leagueId)} />}
+          {selectedTab === 'league' && <LeagueTeams leagueId={Number(leagueId)} />}
           {selectedTab === 'players' && <div>Players list</div>}
           {selectedTab === 'trades' && <div>Trades UI</div>}
           {selectedTab === 'scores' && <div>Scores table</div>}
