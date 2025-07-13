@@ -10,6 +10,21 @@ interface CreateLeagueData {
   draftType: string;
 }
 
+interface UpdateLeagueData {
+  leagueId: number;
+  updates: Partial<{
+    name: string;
+    numberOfTeams: number;
+    tradeReviewDays: number;
+    numberOfRounds: number;
+    tradeDeadlineRound: number | null;
+    playoffTeams: number;
+    playoffFormat: 'single_game' | 'two_leg_final' | 'two_leg_all';
+    injuredReserveSlots: number;
+    // logoUrl: string; <-- for later
+  }>;
+}
+
 export const useCreateLeague = () => {
   return useMutation({
     mutationFn: (leagueData: CreateLeagueData) => 
@@ -44,4 +59,17 @@ export const inviteUserToLeague = async ({
   }
 
   return res.json();
+};
+
+export const useUpdateLeague = ({ onSuccess }: { onSuccess: () => void }) => {
+  return useMutation({
+    mutationFn: ({ leagueId, updates }: UpdateLeagueData) =>
+      axios.patch(`${apiConfig.endpoints.fantasyLeagues.update(leagueId)}`, updates, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }),
+    onSuccess: onSuccess,
+  });
 };
