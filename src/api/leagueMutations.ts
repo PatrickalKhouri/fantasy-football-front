@@ -61,7 +61,7 @@ export const inviteUserToLeague = async ({
   return res.json();
 };
 
-export const useUpdateLeague = () => {
+export const useUpdateLeague = ({ onSuccess }: { onSuccess: () => void }) => {
   return useMutation({
     mutationFn: ({ leagueId, updates }: UpdateLeagueData) =>
       axios.patch(`${apiConfig.endpoints.fantasyLeagues.update(leagueId)}`, updates, {
@@ -70,5 +70,6 @@ export const useUpdateLeague = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }),
+    onSuccess: onSuccess,
   });
 };

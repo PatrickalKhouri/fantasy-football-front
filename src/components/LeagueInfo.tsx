@@ -1,5 +1,5 @@
 import React from 'react';
-import LeagueMembers from './LeagueMembers';
+import LeagueTeams from './LeagueTeams';
 import LeagueSettings from './LeagueSettings';
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 const LeagueInfo: React.FC<Props> = ({ leagueId, currentUserId, league}) => {
     return (
         <>
-            <LeagueMembers leagueId={leagueId} />
+            <LeagueTeams leagueId={leagueId} />
             <LeagueSettings leagueId={leagueId} isOwner={league.owner?.id === currentUserId} league={league} />
         </>
     );

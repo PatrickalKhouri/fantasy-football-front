@@ -65,7 +65,7 @@ const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) =>
             <TableCell>{settings.clearWaivers}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ color: 'text.secondary' }}>Deadline de Trocas</TableCell>
+            <TableCell sx={{ color: 'text.secondary' }}>Rodada Limite para Trocas</TableCell>
             <TableCell>{settings.tradeDeadline}</TableCell>
           </TableRow>
           <TableRow>

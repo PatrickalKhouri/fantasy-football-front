@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   Box,
@@ -11,7 +11,13 @@ import {
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+
 import LeagueSettingsForm from './LeagueSettingsForm';
+import RosterSettingsForm from './RosterSettingsForm';
+
+import { useGetLeague } from '../api/leagueQueries';
+
+import { useRosterSettings } from '../api/useRosterSettings';
 
 const SETTINGS = [
   { label: 'Configurações da Liga', key: 'league' },
@@ -27,25 +33,61 @@ interface Props {
   league: any;
 }
 
-const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league    }) => {
+const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
   const [selected, setSelected] = useState('league');
+  const [formData, setFormData] = useState<any>(null);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [formData, setFormData] = useState({
-    name: league.name,
-    numberOfTeams: league.numberOfTeams,
-    tradeReviewDays: league.tradeReviewDays ?? 0,
-    numberOfRounds: league.numberOfRounds ?? 38,
-    tradeDeadlineRound: league.tradeDeadlineRound ?? '',
-    playoffTeams: league.playoffTeams ?? 4,
-    playoffFormat: league.playoffFormat ?? 'single_game',
-    injuredReserveSlots: league.injuredReserveSlots ?? 0,
-  });
 
-  const selectedSetting = SETTINGS.find((s) => s.key === selected);
+  const leagueId = league.id;
+
+  const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(leagueId);
+  const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(leagueId);
+
+  useEffect(() => {
+    if (selected === 'league' && leagueSettings) {
+      setFormData(leagueSettings);
+    } else if (selected === 'roster' && rosterSettings) {
+      setFormData(rosterSettings);
+    } else {
+      setFormData(null);
+    }
+  }, [selected, leagueSettings, rosterSettings]);
+
+  const renderForm = () => {
+    if (!formData) return <Typography>Carregando...</Typography>;
+
+    switch (selected) {
+      case 'league':
+        return (
+          <LeagueSettingsForm
+            values={formData}
+            onChange={(field, value) =>
+              setFormData((prev: any) => ({ ...prev, [field]: value }))
+            }
+            leagueId={leagueId}
+            refetchLeagueSettings={refetchLeagueSettings}
+          />
+        );
+      case 'roster':
+        return (
+          <RosterSettingsForm
+            values={formData}
+            onChange={(field, value) =>
+              setFormData((prev: any) => ({ ...prev, [field]: value }))
+            }
+            leagueId={leagueId}
+            refetchRosterSettings={refetchRosterSettings}
+          />
+        );
+      default:
+        return <Typography>Configuração ainda não disponível.</Typography>;
+    }
+  };
 
   return (
-<Dialog
+    <Dialog
   open={open}
   onClose={onClose}
   fullScreen={isMobile}
@@ -55,85 +97,74 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league    }) => {
     sx: {
       height: '90vh',
       borderRadius: 3,
+      display: 'flex',
+      flexDirection: 'row', // Important: restores side-by-side layout
       overflow: 'hidden',
-      p: 0, // prevent padding
     },
   }}
 >
-  <Box sx={{ display: 'flex', height: '100%', width: '100%' }}>
-    {/* Sidebar */}
-    <Box
-      sx={{
-        width: 240,
-        bgcolor: '#12151d',
-        color: 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        py: 3,
-        px: 2,
-      }}
-    >
-      <Typography variant="h6" fontWeight={600} mb={2}>
-        Configurações
-      </Typography>
-      <List disablePadding>
-        {SETTINGS.map((item) => (
-          <ListItemButton
-            key={item.key}
-            onClick={() => setSelected(item.key)}
-            selected={selected === item.key}
-            sx={{
-              borderRadius: 1,
-              mb: 1,
-              bgcolor: selected === item.key ? '#1f2733' : 'transparent',
+  {/* Sidebar */}
+  <Box
+    sx={{
+      width: 240,
+      bgcolor: '#12151d',
+      color: 'white',
+      display: 'flex',
+      flexDirection: 'column',
+      py: 3,
+      px: 2,
+    }}
+  >
+    <Typography variant="h6" fontWeight={600} mb={2}>
+      Configurações
+    </Typography>
+    <List disablePadding>
+      {SETTINGS.map((item) => (
+        <ListItemButton
+          key={item.key}
+          onClick={() => setSelected(item.key)}
+          selected={selected === item.key}
+          sx={{
+            borderRadius: 1,
+            mb: 1,
+            bgcolor: selected === item.key ? '#1f2733' : 'transparent',
+            '&:hover': { bgcolor: '#1f2733' },
+            '&.Mui-selected': {
+              bgcolor: '#1f2733',
               '&:hover': { bgcolor: '#1f2733' },
-              '&.Mui-selected': {
-                bgcolor: '#1f2733',
-                '&:hover': { bgcolor: '#1f2733' },
-              },
+            },
+          }}
+        >
+          <ListItemText
+            primary={item.label}
+            primaryTypographyProps={{
+              fontSize: 14,
+              fontWeight: selected === item.key ? 600 : 400,
             }}
-          >
-            <ListItemText
-              primary={item.label}
-              primaryTypographyProps={{
-                fontSize: 14,
-                fontWeight: selected === item.key ? 600 : 400,
-              }}
-            />
-          </ListItemButton>
-        ))}
-      </List>
-    </Box>
+          />
+        </ListItemButton>
+      ))}
+    </List>
+  </Box>
 
-    {/* Main content */}
-    <Box sx={{ flex: 1, p: 4, position: 'relative' }}>
-      <IconButton
-        onClick={onClose}
-        sx={{ position: 'absolute', top: 16, right: 16 }}
-      >
-        <CloseIcon />
-      </IconButton>
+  {/* Main Content */}
+  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <IconButton
+      onClick={onClose}
+      sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}
+    >
+      <CloseIcon />
+    </IconButton>
 
-      <Typography variant="h5" fontWeight={600} mb={1}>
-        {selectedSetting?.label}
+    <Box sx={{ flex: 1, overflowY: 'auto', p: 4 }}>
+      <Typography variant="h5" fontWeight={600} mb={2}>
+        {SETTINGS.find((s) => s.key === selected)?.label}
       </Typography>
-      {/* League settings */}
-      {selected === 'league' && (
-        <LeagueSettingsForm
-            values={formData}
-            onChange={(field: any, value: any) =>
-            setFormData((prev) => ({ ...prev, [field]: value }))
-            }
-        />
-        )}
-        {selected !== 'league' && (
-            <Typography variant="body1" color="text.secondary">
-                Aqui vão as configurações de <strong>{selectedSetting?.label.toLowerCase()}</strong>.
-            </Typography>
-        )}
+      {renderForm()}
     </Box>
   </Box>
 </Dialog>
+
   );
 };
 

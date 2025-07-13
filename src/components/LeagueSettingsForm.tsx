@@ -12,6 +12,7 @@ import {
   Button,
 } from '@mui/material';
 import { useUpdateLeague } from '../api/leagueMutations';
+import { Snackbar, Alert } from '@mui/material';
 
 interface Props {
   values: {
@@ -25,28 +26,27 @@ interface Props {
     injuredReserveSlots: number;
   };
   onChange: (field: string, value: any) => void;
+  leagueId: number;
+  refetchLeagueSettings: () => void;
 }
 
-const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
+const LeagueSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refetchLeagueSettings }) => {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
   const tradeDeadlineOptions = useMemo(() => {
     const start = Math.max(1, values.numberOfRounds - 8);
     const end = values.numberOfRounds - 3;
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }, [values.numberOfRounds]);
-
-  const updateLeague = useUpdateLeague();
+  
+  const updateLeague = useUpdateLeague({
+    onSuccess: () => {
+      setOpenSnackbar(true);
+      refetchLeagueSettings();
+    },
+  });
 
   return (
     <>
-    <Box
-        sx={{
-            flex: 1,
-            position: 'relative',
-            overflowY: 'auto',
-            maxHeight: '80vh',
-        }}
-        >
-      {/* Nome da Liga */}
       <Box>
         <Typography fontWeight={600}>Nome da Liga</Typography>
         <TextField
@@ -61,7 +61,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
         <Typography fontWeight={600}>Número de Times</Typography>
         <FormControl fullWidth>
           <Select
-            value={values.numberOfTeams}
+            value={values.numberOfTeams ?? ''}
             onChange={(e) => onChange('numberOfTeams', e.target.value)}
           >
             {[...Array(19)].map((_, i) => (
@@ -81,7 +81,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
         </Typography>
         <FormControl fullWidth>
           <Select
-            value={values.tradeReviewDays}
+            value={values.tradeReviewDays ?? ''}
             onChange={(e) => onChange('tradeReviewDays', e.target.value)}
           >
             {[0, 1, 2, 3].map((day) => (
@@ -98,7 +98,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
         <Typography fontWeight={600}>Número de Rodadas</Typography>
         <FormControl fullWidth>
           <Select
-            value={values.numberOfRounds}
+            value={values.numberOfRounds ?? ''}
             onChange={(e) => onChange('numberOfRounds', e.target.value)}
           >
             {Array.from({ length: 20 }, (_, i) => 19 + i).map((val) => (
@@ -136,7 +136,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
         <Typography fontWeight={600}>Times nos Playoffs</Typography>
         <FormControl fullWidth>
           <Select
-            value={values.playoffTeams}
+            value={values.playoffTeams ?? ''}
             onChange={(e) => onChange('playoffTeams', e.target.value)}
           >
             {[4, 5, 6, 7, 8].map((n) => (
@@ -153,7 +153,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
         <Typography fontWeight={600}>Reservas por Lesão</Typography>
         <FormControl fullWidth>
           <Select
-            value={values.injuredReserveSlots}
+            value={values.injuredReserveSlots ?? ''}
             onChange={(e) => onChange('injuredReserveSlots', e.target.value)}
           >
             {Array.from({ length: 9 }, (_, i) => (
@@ -169,7 +169,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
       <Box>
         <Typography fontWeight={600}>Formato dos Playoffs</Typography>
         <RadioGroup
-          value={values.playoffFormat}
+          value={values.playoffFormat ?? ''}
           onChange={(e) => onChange('playoffFormat', e.target.value)}
         >
           <FormControlLabel
@@ -197,21 +197,19 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange }) => {
             justifyContent: 'flex-end',
         }}
         >
-        <Button
-        variant="contained"
-        onClick={() =>
-            updateLeague.mutate({
-            leagueId: 1,
-            updates: values,
-            })
-        }
-        disabled={updateLeague.isPending}
-        >
-        {updateLeague.isPending ? 'Salvando...' : 'Salvar'}
-        </Button>
+          <Button
+            variant="contained"
+            onClick={() => updateLeague.mutate({ leagueId, updates: values })}
+            disabled={updateLeague.isPending}
+          >
+            Salvar
+          </Button>
         </Box>
-    </Box>
-
+      <Snackbar open={openSnackbar} autoHideDuration={3000} onClose={() => setOpenSnackbar(false)}>
+        <Alert severity="success" sx={{ width: '100%' }}>
+          Configurações salvas com sucesso!
+        </Alert>
+      </Snackbar>
     </>
   );
 };

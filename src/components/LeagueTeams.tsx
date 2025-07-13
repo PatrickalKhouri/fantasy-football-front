@@ -9,14 +9,14 @@ import {
   useTheme,
   Avatar,
 } from '@mui/material';
-import { useLeagueMembers } from '../api/leagueQueries';
+import { useLeagueTeams } from '../api/leagueQueries';
 
 interface Props {
   leagueId: number;
 }
 
-const LeagueMembers: React.FC<Props> = ({ leagueId }) => {
-  const { data: members, isLoading } = useLeagueMembers(leagueId);
+const LeagueTeams: React.FC<Props> = ({ leagueId }) => {
+  const { data: members, isLoading } = useLeagueTeams(leagueId);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -49,7 +49,7 @@ const LeagueMembers: React.FC<Props> = ({ leagueId }) => {
                 {entry.user.lastName[0]}
             </Avatar>
             <Typography variant="body1" fontWeight={500}>
-              {index + 1}. {entry.user.firstName} {entry.user.lastName}
+              {index + 1}. {entry.name}
             </Typography>
 
             {entry.isOwner && (
@@ -65,7 +65,7 @@ const LeagueMembers: React.FC<Props> = ({ leagueId }) => {
 
         {members.length === 0 && (
           <Typography variant="body2" color="text.secondary">
-            Nenhum membro na liga ainda.
+            Nenhum time na liga ainda.
           </Typography>
         )}
       </Stack>
@@ -73,4 +73,4 @@ const LeagueMembers: React.FC<Props> = ({ leagueId }) => {
   );
 };
 
-export default LeagueMembers;
+export default LeagueTeams;
