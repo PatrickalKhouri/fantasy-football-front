@@ -22,7 +22,7 @@ interface Props {
     numberOfRounds: number;
     tradeDeadlineRound: number | null;
     playoffTeams: number;
-    playoffFormat: 'single_game' | 'two_leg_final' | 'two_leg_all';
+    playoffFormat: 'single_game' | 'two_leg_single_game_final' | 'two_leg_all';
     injuredReserveSlots: number;
   };
   onChange: (field: string, value: any) => void;
@@ -178,7 +178,7 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refet
             label="1 jogo por rodada"
           />
           <FormControlLabel
-            value="two_leg_final"
+            value="two_leg_single_game_final"
             control={<Radio />}
             label="2 jogos por rodada, final 1"
           />

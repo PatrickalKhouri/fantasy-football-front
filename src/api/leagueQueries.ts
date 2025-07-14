@@ -34,6 +34,7 @@ export interface FantasyLeague {
     playoffTeams: number;
     injuredReserveSlots: number;
     playoffFormat: string;
+    playoffStartRound: number;
   }
 
   export const useGetMyLeagues = () => {

@@ -11,7 +11,7 @@ interface Props {
 const LeagueInfo: React.FC<Props> = ({ leagueId, currentUserId, league}) => {
     return (
         <>
-            <LeagueTeams leagueId={leagueId} />
+            <LeagueTeams league={league} />
             <LeagueSettings leagueId={leagueId} isOwner={league.owner?.id === currentUserId} league={league} />
         </>
     );
