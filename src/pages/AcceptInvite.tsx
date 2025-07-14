@@ -34,8 +34,9 @@ const InviteAcceptPage = () => {
       return res.json();
     },
     onSuccess: () => {
+      console.log('Invite accepted');
       localStorage.removeItem('league_invite_token');
-      setTimeout(() => navigate('/welcome'), 3000);
+      // setTimeout(() => navigate('/welcome'), 3000);
     },
     onError: (error: Error) => {
       setErrorMessage(error.message);

@@ -1,6 +1,6 @@
 // pages/Welcome.tsx
 import { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress, Button } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateLeagueModal from '../components/CreateLeagueModal';
@@ -17,8 +17,6 @@ const Welcome = () => {
   
   // Use the React Query hook
   const { data: leagues, isLoading, isError, error } = useGetMyLeagues();
-
-
 
 const acceptInviteMutation = useMutation({
   mutationFn: async (token: string) => {
@@ -94,12 +92,31 @@ const acceptInviteMutation = useMutation({
             {error instanceof Error ? error.message : 'Failed to load leagues'}
           </Typography>
         ) : (
+          <>
+          <Box sx={{ mb: 2 }}>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            sx={{
+              backgroundColor: '#1976d2',
+              color: 'white',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}
+          >
+            Criar Nova Liga
+          </Button>
+        </Box>
           <UserLeaguesList 
             leagues={leagues || []} 
             onLeagueSelect={handleLeagueSelect} 
           />
+          </>
         )}
       </Box>
+      
 
       <CreateLeagueModal 
         open={isModalOpen} 

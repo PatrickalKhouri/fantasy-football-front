@@ -1,10 +1,8 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
 
 export const useDeleteUserTeam = ({ onSuccess }: { onSuccess: () => void }) => {
-    const queryClient = useQueryClient();
-    
     return useMutation({
       mutationFn: ({ id }: { id: number }) =>
         axios.delete(`${apiConfig.endpoints.userTeams.delete(id)}`, {
@@ -14,8 +12,6 @@ export const useDeleteUserTeam = ({ onSuccess }: { onSuccess: () => void }) => {
           },
         }),
       onSuccess: () => {
-        // Invalidate league teams queries to refetch the updated data
-        queryClient.invalidateQueries({ queryKey: ['league-members'] });
         onSuccess();
       },
     });
