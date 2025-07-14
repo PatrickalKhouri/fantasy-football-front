@@ -20,6 +20,7 @@ const endpoints = {
     getInvitesByLeagueId: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/invites`,
     getLeagueTeams: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/teams`,
     getRosterSettings: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/roster-settings`,
+    delete: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}`,
   },
   leagueInvites: {
     invite: `${API_BASE_URL}/league-invitations/invite-by-email`,
@@ -28,6 +29,9 @@ const endpoints = {
   },
   rosterSettings: {
     update: (id: number) => `${API_BASE_URL}/roster-settings/${id}`,
+  },
+  userTeams: {
+    delete: (id: number) => `${API_BASE_URL}/user-teams/${id}`,
   },
 };
 

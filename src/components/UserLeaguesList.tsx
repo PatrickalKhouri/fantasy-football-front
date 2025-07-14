@@ -21,18 +21,6 @@ export const UserLeaguesList = ({ leagues, onLeagueSelect }: UserLeaguesListProp
         <Typography variant="body1" sx={{ mb: 2 }}>
           Você não está em nenhuma liga ainda
         </Typography>
-        <Button 
-          variant="contained"
-          onClick={() => onLeagueSelect(0)}
-          sx={{ 
-            px: 4,
-            py: 2,
-            backgroundColor: '#1976d2',
-            '&:hover': { backgroundColor: '#1565c0' }
-          }}
-        >
-          Criar Primeira Liga
-        </Button>
       </Box>
     );
   }

@@ -9,22 +9,29 @@ import {
   IconButton,
   useMediaQuery,
   useTheme,
+  Button,
+  DialogActions,
+  DialogTitle,
+  DialogContentText,
+  DialogContent,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 import LeagueSettingsForm from './LeagueSettingsForm';
 import RosterSettingsForm from './RosterSettingsForm';
+import LeagueMembersSettings from './LegueMemberSettings';
 
-import { useGetLeague } from '../api/leagueQueries';
+import { useGetLeague, useLeagueTeams } from '../api/leagueQueries';
 
 import { useRosterSettings } from '../api/useRosterSettings';
+import { useDeleteLeague } from '../api/leagueMutations';
+import { useNavigate } from 'react-router-dom';
 
 const SETTINGS = [
   { label: 'Configurações da Liga', key: 'league' },
   { label: 'Configurações de Elenco', key: 'roster' },
   { label: 'Configurações de Draft', key: 'draft' },
   { label: 'Configurações de Membros', key: 'members' },
-  { label: 'Excluir Liga', key: 'delete' },
 ];
 
 interface Props {
@@ -34,26 +41,33 @@ interface Props {
 }
 
 const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState('league');
   const [formData, setFormData] = useState<any>(null);
-
+  const { mutate: deleteLeague } = useDeleteLeague();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const leagueId = league.id;
 
   const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(leagueId);
   const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(leagueId);
+  const { data: leagueMembers, refetch: refetchLeagueMembers } = useLeagueTeams(leagueId);
+
+  console.log(leagueMembers);
 
   useEffect(() => {
     if (selected === 'league' && leagueSettings) {
       setFormData(leagueSettings);
     } else if (selected === 'roster' && rosterSettings) {
       setFormData(rosterSettings);
+    } else if (selected === 'members' && leagueMembers) {
+      setFormData(leagueMembers);
     } else {
       setFormData(null);
     }
-  }, [selected, leagueSettings, rosterSettings]);
+  }, [selected, leagueSettings, rosterSettings, leagueMembers]);
 
   const renderForm = () => {
     if (!formData) return <Typography>Carregando...</Typography>;
@@ -81,9 +95,30 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
             refetchRosterSettings={refetchRosterSettings}
           />
         );
+      case 'members':
+        return (
+          <LeagueMembersSettings
+            values={formData}
+            refetchLeagueMembers={refetchLeagueMembers}
+          />
+        );  
       default:
         return <Typography>Configuração ainda não disponível.</Typography>;
     }
+  };
+
+  const handleConfirmDelete = () => {
+    setConfirmDelete(true);
+  };
+  
+  const handleDeleteConfirmed = () => {
+    deleteLeague(leagueId, {
+      onSuccess: () => {
+        setConfirmDelete(false);
+        onClose();
+        navigate('/welcome');
+      },
+    });
   };
 
   return (
@@ -144,8 +179,53 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
           />
         </ListItemButton>
       ))}
+          <ListItemButton
+          onClick={() => handleConfirmDelete()}
+          selected={selected === 'delete'}
+          sx={{
+            borderRadius: 1,
+            mb: 1,
+            bgcolor: selected === 'delete' ? '#1f2733' : 'transparent',
+            '&:hover': { bgcolor: '#1f2733' },
+            '&.Mui-selected': {
+              bgcolor: '#1f2733',
+              '&:hover': { bgcolor: '#1f2733' },
+            },
+          }}
+        >
+          <ListItemText
+            primary={'Excluir Liga'}
+            primaryTypographyProps={{
+              fontSize: 14,
+              fontWeight: selected === 'delete' ? 600 : 400,
+            }}
+          />
+        </ListItemButton>
     </List>
   </Box>
+
+  <Dialog
+    open={confirmDelete}
+    onClose={() => setConfirmDelete(false)}
+    aria-labelledby="confirm-dialog-title"
+    aria-describedby="confirm-dialog-description"
+  >
+    <DialogTitle id="confirm-dialog-title">Confirmar Exclusão</DialogTitle>
+    <DialogContent>
+      <DialogContentText id="confirm-dialog-description">
+        Tem certeza que deseja excluir esta liga? Isso removerá todos os times e o histórico associado. 
+        Esta ação é <strong>irreversível</strong>.
+      </DialogContentText>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setConfirmDelete(false)} color="inherit">
+        Cancelar
+      </Button>
+      <Button onClick={handleDeleteConfirmed} color="error" variant="contained">
+        Excluir Liga
+      </Button>
+    </DialogActions>
+  </Dialog>
 
   {/* Main Content */}
   <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>

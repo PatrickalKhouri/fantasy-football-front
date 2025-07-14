@@ -29,6 +29,11 @@ export interface FantasyLeague {
     };
     userLeagues: User[];
     members: User[];
+    tradeDeadlineRound: number;
+    clearWaivers: string;
+    playoffTeams: number;
+    injuredReserveSlots: number;
+    playoffFormat: string;
   }
 
   export const useGetMyLeagues = () => {

@@ -23,6 +23,7 @@ interface SignUpFormData {
   lastName: string;
   email: string;
   password: string;
+  username: string;
   birthDate: string;
 }
 
@@ -33,6 +34,7 @@ const SignUp: React.FC = () => {
     firstName: '',
     lastName: '',
     birthDate: null as Dayjs | null,
+    username: '',
   });
 
   const [errors, setErrors] = useState({
@@ -41,6 +43,7 @@ const SignUp: React.FC = () => {
     firstName: false,
     lastName: false,
     birthDate: false,
+    username: false,
   });
 
   const navigate = useNavigate();
@@ -85,6 +88,7 @@ const SignUp: React.FC = () => {
       firstName: !formData.firstName,
       lastName: !formData.lastName,
       birthDate: !formData.birthDate,
+      username: !formData.username,
     };
 
     setErrors(newErrors);
@@ -157,6 +161,21 @@ const SignUp: React.FC = () => {
                 required
               />
             </Box>
+
+            <TextField
+              name="username"
+              label="Apelido"
+              type="text"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              placeholder="Apelido"
+              value={formData.username}
+              onChange={handleChange}
+              error={errors.username}
+              helperText={errors.email ? "Email é obrigatório" : ""}
+              required
+            />
             
             <TextField
               name="email"
