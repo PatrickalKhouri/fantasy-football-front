@@ -14,8 +14,9 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import LeagueSettingsForm from './LeagueSettingsForm';
 import RosterSettingsForm from './RosterSettingsForm';
+import LeagueMembersSettings from './LegueMemberSettings';
 
-import { useGetLeague } from '../api/leagueQueries';
+import { useGetLeague, useLeagueTeams } from '../api/leagueQueries';
 
 import { useRosterSettings } from '../api/useRosterSettings';
 
@@ -44,12 +45,17 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
 
   const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(leagueId);
   const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(leagueId);
+  const { data: leagueMembers, refetch: refetchLeagueMembers } = useLeagueTeams(leagueId);
+
+  console.log(leagueMembers);
 
   useEffect(() => {
     if (selected === 'league' && leagueSettings) {
       setFormData(leagueSettings);
     } else if (selected === 'roster' && rosterSettings) {
       setFormData(rosterSettings);
+    } else if (selected === 'members' && leagueMembers) {
+      setFormData(leagueMembers);
     } else {
       setFormData(null);
     }
@@ -81,6 +87,17 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
             refetchRosterSettings={refetchRosterSettings}
           />
         );
+      case 'members':
+        return (
+          <LeagueMembersSettings
+            values={formData}
+            onRemoveClick={(userLeagueId) => {
+              console.log(userLeagueId);
+            }}
+            leagueId={leagueId}
+            refetchLeagueMembers={refetchLeagueMembers}
+          />
+        );  
       default:
         return <Typography>Configuração ainda não disponível.</Typography>;
     }

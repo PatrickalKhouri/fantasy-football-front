@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import LeagueSettingsModal from './LeagueSettingsModal';
+import { useGetLeague } from '../api/leagueQueries';
 
 interface Props {
   leagueId: number;
@@ -20,13 +21,13 @@ interface Props {
 }
 
 const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) => {
+  const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(league.id);
   const [modalOpen, setModalOpen] = useState(false);  
   const settings = {
-    numberOfTeams: 8,
-    playoffs: '4 times, começa na rodada 14',
-    clearWaivers: 'Quarta-feira às 4h',
-    tradeDeadline: 'Rodada 10 - Trocas não permitidas após isso',
-    irSlots: '2 vagas',
+    numberOfTeams: leagueSettings?.numberOfTeams,
+    playoffs: leagueSettings?.playoffTeams,
+    tradeDeadline: leagueSettings?.tradeDeadlineRound,
+    irSlots: leagueSettings?.injuredReserveSlots,
   };
 
   return (
@@ -57,16 +58,16 @@ const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) =>
             <TableCell>{settings.numberOfTeams}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ color: 'text.secondary' }}>Playoffs</TableCell>
+            <TableCell sx={{ color: 'text.secondary' }}>Times classificados para os Playoffs</TableCell>
             <TableCell>{settings.playoffs}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell sx={{ color: 'text.secondary' }}>Limpar Waivers</TableCell>
-            <TableCell>{settings.clearWaivers}</TableCell>
+            <TableCell sx={{ color: 'text.secondary' }}>Rodada em que os playoffs comecam</TableCell>
+            <TableCell>3a</TableCell>
           </TableRow>
           <TableRow>
             <TableCell sx={{ color: 'text.secondary' }}>Rodada Limite para Trocas</TableCell>
-            <TableCell>{settings.tradeDeadline}</TableCell>
+            <TableCell>{settings.tradeDeadline}a</TableCell>
           </TableRow>
           <TableRow>
             <TableCell sx={{ color: 'text.secondary' }}>Vagas para Lesionados</TableCell>
