@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
+import { useNavigate } from 'react-router-dom';
 
 interface CreateLeagueData {
   name: string;
@@ -73,3 +74,14 @@ export const useUpdateLeague = ({ onSuccess }: { onSuccess: () => void }) => {
     onSuccess: onSuccess,
   });
 };
+
+export const useDeleteLeague = () =>
+  useMutation({
+    mutationFn: (leagueId: number) =>
+      axios.delete(`${apiConfig.endpoints.fantasyLeagues.delete(leagueId)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }),
+  });
