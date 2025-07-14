@@ -59,7 +59,7 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
     } else {
       setFormData(null);
     }
-  }, [selected, leagueSettings, rosterSettings]);
+  }, [selected, leagueSettings, rosterSettings, leagueMembers]);
 
   const renderForm = () => {
     if (!formData) return <Typography>Carregando...</Typography>;
@@ -91,10 +91,6 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
         return (
           <LeagueMembersSettings
             values={formData}
-            onRemoveClick={(userLeagueId) => {
-              console.log(userLeagueId);
-            }}
-            leagueId={leagueId}
             refetchLeagueMembers={refetchLeagueMembers}
           />
         );  

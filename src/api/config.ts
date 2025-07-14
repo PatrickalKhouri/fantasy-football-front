@@ -29,6 +29,9 @@ const endpoints = {
   rosterSettings: {
     update: (id: number) => `${API_BASE_URL}/roster-settings/${id}`,
   },
+  userTeams: {
+    delete: (id: number) => `${API_BASE_URL}/user-teams/${id}`,
+  },
 };
 
 const headers = {

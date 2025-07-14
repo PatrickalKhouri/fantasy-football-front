@@ -13,19 +13,25 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useLeagueTeams } from '../api/leagueQueries';
 import { useGetCurrentUser } from '../api/authQueries';
+import { useDeleteUserTeam } from '../api/userTeamsMutations';
 
 interface Props {
   values: any;
-  leagueId: number;
-  onRemoveClick: (userLeagueId: number) => void;
   refetchLeagueMembers: () => void;
 }
 
-const LeagueMembersSettings: React.FC<Props> = ({ values, leagueId, onRemoveClick, refetchLeagueMembers }) => {
+const LeagueMembersSettings: React.FC<Props> = ({ values, refetchLeagueMembers }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { data: currentUser } = useGetCurrentUser();
+
+  const { mutate: deleteUserTeam } = useDeleteUserTeam({
+    onSuccess: () => {
+      refetchLeagueMembers();
+    },
+  });
+
   const currentUserId = currentUser?.id;
 
   console.log(values);
@@ -66,7 +72,7 @@ const LeagueMembersSettings: React.FC<Props> = ({ values, leagueId, onRemoveClic
             <span>
               <IconButton
                 color="error"
-                onClick={() => onRemoveClick(entry.id)}
+                onClick={() => deleteUserTeam({ id: entry.id })}
                 disabled={entry.user.id === currentUserId || entry.isOwner}
               >
                 <DeleteIcon />
