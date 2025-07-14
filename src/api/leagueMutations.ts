@@ -20,7 +20,7 @@ interface UpdateLeagueData {
     numberOfRounds: number;
     tradeDeadlineRound: number | null;
     playoffTeams: number;
-    playoffFormat: 'single_game' | 'two_leg_final' | 'two_leg_all';
+    playoffFormat: 'single_game' | 'two_leg_single_game_final' | 'two_leg_all';
     injuredReserveSlots: number;
     // logoUrl: string; <-- for later
   }>;

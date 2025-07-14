@@ -12,13 +12,16 @@ import {
 import { useLeagueTeams } from '../api/leagueQueries';
 
 interface Props {
-  leagueId: number;
+  league: any;
 }
 
-const LeagueTeams: React.FC<Props> = ({ leagueId }) => {
-  const { data: members, isLoading } = useLeagueTeams(leagueId);
+const LeagueTeams: React.FC<Props> = ({ league}) => {
+  const { data: members, isLoading } = useLeagueTeams(league.id);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const numberOfTeams = league.numberOfTeams;
+  
 
   if (isLoading) return <p>Carregando membros...</p>;
 
@@ -45,8 +48,8 @@ const LeagueTeams: React.FC<Props> = ({ leagueId }) => {
             }}
           >
             <Avatar>
-                {entry.user.firstName[0]}
-                {entry.user.lastName[0]}
+              {entry.user.firstName[0]}
+              {entry.user.lastName[0]}
             </Avatar>
             <Typography variant="body1" fontWeight={500}>
               {index + 1}. {entry.name}
@@ -60,6 +63,30 @@ const LeagueTeams: React.FC<Props> = ({ leagueId }) => {
                 sx={{ mt: isMobile ? 1 : 0 }}
               />
             )}
+          </Box>
+        ))}
+
+        {/* Placeholder teams */}
+        {Array.from({ length: numberOfTeams - members.length }).map((_, i) => (
+          <Box
+            key={`placeholder-${i}`}
+            sx={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: 'flex-start',
+              gap: 2,
+              alignItems: isMobile ? 'flex-start' : 'center',
+              p: 2,
+              borderRadius: 2,
+              bgcolor: 'grey.100',
+              border: '1px dashed',
+              borderColor: 'grey.300',
+            }}
+          >
+            <Avatar sx={{ bgcolor: 'grey.300' }} />
+            <Typography variant="body1" fontWeight={500} color="text.secondary">
+              {members.length + i + 1}. Time {members.length + i + 1}
+            </Typography>
           </Box>
         ))}
 

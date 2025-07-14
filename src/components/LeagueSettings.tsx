@@ -21,13 +21,14 @@ interface Props {
 }
 
 const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) => {
-  const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(league.id);
+  const { data: leagueSettings } = useGetLeague(league.id);
   const [modalOpen, setModalOpen] = useState(false);  
   const settings = {
     numberOfTeams: leagueSettings?.numberOfTeams,
     playoffs: leagueSettings?.playoffTeams,
     tradeDeadline: leagueSettings?.tradeDeadlineRound,
     irSlots: leagueSettings?.injuredReserveSlots,
+    playoffStartRound: leagueSettings?.playoffStartRound,
   };
 
   return (
@@ -63,7 +64,7 @@ const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) =>
           </TableRow>
           <TableRow>
             <TableCell sx={{ color: 'text.secondary' }}>Rodada em que os playoffs comecam</TableCell>
-            <TableCell>3a</TableCell>
+            <TableCell>{settings.playoffStartRound}a</TableCell>
           </TableRow>
           <TableRow>
             <TableCell sx={{ color: 'text.secondary' }}>Rodada Limite para Trocas</TableCell>
