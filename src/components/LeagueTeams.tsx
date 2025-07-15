@@ -85,7 +85,7 @@ const LeagueTeams: React.FC<Props> = ({ league}) => {
           >
             <Avatar sx={{ bgcolor: 'grey.300' }} />
             <Typography variant="body1" fontWeight={500} color="text.secondary">
-              {members.length + i + 1}. Time {members.length + i + 1}
+             Time {members.length + i + 1}
             </Typography>
           </Box>
         ))}

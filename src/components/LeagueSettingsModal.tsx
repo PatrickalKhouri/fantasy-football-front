@@ -55,8 +55,6 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
   const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(leagueId);
   const { data: leagueMembers, refetch: refetchLeagueMembers } = useLeagueTeams(leagueId);
 
-  console.log(leagueMembers);
-
   useEffect(() => {
     if (selected === 'league' && leagueSettings) {
       setFormData(leagueSettings);
@@ -98,7 +96,7 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
       case 'members':
         return (
           <LeagueMembersSettings
-            values={formData}
+            values={leagueMembers}
             refetchLeagueMembers={refetchLeagueMembers}
           />
         );  
