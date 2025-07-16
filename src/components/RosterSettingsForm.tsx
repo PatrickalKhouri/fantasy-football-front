@@ -21,16 +21,18 @@ interface Props {
     starterDefenseSlots: number;
   };
   onChange: (field: string, value: any) => void;
-  leagueId: number;
+  id: number;
   refetchRosterSettings: () => void;
+  refetchDraftSettings: () => void;
 }
 
-const RosterSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refetchRosterSettings }) => {
+const RosterSettingsForm: React.FC<Props> = ({ values, onChange, id , refetchRosterSettings, refetchDraftSettings }) => {
 const [openSnackbar, setOpenSnackbar] = useState(false);
   const updateRoster = useUpdateRosterSettings({
     onSuccess: () => {
       setOpenSnackbar(true);
       refetchRosterSettings();
+      refetchDraftSettings();
     },
   });
 
@@ -185,7 +187,7 @@ const [openSnackbar, setOpenSnackbar] = useState(false);
         >
       <Button
         variant="contained"
-        onClick={() => updateRoster.mutate({ id: leagueId, updates: values })}
+        onClick={() => updateRoster.mutate({ id, updates: values })}
         disabled={updateRoster.isPending || isStarterTotalExceeded || isBenchTotalExceeded}
       >
         Salvar

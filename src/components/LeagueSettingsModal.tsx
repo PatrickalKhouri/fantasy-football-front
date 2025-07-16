@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import LeagueSettingsForm from './LeagueSettingsForm';
 import RosterSettingsForm from './RosterSettingsForm';
+import DraftSettingsForm from './DraftSettingsForm';
 import LeagueMembersSettings from './LegueMemberSettings';
 
 import { useGetLeague, useLeagueTeams } from '../api/leagueQueries';
@@ -26,6 +27,8 @@ import { useGetLeague, useLeagueTeams } from '../api/leagueQueries';
 import { useRosterSettings } from '../api/useRosterSettings';
 import { useDeleteLeague } from '../api/leagueMutations';
 import { useNavigate } from 'react-router-dom';
+import { useDraftSettings } from '../api/useDraftSettings';
+
 
 const SETTINGS = [
   { label: 'Configurações da Liga', key: 'league' },
@@ -54,6 +57,8 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
   const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(leagueId);
   const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(leagueId);
   const { data: leagueMembers, refetch: refetchLeagueMembers } = useLeagueTeams(leagueId);
+  const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(leagueId);
+  console.log({ draftSettings });
 
   useEffect(() => {
     if (selected === 'league' && leagueSettings) {
@@ -62,10 +67,12 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
       setFormData(rosterSettings);
     } else if (selected === 'members' && leagueMembers) {
       setFormData(leagueMembers);
+    } else if (selected === 'draft' && draftSettings) {
+      setFormData(draftSettings);
     } else {
       setFormData(null);
     }
-  }, [selected, leagueSettings, rosterSettings, leagueMembers]);
+  }, [selected, leagueSettings, rosterSettings, leagueMembers, draftSettings]);
 
   const renderForm = () => {
     if (!formData) return <Typography>Carregando...</Typography>;
@@ -85,21 +92,33 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
       case 'roster':
         return (
           <RosterSettingsForm
+              values={formData}
+              onChange={(field, value) =>
+                setFormData((prev: any) => ({ ...prev, [field]: value }))
+              }
+              id={draftSettings.id}
+              refetchRosterSettings={refetchRosterSettings}
+              refetchDraftSettings={refetchDraftSettings}
+            />
+          );
+      case 'draft':
+        return (
+          <DraftSettingsForm
             values={formData}
             onChange={(field, value) =>
               setFormData((prev: any) => ({ ...prev, [field]: value }))
             }
-            leagueId={leagueId}
-            refetchRosterSettings={refetchRosterSettings}
+            id={draftSettings.id}
+            refetchDraftSettings={refetchDraftSettings}
           />
         );
       case 'members':
         return (
-          <LeagueMembersSettings
-            values={leagueMembers}
-            refetchLeagueMembers={refetchLeagueMembers}
-          />
-        );  
+            <LeagueMembersSettings
+              values={leagueMembers}
+              refetchLeagueMembers={refetchLeagueMembers}
+            />
+          );  
       default:
         return <Typography>Configuração ainda não disponível.</Typography>;
     }
