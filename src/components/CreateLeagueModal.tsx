@@ -58,7 +58,7 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
   const { user } = useAuth();
   const [leagueName, setLeagueName] = useState('');
   const [numberOfTeams, setNumberOfTeams] = useState(8);
-  const [draftType, setDraftType] = useState('SNAKE');
+  const [draftType, setDraftType] = useState('snake');
   const { mutate: createLeague, isPending } = useCreateLeague();
 
   const handleSubmit = (e: React.FormEvent) => {
