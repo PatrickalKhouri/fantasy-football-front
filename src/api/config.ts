@@ -16,12 +16,12 @@ const endpoints = {
     get: `${API_BASE_URL}/fantasy-leagues`,
     myLeagues: `${API_BASE_URL}/fantasy-leagues/my-leagues`,
     getLeague: `${API_BASE_URL}/fantasy-leagues`,
-    update: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}`,
-    getInvitesByLeagueId: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/invites`,
-    getLeagueTeams: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/teams`,
-    getRosterSettings: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/roster-settings`,
-    getDraftSettings: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-settings`,
-    delete: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}`,
+    update: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}`,
+    getInvitesByLeagueId: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/invites`,
+    getLeagueTeams: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/teams`,
+    getRosterSettings: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/roster-settings`,
+    getDraftSettings: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/draft-settings`,
+    delete: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}`,
   },
   leagueInvites: {
     invite: `${API_BASE_URL}/league-invitations/invite-by-email`,
@@ -37,6 +37,9 @@ const endpoints = {
   userTeams: {
     delete: (id: number) => `${API_BASE_URL}/user-teams/${id}`,
   },
+  players: {
+    getAll: `${API_BASE_URL}/players`,
+  },  
 };
 
 const headers = {

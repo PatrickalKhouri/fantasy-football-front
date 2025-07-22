@@ -1,18 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
-import { useNavigate } from 'react-router-dom';
 
-interface CreateLeagueData {
+interface CreateFantasyLeagueData {
   name: string;
   numberOfTeams: number;
   ownerId: number;
-  championshipId: number;
+  leagueId: number;
   draftType: string;
 }
 
-interface UpdateLeagueData {
-  leagueId: number;
+interface UpdateFantasyLeagueData {
+  id: number;
   updates: Partial<{
     name: string;
     numberOfTeams: number;
@@ -26,10 +25,10 @@ interface UpdateLeagueData {
   }>;
 }
 
-export const useCreateLeague = () => {
+export const useCreateFantasyLeague = () => {
   return useMutation({
-    mutationFn: (leagueData: CreateLeagueData) => 
-      axios.post(apiConfig.endpoints.fantasyLeagues.create, leagueData, {
+    mutationFn: (fantasyLeagueData: CreateFantasyLeagueData) => 
+      axios.post(apiConfig.endpoints.fantasyLeagues.create, fantasyLeagueData, {
         headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -38,12 +37,12 @@ export const useCreateLeague = () => {
   });
 };
 
-export const inviteUserToLeague = async ({
+export const inviteUserToFantasyLeague = async ({
   email,
-  leagueId,
+  id,
 }: {
   email: string;
-  leagueId: number;
+  id: number;
 }) => {
   const res = await fetch(`${apiConfig.endpoints.leagueInvites.invite}`, {
     method: 'POST',
@@ -51,7 +50,7 @@ export const inviteUserToLeague = async ({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-    body: JSON.stringify({ email, leagueId }),
+    body: JSON.stringify({ email, id }),
   });
 
   if (!res.ok) {
@@ -62,10 +61,10 @@ export const inviteUserToLeague = async ({
   return res.json();
 };
 
-export const useUpdateLeague = ({ onSuccess }: { onSuccess: () => void }) => {
+export const useUpdateFantasyLeague = ({ onSuccess }: { onSuccess: () => void }) => {
   return useMutation({
-    mutationFn: ({ leagueId, updates }: UpdateLeagueData) =>
-      axios.patch(`${apiConfig.endpoints.fantasyLeagues.update(leagueId)}`, updates, {
+    mutationFn: ({ id, updates }: UpdateFantasyLeagueData) =>
+      axios.patch(`${apiConfig.endpoints.fantasyLeagues.update(id)}`, updates, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -75,10 +74,10 @@ export const useUpdateLeague = ({ onSuccess }: { onSuccess: () => void }) => {
   });
 };
 
-export const useDeleteLeague = () =>
+export const useDeleteFantasyLeague = () =>
   useMutation({
-    mutationFn: (leagueId: number) =>
-      axios.delete(`${apiConfig.endpoints.fantasyLeagues.delete(leagueId)}`, {
+    mutationFn: (id: number) =>
+      axios.delete(`${apiConfig.endpoints.fantasyLeagues.delete(id)}`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,

@@ -1,21 +1,19 @@
-// components/UserLeaguesList.tsx
 import { 
   Box, 
   Typography, 
   Card, 
   CardActionArea, 
   CardContent,
-  Button
 } from '@mui/material';
-import { FantasyLeague } from '../api/leagueQueries';
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
 
 interface UserLeaguesListProps {
-  leagues: FantasyLeague[];
-  onLeagueSelect: (leagueId: number) => void;
+  fantasyLeagues: FantasyLeague[];
+  onFantasyLeagueSelect: (fantasyLeagueId: number) => void;
 }
 
-export const UserLeaguesList = ({ leagues, onLeagueSelect }: UserLeaguesListProps) => {
-  if (leagues.length === 0) {
+export const UserFantasyLeaguesList = ({ fantasyLeagues, onFantasyLeagueSelect }: UserLeaguesListProps) => {
+  if (fantasyLeagues.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', mt: 4 }}>
         <Typography variant="body1" sx={{ mb: 2 }}>
@@ -40,9 +38,9 @@ export const UserLeaguesList = ({ leagues, onLeagueSelect }: UserLeaguesListProp
         gap: 2,
         justifyContent: 'center'
       }}>
-        {leagues.map((league) => (
+        {fantasyLeagues.map((fantasyLeague) => (
           <Card 
-            key={league.id}
+            key={fantasyLeague.id}
             sx={{ 
               height: '100%',
               display: 'flex',
@@ -56,13 +54,13 @@ export const UserLeaguesList = ({ leagues, onLeagueSelect }: UserLeaguesListProp
             }}
           >
             <CardActionArea 
-              onClick={() => onLeagueSelect(league.id)}
+              onClick={() => onFantasyLeagueSelect(fantasyLeague.id)}
               sx={{ flexGrow: 1 }}
             >
               <CardContent>
                 <Typography gutterBottom variant="h6" component="div">
-                  {league.name}
-                  {league.isOwner && (
+                  {fantasyLeague.name}
+                  {fantasyLeague.isOwner && (
                     <Typography 
                       component="span" 
                       variant="caption" 
@@ -74,10 +72,10 @@ export const UserLeaguesList = ({ leagues, onLeagueSelect }: UserLeaguesListProp
                   )}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Times: {league.numberOfTeams}
+                  Times: {fantasyLeague.numberOfTeams}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Campeonato: {league.championship.name}
+                  Campeonato: {fantasyLeague.league.name}
                 </Typography>
               </CardContent>
             </CardActionArea>

@@ -9,18 +9,18 @@ import {
   useTheme,
   Avatar,
 } from '@mui/material';
-import { useLeagueTeams } from '../api/leagueQueries';
+import { useFantasyLeagueTeams } from '../api/fantasyLeagueQueries';
 
 interface Props {
-  league: any;
+  fantasyLeague: any;
 }
 
-const LeagueTeams: React.FC<Props> = ({ league}) => {
-  const { data: members, isLoading } = useLeagueTeams(league.id);
+const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
+  const { data: members, isLoading } = useFantasyLeagueTeams(fantasyLeague.id);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const numberOfTeams = league.numberOfTeams;
+  const numberOfTeams = fantasyLeague.numberOfTeams;
   
 
   if (isLoading) return <p>Carregando membros...</p>;
@@ -100,4 +100,4 @@ const LeagueTeams: React.FC<Props> = ({ league}) => {
   );
 };
 
-export default LeagueTeams;
+export default FantasyLeagueTeams;

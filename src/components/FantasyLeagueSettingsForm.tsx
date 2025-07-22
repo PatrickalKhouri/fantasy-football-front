@@ -11,7 +11,7 @@ import {
   Radio,
   Button,
 } from '@mui/material';
-import { useUpdateLeague } from '../api/leagueMutations';
+import { useUpdateFantasyLeague } from '../api/fantasyLeagueMutations';
 import { Snackbar, Alert } from '@mui/material';
 
 interface Props {
@@ -26,11 +26,11 @@ interface Props {
     injuredReserveSlots: number;
   };
   onChange: (field: string, value: any) => void;
-  leagueId: number;
-  refetchLeagueSettings: () => void;
+  id: number;
+  refetchFantasyLeagueSettings: () => void;
 }
 
-const LeagueSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refetchLeagueSettings }) => {
+const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refetchFantasyLeagueSettings }) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const tradeDeadlineOptions = useMemo(() => {
     const start = Math.max(1, values.numberOfRounds - 8);
@@ -40,10 +40,10 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refet
 
   console.log({ values });
   
-  const updateLeague = useUpdateLeague({
+  const updateFantasyLeague = useUpdateFantasyLeague({
     onSuccess: () => {
       setOpenSnackbar(true);
-      refetchLeagueSettings();
+      refetchFantasyLeagueSettings();
     },
   });
 
@@ -201,8 +201,8 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refet
         >
           <Button
             variant="contained"
-            onClick={() => updateLeague.mutate({ leagueId, updates: values })}
-            disabled={updateLeague.isPending}
+            onClick={() => updateFantasyLeague.mutate({ id, updates: values })}
+            disabled={updateFantasyLeague.isPending}
           >
             Salvar
           </Button>
@@ -216,4 +216,4 @@ const LeagueSettingsForm: React.FC<Props> = ({ values, onChange, leagueId, refet
   );
 };
 
-export default LeagueSettingsForm;
+export default FantasyLeagueSettingsForm;

@@ -10,25 +10,24 @@ import {
   Box,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import LeagueSettingsModal from './LeagueSettingsModal';
-import { useGetLeague } from '../api/leagueQueries';
+import FantasyLeagueSettingsModal from './FantasyLeagueSettingsModal';
+import { useGetFantasyLeague } from '../api/fantasyLeagueQueries';
 
 interface Props {
-  leagueId: number;
   isOwner?: boolean;
   onEdit?: () => void;
-  league: any;
+  fantasyLeague: any;
 }
 
-const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) => {
-  const { data: leagueSettings } = useGetLeague(league.id);
+const FantasyLeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, fantasyLeague }) => {
+  const { data: fantasyLeagueSettings } = useGetFantasyLeague(fantasyLeague.id);
   const [modalOpen, setModalOpen] = useState(false);  
   const settings = {
-    numberOfTeams: leagueSettings?.numberOfTeams,
-    playoffs: leagueSettings?.playoffTeams,
-    tradeDeadline: leagueSettings?.tradeDeadlineRound,
-    irSlots: leagueSettings?.injuredReserveSlots,
-    playoffStartRound: leagueSettings?.playoffStartRound,
+    numberOfTeams: fantasyLeagueSettings?.numberOfTeams,
+    playoffs: fantasyLeagueSettings?.playoffTeams,
+    tradeDeadline: fantasyLeagueSettings?.tradeDeadlineRound,
+    irSlots: fantasyLeagueSettings?.injuredReserveSlots,
+    playoffStartRound: fantasyLeagueSettings?.playoffStartRound,
   };
 
   return (
@@ -76,9 +75,9 @@ const LeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, league }) =>
           </TableRow>
         </TableBody>
       </Table>
-      <LeagueSettingsModal open={modalOpen} onClose={() => setModalOpen(false)} league={league} />
+      <FantasyLeagueSettingsModal open={modalOpen} onClose={() => setModalOpen(false)} fantasyLeague={fantasyLeague} />
     </Paper>
   );
 };
 
-export default LeagueSettings;
+export default FantasyLeagueSettings;

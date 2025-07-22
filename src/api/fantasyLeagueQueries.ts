@@ -2,7 +2,7 @@ import axios from 'axios';
 import { apiConfig } from './config';
 import { useQuery } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import { inviteUserToLeague } from './leagueMutations';
+import { inviteUserToFantasyLeague } from './fantasyLeagueMutations';
 
 export interface User {
   id: number;
@@ -18,7 +18,7 @@ export interface FantasyLeague {
     numberOfTeams: number;
     isOwner?: boolean;
     isActive?: boolean;
-    championship: {
+    league: {
       id: number;
       name: string;
     };
@@ -56,12 +56,12 @@ export interface FantasyLeague {
     });
   };
 
-  export const useGetLeague = (leagueId: number) => {
+  export const useGetFantasyLeague = (id: number) => {
     return useQuery<FantasyLeague>({
-      queryKey: ['leagueId', leagueId],
+      queryKey: ['leagueId', id],
       queryFn: async () => {
         const response = await axios.get(
-          `${apiConfig.endpoints.fantasyLeagues.getLeague}/${leagueId}`,
+          `${apiConfig.endpoints.fantasyLeagues.getLeague}/${id}`,
           {
             withCredentials: true,
             headers: {
@@ -75,25 +75,25 @@ export interface FantasyLeague {
     })
 }
 
-export const useInviteUserToLeague = (leagueId: number) => {
+export const useInviteUserToFantasyLeague = (id: number) => {
   return useMutation({
     mutationFn: (email: string) =>
-      inviteUserToLeague({ email, leagueId }),
+      inviteUserToFantasyLeague({ email, id }),
   });
 };
 
 
-export const useLeagueTeams = (leagueId: number) => {
+export const useFantasyLeagueTeams = (id: number) => {
   return useQuery({
-    queryKey: ['league-members', leagueId],
+    queryKey: ['league-members', id],
     queryFn: async () => {
-      const res = await axios.get(apiConfig.endpoints.fantasyLeagues.getLeagueTeams(leagueId), {
+      const res = await axios.get(apiConfig.endpoints.fantasyLeagues.getLeagueTeams(id), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
       return res.data;
     },
-    enabled: !!leagueId,
+    enabled: !!id,
   });
 };

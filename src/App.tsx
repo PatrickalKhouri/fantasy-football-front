@@ -7,7 +7,7 @@ import Navbar from './components/Navbar';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Welcome from './pages/Welcome';
-import League from './pages/League';
+import FantasyLeague from './pages/FantasyLeague';
 import { useGetCurrentUser } from './api/authQueries';
 import AcceptInvite from './pages/AcceptInvite';
 const App: React.FC = () => {
@@ -31,7 +31,7 @@ const App: React.FC = () => {
                 </div>
               } />
               <Route path="/welcome" element={<Welcome />} /> 
-              <Route path="/league/:leagueId" element={<League currentUserId={currentUser?.id as number} />} />
+              <Route path="/fantasy-league/:fantasyLeagueId" element={<FantasyLeague currentUserId={currentUser?.id as number} />} />
             </Route>
 
             {/* Fallback redirect */}

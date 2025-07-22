@@ -12,13 +12,13 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-interface InviteToLeagueModalProps {
+interface InviteToFantasyLeagueModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (email: string) => void;
 }
 
-const InviteToLeagueModal: React.FC<InviteToLeagueModalProps> = ({ open, onClose, onSubmit }) => {
+const InviteToFantasyLeagueModal: React.FC<InviteToFantasyLeagueModalProps> = ({ open, onClose, onSubmit }) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -76,4 +76,4 @@ const InviteToLeagueModal: React.FC<InviteToLeagueModalProps> = ({ open, onClose
   );
 };
 
-export default InviteToLeagueModal;
+export default InviteToFantasyLeagueModal;

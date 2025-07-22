@@ -4,8 +4,8 @@ import { Box, Typography, CircularProgress, Button } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateLeagueModal from '../components/CreateLeagueModal';
-import { UserLeaguesList } from '../components/UserLeaguesList';
-import { useGetMyLeagues } from '../api/leagueQueries';
+import { UserFantasyLeaguesList } from '../components/UserFantasyLeaguesList';
+import { useGetMyLeagues } from '../api/fantasyLeagueQueries';
 import { apiConfig } from '../api/config';
 import { useMutation } from '@tanstack/react-query';
 
@@ -16,7 +16,7 @@ const Welcome = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Use the React Query hook
-  const { data: leagues, isLoading, isError, error } = useGetMyLeagues();
+  const { data: fantasyLeagues, isLoading, isError, error } = useGetMyLeagues();
 
 const acceptInviteMutation = useMutation({
   mutationFn: async (token: string) => {
@@ -56,11 +56,11 @@ const acceptInviteMutation = useMutation({
     return null;
   }
 
-  const handleLeagueSelect = (leagueId: number) => {
-    if (leagueId === 0) {
+  const handleFantasyLeagueSelect = (fantasyLeagueId: number) => {
+    if (fantasyLeagueId === 0) {
       setIsModalOpen(true);
     } else {
-      navigate(`/league/${leagueId}`);
+      navigate(`/fantasy-league/${fantasyLeagueId}`);
     }
   };
 
@@ -109,9 +109,9 @@ const acceptInviteMutation = useMutation({
             Criar Nova Liga
           </Button>
         </Box>
-          <UserLeaguesList 
-            leagues={leagues || []} 
-            onLeagueSelect={handleLeagueSelect} 
+          <UserFantasyLeaguesList 
+            fantasyLeagues={fantasyLeagues || []} 
+            onFantasyLeagueSelect={handleFantasyLeagueSelect} 
           />
           </>
         )}
