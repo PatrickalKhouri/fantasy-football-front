@@ -21,7 +21,11 @@ import { usePlayers } from '../api/playersQueries';
 
 const POSITIONS = ['ALL', 'GK', 'DEF', 'MID', 'FWD'];
 
-const PlayersList: React.FC = () => {
+interface PlayersListProps {
+  fantasyLeague: any;
+}
+
+const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -29,6 +33,7 @@ const PlayersList: React.FC = () => {
   const [search, setSearch] = useState<string>('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+;
 
   const { data, isLoading } = usePlayers({
     position: position === 'ALL' ? undefined : position,
@@ -37,6 +42,7 @@ const PlayersList: React.FC = () => {
     limit: rowsPerPage,
     sortBy: 'goals',
     order: 'desc',
+    leagueId: fantasyLeague.league.id,
   });
 
   const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);

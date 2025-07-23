@@ -10,6 +10,7 @@ export const usePlayers = ({
   limit = 10,
   sortBy = 'goals',
   order = 'desc',
+  leagueId,
 }: {
   position?: string;
   search?: string;
@@ -17,12 +18,13 @@ export const usePlayers = ({
   limit?: number;
   sortBy?: string;
   order?: 'asc' | 'desc';
+  leagueId?: number;
 }) => {
   return useQuery({
-    queryKey: ['players', { position, search, page, limit, sortBy, order }],
+    queryKey: ['players', { position, search, page, limit, sortBy, order, leagueId }],
     queryFn: async () => {
       const response = await axios.get(`${apiConfig.endpoints.players.getAll}`, {
-        params: { position, search, page, limit, sortBy, order },
+        params: { position, search, page, limit, sortBy, order, leagueId },
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
