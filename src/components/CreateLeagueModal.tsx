@@ -70,7 +70,7 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
         name: leagueName,
         numberOfTeams,
         ownerId: Number(user?.id) || 0,
-        leagueId: 3,
+        leagueId: 1,
         draftType,
       },
       {

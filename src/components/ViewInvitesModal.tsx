@@ -16,7 +16,7 @@ import {
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useGetInvitesByLeague, useCancelInvite } from '../api/leagueInviteQueries';
+import { useGetInvitesByLeague, useCancelInvite } from '../api/fantasyLeagueInviteQueries';
 
 interface ViewInvitesModalProps {
   open: boolean;

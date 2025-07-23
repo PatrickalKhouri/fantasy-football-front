@@ -44,7 +44,7 @@ export const inviteUserToFantasyLeague = async ({
   email: string;
   id: number;
 }) => {
-  const res = await fetch(`${apiConfig.endpoints.leagueInvites.invite}`, {
+  const res = await fetch(`${apiConfig.endpoints.fantasyLeagueInvites.invite}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

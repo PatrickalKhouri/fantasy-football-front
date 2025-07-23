@@ -20,7 +20,7 @@ const Welcome = () => {
 
 const acceptInviteMutation = useMutation({
   mutationFn: async (token: string) => {
-    const res = await fetch(`${apiConfig.endpoints.leagueInvites.accept}?token=${token}`, {
+    const res = await fetch(`${apiConfig.endpoints.fantasyLeagueInvites.accept}?token=${token}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -116,7 +116,6 @@ const acceptInviteMutation = useMutation({
           </>
         )}
       </Box>
-      
 
       <CreateLeagueModal 
         open={isModalOpen} 

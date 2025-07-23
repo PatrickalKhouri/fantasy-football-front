@@ -19,7 +19,7 @@ const InviteAcceptPage = () => {
 
   const acceptInviteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${apiConfig.endpoints.leagueInvites.accept}?token=${token}`, {
+      const res = await fetch(`${apiConfig.endpoints.fantasyLeagueInvites.accept}?token=${token}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

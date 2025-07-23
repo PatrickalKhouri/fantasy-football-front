@@ -23,10 +23,10 @@ const endpoints = {
     getDraftSettings: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/draft-settings`,
     delete: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}`,
   },
-  leagueInvites: {
-    invite: `${API_BASE_URL}/league-invitations/invite-by-email`,
-    accept: `${API_BASE_URL}/league-invitations/accept`,
-    cancel: (inviteId: number) => `${API_BASE_URL}/league-invitations/${inviteId}`,
+  fantasyLeagueInvites: {
+    invite: `${API_BASE_URL}/fantasy-league-invitations/invite-by-email`,
+    accept: `${API_BASE_URL}/fantasy-league-invitations/accept`,
+    cancel: (inviteId: number) => `${API_BASE_URL}/fantasy-league-invitations/${inviteId}`,
   },
   rosterSettings: {
     update: (id: number) => `${API_BASE_URL}/roster-settings/${id}`,
