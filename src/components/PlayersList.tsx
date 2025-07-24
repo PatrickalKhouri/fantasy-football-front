@@ -15,10 +15,30 @@ import {
   TablePagination,
   useTheme,
   useMediaQuery,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 import { usePlayers } from '../api/playersQueries';
 
 const POSITIONS = ['Todos', 'DEF', 'MEI', 'ATA'];
+
+const POSITIONS_TRANSLATION = {
+  'Defender': 'Defensor',
+  'Midfielder': 'Meio-Campo',
+  'Attacker': 'Atacante',
+  'Goalkeeper': 'Goleiro',
+  'ALL': 'Todos',
+  'Defense': 'Defesa', // for synthetic team players
+};
+
+const POSITIONS_BACKEND_MAP = {
+  'DEF': 'Defense',
+  'MEI': 'Midfielder',
+  'ATA': 'Attacker',
+};
+
+console.log(POSITIONS_TRANSLATION.Attacker);
 
 interface PlayersListProps {
   fantasyLeague: any;
@@ -34,7 +54,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { data, isLoading, isFetching } = usePlayers({
-    position: position === 'ALL' ? undefined : position,
+    position: position === 'ALL' ? undefined : POSITIONS_BACKEND_MAP[position as keyof typeof POSITIONS_BACKEND_MAP],
     search,
     page: page + 1,
     limit: rowsPerPage,
@@ -50,6 +70,10 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
       previousDataRef.current = data.data;
     }
   }, [data]);
+  
+  useEffect(() => {
+    setPage(0);
+  }, [position, search]);
 
   const players = data?.data?.length ? data.data : previousDataRef.current;
   const totalCount = data?.meta?.total || previousDataRef.current.length;
@@ -90,8 +114,22 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
         <TextField
           placeholder="Buscar jogador"
           size="small"
+          value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ minWidth: 200 }}
+          InputProps={{
+            endAdornment: search && (
+              <InputAdornment position="end">
+                <IconButton
+                  size="small"
+                  onClick={() => setSearch('')}
+                  edge="end"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
       </Box>
 
@@ -124,7 +162,9 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
                     </Box>
                   </TableCell>
                   <TableCell>{player.team_name}</TableCell>
-                  <TableCell>{player.player_position}</TableCell>
+                  <TableCell>
+                    {POSITIONS_TRANSLATION[player.player_position as keyof typeof POSITIONS_TRANSLATION]}
+                  </TableCell>
                   <TableCell align="right">{player.goals}</TableCell>
                 </TableRow>
               ))
