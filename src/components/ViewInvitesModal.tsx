@@ -16,21 +16,21 @@ import {
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useGetInvitesByLeague, useCancelInvite } from '../api/leagueInviteQueries';
+import { useGetInvitesByLeague, useCancelInvite } from '../api/fantasyLeagueInviteQueries';
 
 interface ViewInvitesModalProps {
   open: boolean;
   onClose: () => void;
-  leagueId: number;
+  fantasyLeagueId: number;
 }
 
-const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, leagueId }) => { 
+const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, fantasyLeagueId }) => { 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [invites, setInvites] = useState<any[]>([]);
 
-  const { data: invitesData, isLoading } = useGetInvitesByLeague(leagueId, open);
-  const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite(leagueId);
+  const { data: invitesData, isLoading } = useGetInvitesByLeague(fantasyLeagueId, open);
+  const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite(fantasyLeagueId);
 
   useEffect(() => {
     if (invitesData) {

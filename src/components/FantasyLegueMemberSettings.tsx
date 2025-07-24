@@ -4,37 +4,28 @@ import {
   Box,
   Stack,
   IconButton,
-  Avatar,
   Chip,
-  useMediaQuery,
-  useTheme,
   Tooltip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useLeagueTeams } from '../api/leagueQueries';
 import { useGetCurrentUser } from '../api/authQueries';
 import { useDeleteUserTeam } from '../api/userTeamsMutations';
 
 interface Props {
   values: any;
-  refetchLeagueMembers: () => void;
+  refetchFantasyLeagueMembers: () => void;
 }
 
-const LeagueMembersSettings: React.FC<Props> = ({ values, refetchLeagueMembers }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+const FantasyLeagueMembersSettings: React.FC<Props> = ({ values, refetchFantasyLeagueMembers }) => {
   const { data: currentUser } = useGetCurrentUser();
 
   const { mutate: deleteUserTeam } = useDeleteUserTeam({
     onSuccess: () => {
-      refetchLeagueMembers();
+      refetchFantasyLeagueMembers();
     },
   });
 
   const currentUserId = currentUser?.id;
-
-  console.log(values);
 
   return (
     <Stack spacing={2} sx={{ py: 2 }}>
@@ -91,4 +82,4 @@ const LeagueMembersSettings: React.FC<Props> = ({ values, refetchLeagueMembers }
   );
 };
 
-export default LeagueMembersSettings;
+export default FantasyLeagueMembersSettings;

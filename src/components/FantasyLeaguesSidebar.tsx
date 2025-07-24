@@ -6,22 +6,22 @@ import {
   Divider,
   Paper,
 } from '@mui/material';
-import { FantasyLeague } from '../api/leagueQueries';
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
 
 type Props = {
-  league: FantasyLeague;
+  fantasyLeague: FantasyLeague;
   currentUserId: number;
   onInviteClick?: () => void;
   onViewInvitesClick?: () => void;
 };
 
-const LeagueSidebar: React.FC<Props> = ({
-  league,
+const FantasyLeaguesSidebar: React.FC<Props> = ({
+  fantasyLeague,
   currentUserId,
   onInviteClick,
   onViewInvitesClick,
 }) => {
-  const isOwner = currentUserId === league.owner?.id;
+  const isOwner = currentUserId === fantasyLeague.owner?.id;
 
   return (
     <Paper
@@ -39,15 +39,15 @@ const LeagueSidebar: React.FC<Props> = ({
       }}
     >
       <Typography variant="h6" gutterBottom>
-        {league.name}
+        {fantasyLeague.name}
       </Typography>
 
       <Typography variant="body2" sx={{ mb: 1 }}>
-        <strong>Dono:</strong> {league.owner?.firstName} {league.owner?.lastName}
+        <strong>Dono:</strong> {fantasyLeague.owner?.firstName} {fantasyLeague.owner?.lastName}
       </Typography>
 
       <Typography variant="body2" sx={{ mb: 2 }}>
-        <strong>Quantidade de times:</strong> {league.members.length}
+        <strong>Quantidade de times:</strong> {fantasyLeague.members.length}
       </Typography>
 
       <Divider sx={{ mb: 2 }} />
@@ -77,4 +77,4 @@ const LeagueSidebar: React.FC<Props> = ({
   );
 };
 
-export default LeagueSidebar;
+export default FantasyLeaguesSidebar;

@@ -10,12 +10,12 @@ const tabs = [
   { label: 'Pontuações', key: 'scores' },
 ];
 
-interface LeagueTabsProps {
+interface FantasyLeagueTabsProps {
   selected: string;
   onChange: (key: string) => void;
 }
 
-const LeagueTabs: React.FC<LeagueTabsProps> = ({ selected, onChange }) => {
+const FantasyLeagueTabs: React.FC<FantasyLeagueTabsProps> = ({ selected, onChange }) => {
   return (
     <Box sx={{ bgcolor: 'background.paper', py: 2 }}>
       <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
@@ -44,4 +44,4 @@ const LeagueTabs: React.FC<LeagueTabsProps> = ({ selected, onChange }) => {
   );
 };
 
-export default LeagueTabs;
+export default FantasyLeagueTabs;

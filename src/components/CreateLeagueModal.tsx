@@ -15,7 +15,7 @@ import {
   Paper,
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import { useCreateLeague } from '../api/leagueMutations';
+import { useCreateFantasyLeague } from '../api/fantasyLeagueMutations';
 
 const modalStyle = {
   position: 'absolute',
@@ -59,18 +59,18 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
   const [leagueName, setLeagueName] = useState('');
   const [numberOfTeams, setNumberOfTeams] = useState(8);
   const [draftType, setDraftType] = useState('snake');
-  const { mutate: createLeague, isPending } = useCreateLeague();
+  const { mutate: createFantasyLeague, isPending } = useCreateFantasyLeague();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!leagueName.trim()) return;
 
-    createLeague(
+    createFantasyLeague(
       {
         name: leagueName,
         numberOfTeams,
         ownerId: Number(user?.id) || 0,
-        championshipId: 1,
+        leagueId: 1,
         draftType,
       },
       {

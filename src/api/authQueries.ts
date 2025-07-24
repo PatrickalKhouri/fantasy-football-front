@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiConfig } from './config';
 import axios from 'axios';
-import { User } from './leagueQueries';
+import { User } from './fantasyLeagueQueries';
 
 interface SignUpData {
   firstName: string;

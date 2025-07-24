@@ -22,7 +22,7 @@ export const useCancelInvite = (leagueId: number) => {
 
   return useMutation({
     mutationFn: async (inviteId: number) => {
-      await axios.delete(apiConfig.endpoints.leagueInvites.cancel(inviteId), {
+      await axios.delete(apiConfig.endpoints.fantasyLeagueInvites.cancel(inviteId), {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

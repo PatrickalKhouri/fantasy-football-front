@@ -17,15 +17,15 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-import LeagueSettingsForm from './LeagueSettingsForm';
+import LeagueSettingsForm from './FantasyLeagueSettingsForm';
 import RosterSettingsForm from './RosterSettingsForm';
 import DraftSettingsForm from './DraftSettingsForm';
-import LeagueMembersSettings from './LegueMemberSettings';
+import LeagueMembersSettings from './FantasyLegueMemberSettings';
 
-import { useGetLeague, useLeagueTeams } from '../api/leagueQueries';
+import { useGetFantasyLeague, useFantasyLeagueTeams } from '../api/fantasyLeagueQueries';
 
 import { useRosterSettings } from '../api/useRosterSettings';
-import { useDeleteLeague } from '../api/leagueMutations';
+import { useDeleteFantasyLeague } from '../api/fantasyLeagueMutations';
 import { useNavigate } from 'react-router-dom';
 import { useDraftSettings } from '../api/useDraftSettings';
 
@@ -40,39 +40,39 @@ const SETTINGS = [
 interface Props {
   open: boolean;
   onClose: () => void;
-  league: any;
+  fantasyLeague: any;
 }
 
-const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
+const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLeague }) => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState('league');
   const [formData, setFormData] = useState<any>(null);
-  const { mutate: deleteLeague } = useDeleteLeague();
+  const { mutate: deleteFantasyLeague } = useDeleteFantasyLeague();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const leagueId = league.id;
+  const fantasyLeagueId = fantasyLeague.id;
 
-  const { data: leagueSettings, refetch: refetchLeagueSettings } = useGetLeague(leagueId);
-  const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(leagueId);
-  const { data: leagueMembers, refetch: refetchLeagueMembers } = useLeagueTeams(leagueId);
-  const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(leagueId);
+  const { data: fantasyLeagueSettings, refetch: refetchFantasyLeagueSettings } = useGetFantasyLeague(fantasyLeague.id);
+  const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(fantasyLeagueId);
+  const { data: fantasyLeagueMembers, refetch: refetchFantasyLeagueMembers } = useFantasyLeagueTeams(fantasyLeagueId);
+  const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(fantasyLeagueId);
   console.log({ draftSettings });
 
   useEffect(() => {
-    if (selected === 'league' && leagueSettings) {
-      setFormData(leagueSettings);
+    if (selected === 'league' && fantasyLeagueSettings) {
+      setFormData(fantasyLeagueSettings);
     } else if (selected === 'roster' && rosterSettings) {
       setFormData(rosterSettings);
-    } else if (selected === 'members' && leagueMembers) {
-      setFormData(leagueMembers);
+    } else if (selected === 'members' && fantasyLeagueMembers) {
+      setFormData(fantasyLeagueMembers);
     } else if (selected === 'draft' && draftSettings) {
       setFormData(draftSettings);
     } else {
       setFormData(null);
     }
-  }, [selected, leagueSettings, rosterSettings, leagueMembers, draftSettings]);
+  }, [selected, fantasyLeagueSettings, rosterSettings, fantasyLeagueMembers, draftSettings]);
 
   const renderForm = () => {
     if (!formData) return <Typography>Carregando...</Typography>;
@@ -85,8 +85,8 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
             onChange={(field, value) =>
               setFormData((prev: any) => ({ ...prev, [field]: value }))
             }
-            leagueId={leagueId}
-            refetchLeagueSettings={refetchLeagueSettings}
+            id={fantasyLeagueId}
+            refetchFantasyLeagueSettings={refetchFantasyLeagueSettings}
           />
         );
       case 'roster':
@@ -115,8 +115,8 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
       case 'members':
         return (
             <LeagueMembersSettings
-              values={leagueMembers}
-              refetchLeagueMembers={refetchLeagueMembers}
+              values={fantasyLeagueMembers}
+              refetchFantasyLeagueMembers={refetchFantasyLeagueMembers}
             />
           );  
       default:
@@ -129,7 +129,7 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
   };
   
   const handleDeleteConfirmed = () => {
-    deleteLeague(leagueId, {
+    deleteFantasyLeague(fantasyLeagueId, {
       onSuccess: () => {
         setConfirmDelete(false);
         onClose();
@@ -265,4 +265,4 @@ const LeagueSettingsModal: React.FC<Props> = ({ open, onClose, league }) => {
   );
 };
 
-export default LeagueSettingsModal;
+export default FantasyLeagueSettingsModal;

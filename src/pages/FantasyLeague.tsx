@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetLeague } from '../api/leagueQueries';
-import LeagueSidebar from '../components/LeaguesSidebar';
-import InviteToLeagueModal from '../components/InviteToLeagueModal';
-import { useInviteUserToLeague } from '../api/leagueQueries';
+import { useGetFantasyLeague } from '../api/fantasyLeagueQueries';
+import LeagueSidebar from '../components/FantasyLeaguesSidebar';
+import InviteToLeagueModal from '../components/InviteToFantasyLeagueModal';
+import { useInviteUserToFantasyLeague } from '../api/fantasyLeagueQueries';
 import { Snackbar, Alert, Box, useMediaQuery, useTheme } from '@mui/material';
-import LeagueTabs from '../components/LeagueTabs';
+import LeagueTabs from '../components/FantasyLeagueTabs';
 import ViewInvitesModal from '../components/ViewInvitesModal';
-import LeagueInfo from '../components/LeagueInfo';
+import FantasyLeagueInfo from '../components/FantasyLeagueInfo';
+import PlayersList from '../components/PlayersList';
 
-const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
-  const { leagueId } = useParams<{ leagueId: string }>();
-  const { data: league, isLoading, error } = useGetLeague(Number(leagueId));
+const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
+  const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
+  const { data: fantasyLeague, isLoading, error } = useGetFantasyLeague(Number(fantasyLeagueId));
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -23,9 +24,9 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const { mutate: inviteUserToLeague } = useInviteUserToLeague(Number(leagueId));
+  const { mutate: inviteUserToFantasyLeague } = useInviteUserToFantasyLeague(Number(fantasyLeagueId));
   const handleInvite = (email: string) => {
-    inviteUserToLeague(email, {
+    inviteUserToFantasyLeague(email, {
       onSuccess: () => {
         setSnackbar({
           open: true,
@@ -44,7 +45,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   };
 
   if (isLoading) return <p>Loading...</p>;
-  if (error || !league) return <p>Something went wrong.</p>;
+  if (error || !fantasyLeague) return <p>Something went wrong.</p>;
 
   return (
     <Box
@@ -60,7 +61,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         py={2}
       >
         <LeagueSidebar
-          league={league}
+          fantasyLeague={fantasyLeague}
           currentUserId={currentUserId}
           onInviteClick={() => setInviteModalOpen(true)}
           onViewInvitesClick={() => setViewInvitesModalOpen(true)}
@@ -78,8 +79,8 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         <Box mt={4}>
           {selectedTab === 'draft' && <div>Draft content</div>}
           {selectedTab === 'team' && <div>Team content</div>}
-          {selectedTab === 'league' && <LeagueInfo leagueId={Number(leagueId)} currentUserId={currentUserId} league={league} />}
-          {selectedTab === 'players' && <div>Players list</div>}
+          {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
+          {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} />}
           {selectedTab === 'trades' && <div>Trades UI</div>}
           {selectedTab === 'scores' && <div>Scores table</div>}
         </Box>
@@ -92,7 +93,7 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
       />
 
       <ViewInvitesModal
-        leagueId={Number(leagueId)}
+        fantasyLeagueId={Number(fantasyLeagueId)}
         open={viewInvitesModalOpen}
         onClose={() => setViewInvitesModalOpen(false)}
       />
@@ -115,4 +116,4 @@ const LeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   );
 };
 
-export default LeaguePage;
+export default FantasyLeaguePage;
