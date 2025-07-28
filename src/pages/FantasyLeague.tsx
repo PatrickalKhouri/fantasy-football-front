@@ -9,6 +9,8 @@ import LeagueTabs from '../components/FantasyLeagueTabs';
 import ViewInvitesModal from '../components/ViewInvitesModal';
 import FantasyLeagueInfo from '../components/FantasyLeagueInfo';
 import PlayersList from '../components/PlayersList';
+import { TeamTab } from '../components/TeamTabComponent';
+import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
@@ -25,6 +27,9 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { mutate: inviteUserToFantasyLeague } = useInviteUserToFantasyLeague(Number(fantasyLeagueId));
+  const { data: userTeam, isLoading: isLoadingUserTeam, error: errorUserTeam } = useFindUserFantasyLeagueTeam(currentUserId, Number(fantasyLeagueId));
+
+
   const handleInvite = (email: string) => {
     inviteUserToFantasyLeague(email, {
       onSuccess: () => {
@@ -78,7 +83,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
 
         <Box mt={4}>
           {selectedTab === 'draft' && <div>Draft content</div>}
-          {selectedTab === 'team' && <div>Team content</div>}
+          {selectedTab === 'team' && <TeamTab seasonYear={2023} userTeamId={userTeam.id} />}
           {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} />}
           {selectedTab === 'trades' && <div>Trades UI</div>}

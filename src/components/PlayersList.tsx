@@ -38,8 +38,6 @@ const POSITIONS_BACKEND_MAP = {
   'ATA': 'Attacker',
 };
 
-console.log(POSITIONS_TRANSLATION.Attacker);
-
 interface PlayersListProps {
   fantasyLeague: any;
 }

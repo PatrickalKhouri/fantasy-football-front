@@ -39,7 +39,6 @@ const DraftSettingsForm: React.FC<Props> = ({
       refetchDraftSettings();
     },
   });
-  console.log({ values });
 
   return (
     <>
