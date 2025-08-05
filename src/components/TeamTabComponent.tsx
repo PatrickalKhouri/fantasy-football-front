@@ -125,6 +125,7 @@ interface Props {
         seasonYear={seasonYear}
         slot={selectedSlot?.slot}
         slotType={selectedSlot?.slotType}
+        refetch={refetch}
       />
 
 <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>

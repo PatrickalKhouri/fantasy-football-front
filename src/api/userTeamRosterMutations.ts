@@ -11,7 +11,7 @@ export const useAddPlayer = ({ onSuccess }: { onSuccess: () => void }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       }),
-    onSuccess: onSuccess,
+    onSuccess,
   });
 };
 

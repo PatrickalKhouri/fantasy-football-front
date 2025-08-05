@@ -45,11 +45,12 @@ interface PlayerSelectModalProps {
   onClose: () => void;
   onSelectPlayer: (player: any) => void;
   fantasyLeague: any;
-  allowedPositions: string[]; // slot.allowedPositions
+  allowedPositions: string[];
   userTeamId: number;
   seasonYear: number;
   slot: string;
   slotType: string;
+  refetch: () => void;
 }
 
 const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
@@ -62,6 +63,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
   slotType,
   userTeamId,
   seasonYear,
+  refetch,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -79,27 +81,27 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
   const { mutate: addPlayer } = useAddPlayer({
     onSuccess: () => {
       setSnackbar({ open: true, message: 'Player added to roster!', type: 'success' });
-      onClose(); // close modal after success
+      refetch();
+      onClose();
     },
   });
 
   const handlePlayerClick = (playerId: number) => {
-    console.log(slot, slotType, userTeamId, seasonYear);
     addPlayer({
       body: {
-        slot: slot,
-        slotType: slotType,
+        slot,
+        slotType,
         playerId,
         userTeamId,
-        seasonYear,              // Pass from props or context
-        targetSlotIndex: 0,      // Optional, can be undefined
+        seasonYear,
+        targetSlotIndex: 0,
       },
     });
   };
 
-
-  // Only fetch matching positions if not "ALL"
-  const backendPosition = allowedPositions.map((pos) => POSITIONS_BACKEND_MAP[pos as keyof typeof POSITIONS_BACKEND_MAP]);
+  const backendPosition = allowedPositions.map(
+    (pos) => POSITIONS_BACKEND_MAP[pos as keyof typeof POSITIONS_BACKEND_MAP]
+  );
 
   const { data, isLoading, isFetching } = usePlayers({
     position: backendPosition,
@@ -111,8 +113,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     leagueId: fantasyLeague.league.id,
   });
 
-  console.log(data);
-
+  // 🔁 Cache the last successful data to prevent blinking
   const previousDataRef = useRef<any[]>([]);
   useEffect(() => {
     if (data?.data?.length) {
@@ -120,15 +121,11 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     }
   }, [data]);
 
-  const players = data?.data || [];
-  
-
+  const players = data?.data?.length ? data.data : previousDataRef.current;
   const totalCount = data?.meta?.total || previousDataRef.current.length;
 
   const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -137,12 +134,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Selecionar Jogador</DialogTitle>
       <DialogContent>
-        <Box
-          display="flex"
-          flexDirection={isMobile ? 'column' : 'row'}
-          gap={2}
-          mb={3}
-        >
+        <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} gap={2} mb={3}>
           <ToggleButtonGroup
             value={position}
             exclusive
@@ -165,11 +157,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
             InputProps={{
               endAdornment: search && (
                 <InputAdornment position="end">
-                  <IconButton
-                    size="small"
-                    onClick={() => setSearch('')}
-                    edge="end"
-                  >
+                  <IconButton size="small" onClick={() => setSearch('')} edge="end">
                     <ClearIcon fontSize="small" />
                   </IconButton>
                 </InputAdornment>
@@ -199,27 +187,18 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
                   <TableRow
                     key={player.player_id}
                     hover
-                    onClick={() => {
-                      handlePlayerClick(player.player_id);
-                    }}
+                    onClick={() => handlePlayerClick(player.player_id)}
                     style={{ cursor: 'pointer' }}
                   >
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>
-                        <Avatar
-                          src={player.player_photo}
-                          alt={player.player_name}
-                        />
+                        <Avatar src={player.player_photo} alt={player.player_name} />
                         {player.player_name}
                       </Box>
                     </TableCell>
                     <TableCell>{player.team_name}</TableCell>
                     <TableCell>
-                      {
-                        POSITIONS_TRANSLATION[
-                          player.player_position as keyof typeof POSITIONS_TRANSLATION
-                        ]
-                      }
+                      {POSITIONS_TRANSLATION[player.player_position as keyof typeof POSITIONS_TRANSLATION]}
                     </TableCell>
                     <TableCell align="right">{player.goals}</TableCell>
                   </TableRow>
