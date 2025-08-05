@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from '../api/config';
 
-export const useVirtualRoster = ({
+export const useRoster = ({
   userTeamId,
   seasonYear,
   round,
@@ -17,7 +17,7 @@ export const useVirtualRoster = ({
     queryKey: ['virtual-roster', userTeamId, seasonYear, round],
     queryFn: async () => {
       const res = await axios.get(
-        apiConfig.endpoints.usersTeamsRoster.getVirtualRoster(userTeamId!, seasonYear!, round!),
+        apiConfig.endpoints.usersTeamsRoster.getRoster(userTeamId!, seasonYear!),
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,

@@ -52,7 +52,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { data, isLoading, isFetching } = usePlayers({
-    position: position === 'ALL' ? undefined : POSITIONS_BACKEND_MAP[position as keyof typeof POSITIONS_BACKEND_MAP],
+    position: position === 'ALL' ? undefined : [POSITIONS_BACKEND_MAP[position as keyof typeof POSITIONS_BACKEND_MAP]],
     search,
     page: page + 1,
     limit: rowsPerPage,

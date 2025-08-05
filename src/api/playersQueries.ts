@@ -33,7 +33,7 @@ export const usePlayers = ({
   order,
   leagueId,
 }: {
-  position?: string;
+  position?: string[];
   search?: string;
   page: number;
   limit: number;

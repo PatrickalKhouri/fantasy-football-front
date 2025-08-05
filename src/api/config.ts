@@ -42,7 +42,10 @@ const endpoints = {
     getAll: `${API_BASE_URL}/players`,
   },
   usersTeamsRoster: {
-    getVirtualRoster: (userTeamId: number, season: number, round: number) => `${API_BASE_URL}/user-team-rosters/team/${userTeamId}/season/${season}/round/${round}`,
+    addPlayer: `${API_BASE_URL}/user-team-rosters`,
+    deletePlayer: (id: number) => `${API_BASE_URL}/user-team-rosters/${id}`,
+    movePlayer: (id: number) => `${API_BASE_URL}/user-team-rosters/${id}/move`,
+    getRoster: (userTeamId: number, season: number) => `${API_BASE_URL}/user-team-rosters/team/${userTeamId}/season/${season}`,
   },
 };
 

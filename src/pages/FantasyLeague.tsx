@@ -83,7 +83,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
 
         <Box mt={4}>
           {selectedTab === 'draft' && <div>Draft content</div>}
-          {selectedTab === 'team' && <TeamTab seasonYear={2023} userTeamId={userTeam.id} />}
+          {selectedTab === 'team' && <TeamTab seasonYear={2023} userTeam={userTeam} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} />}
           {selectedTab === 'trades' && <div>Trades UI</div>}

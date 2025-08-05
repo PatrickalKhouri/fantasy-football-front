@@ -1,14 +1,11 @@
-import { Avatar, Typography, Box, Chip, Paper, Stack } from '@mui/material';
+import { Avatar, Typography, Box, Chip, Paper, Stack, Button } from '@mui/material';
 
 interface SlotCardProps {
   slotType: 'starter' | 'bench';
   allowedPositions: RosterSlot[];
-  player: {
-    id: number;
-    name: string;
-    photo: string;
-    position: string;
-  } | null;
+  player: { id: number; name: string; photo: string; position: string } | null;
+  slot: any; // contains slot.id
+  onRemovePlayer?: () => void;
 }
 
 export enum RosterSlot {
@@ -29,7 +26,7 @@ export enum RosterSlot {
     BN: '#666',
   };
 
-  export const SlotCard: React.FC<SlotCardProps> = ({ slotType, allowedPositions, player }) => {
+  export const SlotCard: React.FC<SlotCardProps> = ({ slotType, allowedPositions, player, onRemovePlayer, slot }) => {
     const isEmpty = !player;
     const isBench = slotType === 'bench';
 
@@ -79,9 +76,22 @@ export enum RosterSlot {
               </Box>
             </>
           ) : (
-            <Typography color="text.secondary">Empty</Typography>
+            <Typography color="text.secondary">Disponível</Typography>
           )}
         </Stack>
+        {player && onRemovePlayer && (
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemovePlayer();
+            }}
+          >
+            Liberar jogador
+          </Button>
+        )}
       </Paper>
     );
   };
