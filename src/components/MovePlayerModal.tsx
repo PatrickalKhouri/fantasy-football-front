@@ -20,6 +20,7 @@ type UISlot = {
     name: string;
     photo: string;
     position: 'Defense' | 'Midfielder' | 'Attacker';
+    team: { code: string };
   };
 };
 
@@ -114,6 +115,9 @@ const labelFor = (slot: UISlot['slot'], allowed: RosterSlot[]) => {
               <Typography variant="body2" color="text.secondary">
                 {originSnapshot.player.position}
               </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {originSnapshot.player.team.code}
+              </Typography>
             </div>
             <Chip
               label={`${labelFor(originSnapshot.labelSlot, originSnapshot.allowedPositions)} • ${
@@ -143,7 +147,7 @@ const labelFor = (slot: UISlot['slot'], allowed: RosterSlot[]) => {
                       </Typography>
                     </Stack>
                   }
-                  secondary={s.player ? s.player.position : 'Disponível'}
+                  secondary={s.player ? `${s.player.position} - ${s.player.team.code}` : 'Disponível'}
                 />
               </ListItemButton>
             ))}

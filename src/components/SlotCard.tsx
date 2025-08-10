@@ -3,7 +3,7 @@ import { Avatar, Typography, Box, Chip, Paper, Stack, Button } from '@mui/materi
 interface SlotCardProps {
   slotType: 'starter' | 'bench';
   allowedPositions: RosterSlot[];
-  player: { id: number; name: string; photo: string; position: string } | null;
+  player: { id: number; name: string; photo: string; position: string; team: { code: string } } | null;
   slot: any; // contains slot.id
   onRemovePlayer?: () => void;
 }
@@ -71,7 +71,7 @@ export enum RosterSlot {
                   {player.name}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {player.position}
+                 {player.team.code} - {player.position}
                 </Typography>
               </Box>
             </>
