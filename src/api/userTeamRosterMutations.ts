@@ -29,3 +29,25 @@ export const useRemovePlayer = ({ onSuccess }: { onSuccess: () => void }) => {
     });
   };
   
+
+  export const useMovePlayer = ({ onSuccess }: { onSuccess: () => void }) => {
+    return useMutation({
+      mutationFn: (body: {
+        userTeamId: number;
+        seasonYear: number;
+        originSlotIndex: number;
+        targetSlotIndex: number;
+      }) =>
+        axios.patch(
+          apiConfig.endpoints.usersTeamsRoster.movePlayer,
+          body,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        ),
+      onSuccess,
+    });
+  };

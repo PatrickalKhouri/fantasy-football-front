@@ -8,6 +8,7 @@ import { useRemovePlayer } from '../api/userTeamRosterMutations';
 import { SlotCard } from './SlotCard';
 import { useMemo, useState } from 'react';
 import PlayerSelectModal from './PlayerSelectModal';
+import MovePlayerModal from './MovePlayerModal';
 
 interface Props {
     userTeam: any;
@@ -20,17 +21,23 @@ interface Props {
     const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [round, setRound] = useState(initialRound);
+    const [moveOpen, setMoveOpen] = useState(false);
+    const [originIndex, setOriginIndex] = useState<number | null>(null);
 
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
     const [selectedPlayerName, setSelectedPlayerName] = useState<string | null>(null);
 
+    
+
     const handleSlotClick = (slot: any) => {
       if (slot.player) {
-        return true
+        setOriginIndex(slot.index);
+        setMoveOpen(true);
+      } else {
+        setSelectedSlot(slot);
+        setIsModalOpen(true);
       }
-      setSelectedSlot(slot);
-      setIsModalOpen(true);
     };
     const userTeamId = userTeam.id;
 
@@ -126,7 +133,20 @@ interface Props {
         slot={selectedSlot?.slot}
         slotType={selectedSlot?.slotType}
         refetch={refetch}
+        targetSlotIndex={selectedSlot?.index}
       />
+
+      {originIndex !== null && (
+        <MovePlayerModal
+          open={moveOpen}
+          onClose={() => setMoveOpen(false)}
+          slots={slots || []}
+          originIndex={originIndex}
+          userTeamId={userTeam.id}
+          seasonYear={seasonYear}
+          refetch={refetch}
+        />
+      )}
 
 <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Confirmar remoção</DialogTitle>

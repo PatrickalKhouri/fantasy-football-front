@@ -49,7 +49,8 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
   const [position, setPosition] = useState<string>('ALL');
   const [search, setSearch] = useState<string>('');
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [onlyFreeAgents, setOnlyFreeAgents] = useState(false);
 
   const { data, isLoading, isFetching } = usePlayers({
     position: position === 'ALL' ? undefined : [POSITIONS_BACKEND_MAP[position as keyof typeof POSITIONS_BACKEND_MAP]],
@@ -59,6 +60,8 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
     sortBy: 'goals',
     order: 'desc',
     leagueId: fantasyLeague.league.id,
+    fantasyLeagueId: fantasyLeague.id,
+    onlyFreeAgents: onlyFreeAgents, 
   });
 
   // 🔁 Cache last valid data

@@ -51,6 +51,7 @@ interface PlayerSelectModalProps {
   slot: string;
   slotType: string;
   refetch: () => void;
+  targetSlotIndex: number;
 }
 
 const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
@@ -63,6 +64,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
   slotType,
   userTeamId,
   seasonYear,
+  targetSlotIndex,
   refetch,
 }) => {
   const theme = useTheme();
@@ -94,7 +96,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
         playerId,
         userTeamId,
         seasonYear,
-        targetSlotIndex: 0,
+        targetSlotIndex,
       },
     });
   };
@@ -111,6 +113,8 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     sortBy: 'goals',
     order: 'desc',
     leagueId: fantasyLeague.league.id,
+    fantasyLeagueId: fantasyLeague.id,
+    onlyFreeAgents: true, 
   });
 
   // 🔁 Cache the last successful data to prevent blinking
@@ -152,7 +156,10 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
             placeholder="Buscar jogador"
             size="small"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
             sx={{ minWidth: 200 }}
             InputProps={{
               endAdornment: search && (
