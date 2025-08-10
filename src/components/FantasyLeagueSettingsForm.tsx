@@ -37,8 +37,6 @@ const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refe
     const end = values.numberOfRounds - 3;
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }, [values.numberOfRounds]);
-
-  console.log({ values });
   
   const updateFantasyLeague = useUpdateFantasyLeague({
     onSuccess: () => {

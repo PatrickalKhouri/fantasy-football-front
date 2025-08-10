@@ -10,6 +10,7 @@ const endpoints = {
   },
   users: {
     update: `${API_BASE_URL}/users/update`,
+    findUserFantasyLeagueTeam: (id: number, fantasyLeagueId: number) => `${API_BASE_URL}/users/${id}/fantasy-leagues/${fantasyLeagueId}`,
   },
   fantasyLeagues: {
     create: `${API_BASE_URL}/fantasy-leagues`,
@@ -39,7 +40,13 @@ const endpoints = {
   },
   players: {
     getAll: `${API_BASE_URL}/players`,
-  },  
+  },
+  usersTeamsRoster: {
+    addPlayer: `${API_BASE_URL}/user-team-rosters`,
+    deletePlayer: (id: number) => `${API_BASE_URL}/user-team-rosters/${id}`,
+    movePlayer: `${API_BASE_URL}/user-team-rosters/move`,
+    getRoster: (userTeamId: number, season: number) => `${API_BASE_URL}/user-team-rosters/team/${userTeamId}/season/${season}`,
+  },
 };
 
 const headers = {

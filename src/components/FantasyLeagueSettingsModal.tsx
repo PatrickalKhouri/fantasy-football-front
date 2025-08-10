@@ -58,7 +58,6 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
   const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(fantasyLeagueId);
   const { data: fantasyLeagueMembers, refetch: refetchFantasyLeagueMembers } = useFantasyLeagueTeams(fantasyLeagueId);
   const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(fantasyLeagueId);
-  console.log({ draftSettings });
 
   useEffect(() => {
     if (selected === 'league' && fantasyLeagueSettings) {
