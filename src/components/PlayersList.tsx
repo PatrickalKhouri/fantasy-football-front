@@ -23,6 +23,13 @@ import { usePlayers } from '../api/playersQueries';
 
 const POSITIONS = ['Todos', 'DEF', 'MEI', 'ATA'];
 
+const POSITION_OPTIONS = [
+  { value: 'ALL', label: 'TODOS' },
+  { value: 'DEF', label: 'DEF' },
+  { value: 'MEI', label: 'MEI' },
+  { value: 'ATA', label: 'ATA' },
+];
+
 const POSITIONS_TRANSLATION = {
   'Defender': 'Defensor',
   'Midfielder': 'Meio-Campo',
@@ -74,7 +81,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
   
   useEffect(() => {
     setPage(0);
-  }, [position, search]);
+  }, [position, search, onlyFreeAgents]);
 
   const players = data?.data?.length ? data.data : previousDataRef.current;
   const totalCount = data?.meta?.total || previousDataRef.current.length;
@@ -99,18 +106,28 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague }) => {
         gap={2}
         mb={3}
       >
-        <ToggleButtonGroup
-          value={position}
-          exclusive
-          onChange={(_, newPos) => newPos && setPosition(newPos)}
-          size="small"
-        >
-          {POSITIONS.map((pos) => (
-            <ToggleButton key={pos} value={pos}>
-              {pos}
-            </ToggleButton>
-          ))}
-        </ToggleButtonGroup>
+      <ToggleButtonGroup
+        value={position}
+        exclusive
+        onChange={(_, v) => setPosition(v ?? position)} // keep a selection (exclusive can pass null)
+        size="small"
+      >
+        {POSITION_OPTIONS.map(opt => (
+          <ToggleButton key={opt.value} value={opt.value}>
+            {opt.label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+
+      <ToggleButtonGroup
+        value={onlyFreeAgents}
+        exclusive
+        onChange={(_, v) => setOnlyFreeAgents(Boolean(v))} // v can be true, false, or null
+        size="small"
+      >
+        <ToggleButton value={false}>Todos</ToggleButton>
+        <ToggleButton value={true}>Jogadores não escalados</ToggleButton>
+      </ToggleButtonGroup>
 
         <TextField
           placeholder="Buscar jogador"
