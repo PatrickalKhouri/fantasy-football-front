@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { useMovePlayer } from '../api/userTeamRosterMutations';
 import { mapPositionToSlot, RosterSlot } from '../utils/positions';
+import { POSITIONS_TRANSLATION } from './PlayerSelectModal';
 
 type SlotType = 'starter' | 'bench';
 
@@ -113,7 +114,7 @@ const labelFor = (slot: UISlot['slot'], allowed: RosterSlot[]) => {
             <div>
               <Typography fontWeight={700}>{originSnapshot.player.name}</Typography>
               <Typography variant="body2" color="text.secondary">
-                {originSnapshot.player.position}
+                {POSITIONS_TRANSLATION[originSnapshot.player.position as keyof typeof POSITIONS_TRANSLATION]}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {originSnapshot.player.team.code}
@@ -147,7 +148,7 @@ const labelFor = (slot: UISlot['slot'], allowed: RosterSlot[]) => {
                       </Typography>
                     </Stack>
                   }
-                  secondary={s.player ? `${s.player.position} - ${s.player.team.code}` : 'Disponível'}
+                  secondary={s.player ? `${POSITIONS_TRANSLATION[s.player.position as keyof typeof POSITIONS_TRANSLATION]} - ${s.player.team.code}` : 'Disponível'}
                 />
               </ListItemButton>
             ))}

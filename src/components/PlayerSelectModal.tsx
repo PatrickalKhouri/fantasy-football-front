@@ -26,7 +26,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { usePlayers } from '../api/playersQueries';
 import { useAddPlayer } from '../api/userTeamRosterMutations';
 
-const POSITIONS_TRANSLATION = {
+export const POSITIONS_TRANSLATION = {
   Defender: 'Defensor',
   Midfielder: 'Meio-Campo',
   Attacker: 'Atacante',

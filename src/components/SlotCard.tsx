@@ -1,4 +1,5 @@
 import { Avatar, Typography, Box, Chip, Paper, Stack, Button } from '@mui/material';
+import { POSITIONS_TRANSLATION } from './PlayerSelectModal';
 
 interface SlotCardProps {
   slotType: 'starter' | 'bench';
@@ -15,7 +16,6 @@ export enum RosterSlot {
     ATA = 'ATA',
     BN = 'BN',
   }
-  
 
   const slotColors: Record<string, string> = {
     GOL: '#2196f3',
@@ -71,7 +71,7 @@ export enum RosterSlot {
                   {player.name}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                 {player.team.code} - {player.position}
+                 {player.team.code} - {POSITIONS_TRANSLATION[player.position as keyof typeof POSITIONS_TRANSLATION]}
                 </Typography>
               </Box>
             </>
