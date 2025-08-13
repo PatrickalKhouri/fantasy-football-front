@@ -40,6 +40,7 @@ const endpoints = {
   },
   players: {
     getAll: `${API_BASE_URL}/players`,
+    getFilters: `${API_BASE_URL}/players/filters/data`,
   },
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,
