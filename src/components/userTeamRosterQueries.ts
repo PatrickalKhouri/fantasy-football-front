@@ -7,14 +7,12 @@ import { apiConfig } from '../api/config';
 export const useRoster = ({
   userTeamId,
   seasonYear,
-  round,
 }: {
   userTeamId?: number;
   seasonYear?: number;
-  round?: number;
 }) => {
   return useQuery({
-    queryKey: ['virtual-roster', userTeamId, seasonYear, round],
+    queryKey: ['virtual-roster', userTeamId, seasonYear],
     queryFn: async () => {
       const res = await axios.get(
         apiConfig.endpoints.usersTeamsRoster.getRoster(userTeamId!, seasonYear!),
@@ -26,6 +24,6 @@ export const useRoster = ({
       );
       return res.data;
     },
-    enabled: !!userTeamId && !!seasonYear && round !== undefined,
+    enabled: !!userTeamId && !!seasonYear,
   });
 };

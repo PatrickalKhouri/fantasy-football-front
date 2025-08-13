@@ -41,7 +41,7 @@ interface Props {
     };
     const userTeamId = userTeam.id;
 
-    const { data: slots, isLoading, refetch } = useRoster({ userTeamId, seasonYear, round });
+    const { data: slots, isLoading, refetch } = useRoster({ userTeamId, seasonYear });
 
     const { mutate: removePlayer } = useRemovePlayer({
       onSuccess: refetch,
