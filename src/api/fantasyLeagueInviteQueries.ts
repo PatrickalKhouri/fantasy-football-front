@@ -2,7 +2,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
 
-export const useGetInvitesByLeague = (leagueId: number, enabled: boolean = true) => {
+export type FantasyLeagueInvite = {
+  id: number;
+  recipientEmail: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+  export const useGetInvitesByLeague = (leagueId: number, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['league-invites', leagueId],
     queryFn: async () => {
