@@ -1,6 +1,6 @@
 // pages/Welcome.tsx
 import { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Button, Stack, Alert } from '@mui/material';
+import { Box, Typography, Button, Stack, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateLeagueModal from '../components/CreateLeagueModal';

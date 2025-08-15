@@ -1,5 +1,5 @@
 // src/components/MovePlayerModal.tsx
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   List, ListItemButton, ListItemText, ListItemAvatar,

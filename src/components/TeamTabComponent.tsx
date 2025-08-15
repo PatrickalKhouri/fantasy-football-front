@@ -1,6 +1,6 @@
 // src/components/TeamTab.tsx
 
-import { Typography, Stack, CircularProgress, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from '@mui/material';
+import { Typography, Stack, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useRoster } from './userTeamRosterQueries';
