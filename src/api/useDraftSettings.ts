@@ -2,8 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
 
+export interface DraftSettingsResponse {
+  id: number;
+  numberOfTeams: number;
+  playoffTeams: number;
+  tradeDeadlineRound: number;
+  irSlots: number;
+  playoffStartRound: number;
+}
+
 export const useDraftSettings = (leagueId: number) => {
-  return useQuery({
+  return useQuery<DraftSettingsResponse>({
     queryKey: ['draftSettings', leagueId],
     queryFn: async () => {
       const res = await axios.get(

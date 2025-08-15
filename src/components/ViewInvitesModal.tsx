@@ -16,7 +16,7 @@ import {
   useTheme,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useGetInvitesByLeague, useCancelInvite } from '../api/fantasyLeagueInviteQueries';
+import { useGetInvitesByLeague, useCancelInvite, FantasyLeagueInvite } from '../api/fantasyLeagueInviteQueries';
 
 interface ViewInvitesModalProps {
   open: boolean;
@@ -27,7 +27,7 @@ interface ViewInvitesModalProps {
 const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, fantasyLeagueId }) => { 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const [invites, setInvites] = useState<any[]>([]);
+  const [invites, setInvites] = useState<FantasyLeagueInvite[]>([]);
 
   const { data: invitesData, isLoading } = useGetInvitesByLeague(fantasyLeagueId, open);
   const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite(fantasyLeagueId);
@@ -62,7 +62,7 @@ const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, fant
           </Typography>
         ) : (
           <List>
-            {invites.map((invite: any) => (
+            {invites.map((invite: FantasyLeagueInvite) => (
               <ListItem key={invite.id} divider>
                 <ListItemText
                   primary={invite.recipientEmail}

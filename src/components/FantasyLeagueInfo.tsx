@@ -1,11 +1,12 @@
 import React from 'react';
 import FantasyLeagueTeams from './FantasyLeagueTeams';
 import FantasyLeagueSettings from './FantasyLeagueSettings';
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
 
 interface Props {
 
   currentUserId: number;
-  fantasyLeague: any;
+  fantasyLeague: FantasyLeague;
 }
 
 const FantasyLeagueInfo: React.FC<Props> = ({ currentUserId, fantasyLeague}) => {

@@ -15,16 +15,7 @@ import { useUpdateFantasyLeague } from '../api/fantasyLeagueMutations';
 import { Snackbar, Alert } from '@mui/material';
 
 interface Props {
-  values: {
-    name: string;
-    numberOfTeams: number;
-    tradeReviewDays: number;
-    numberOfRounds: number;
-    tradeDeadlineRound: number | null;
-    playoffTeams: number;
-    playoffFormat: 'single_game' | 'two_leg_single_game_final' | 'two_leg_all';
-    injuredReserveSlots: number;
-  };
+  values: any;
   onChange: (field: string, value: any) => void;
   id: number;
   refetchFantasyLeagueSettings: () => void;

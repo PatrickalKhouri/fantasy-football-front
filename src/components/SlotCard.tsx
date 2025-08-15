@@ -1,17 +1,19 @@
 import { Avatar, Typography, Box, Chip, Paper, Stack, Button } from '@mui/material';
 import { POSITIONS_TRANSLATION } from './PlayerSelectModal';
+import { RosterPlayer, Slot } from './userTeamRosterQueries';
 
-interface SlotCardProps {
-  slotType: 'starter' | 'bench';
-  allowedPositions: RosterSlot[];
-  player: { id: number; name: string; photo: string; position: string; team: { code: string } } | null;
-  slot: any; // contains slot.id
+
+export interface SlotCardProps {
+  slotType: string;
+  allowedPositions: RosterSlotCard[];
+  player: RosterPlayer | null;
+  slot: Slot; // contains slot.id
   onRemovePlayer?: () => void;
 }
 
-export enum RosterSlot {
+export enum RosterSlotCard {
     GOL = 'GOL',
-    DEF = 'DEF',
+    DEF = 'DEF',  
     MEI = 'MEI',
     ATA = 'ATA',
     BN = 'BN',

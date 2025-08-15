@@ -10,6 +10,11 @@ export interface Player {
   player_photo: string;
   team_name: string;
   goals: number;
+  team: { code: string };
+  is_rostered: boolean;
+  rostered_by_user_team_id?: number;
+  rostered_by_user_team_name?: string;
+  
 }
 
 export interface PlayersFiltersResponse {

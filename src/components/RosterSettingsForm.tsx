@@ -5,21 +5,11 @@ import {
   TextField,
   Button,
 } from '@mui/material';
-import { useUpdateRosterSettings } from '../api/useUpdateRosterSettings';
+import { RosterSettings, useUpdateRosterSettings } from '../api/useUpdateRosterSettings';
 import { Snackbar, Alert } from '@mui/material';
 
 interface Props {
-  values: {
-    id: number;
-    starterSkillSlots: number;
-    minStarterMidfielders: number;
-    minStarterForwards: number;
-    benchSkillSlots: number;
-    benchDefenseSlots: number;
-    minBenchMidfielders: number;
-    minBenchForwards: number;
-    starterDefenseSlots: number;
-  };
+  values: RosterSettings;
   onChange: (field: string, value: any) => void;
   id: number;
   refetchRosterSettings: () => void;

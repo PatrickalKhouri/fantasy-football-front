@@ -10,16 +10,10 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { useUpdateDraftSettings } from '../api/useDraftSettingsMutations'; // <- create this hook
+import { DraftSettings, useUpdateDraftSettings } from '../api/useDraftSettingsMutations'; // <- create this hook
 
 interface Props {
-  values: {
-    draftType: 'snake' | 'linear';
-    draftDate: string;
-    pickTimer: number;
-    rounds: number; // read-only
-    season: number;  // read-only
-  };
+  values: DraftSettings;
   onChange: (field: string, value: any) => void;
   id: number;
   refetchDraftSettings: () => void;

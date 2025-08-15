@@ -11,12 +11,12 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import FantasyLeagueSettingsModal from './FantasyLeagueSettingsModal';
-import { useGetFantasyLeague } from '../api/fantasyLeagueQueries';
+import { FantasyLeague, useGetFantasyLeague } from '../api/fantasyLeagueQueries';
 
 interface Props {
   isOwner?: boolean;
   onEdit?: () => void;
-  fantasyLeague: any;
+  fantasyLeague: FantasyLeague;
 }
 
 const FantasyLeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, fantasyLeague }) => {

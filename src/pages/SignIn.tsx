@@ -51,7 +51,6 @@ const SignIn: React.FC = () => {
         login(data.access_token, data.user);
       
         const redirect = localStorage.getItem('postLoginRedirect');
-        console.log(redirect);
 
         if (redirect) {
           localStorage.removeItem('postLoginRedirect');

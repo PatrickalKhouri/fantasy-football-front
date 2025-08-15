@@ -34,8 +34,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import { usePlayers, usePlayersFilters } from '../api/playersQueries';
 import AddPlayerModal from './AddPlayerModal';
-import { useRoster } from './userTeamRosterQueries';
+import { Slot, useRoster } from './userTeamRosterQueries';
 import { useRemovePlayer } from '../api/userTeamRosterMutations';
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
 
 
 const POSITION_OPTIONS = [
@@ -61,7 +62,7 @@ const POSITIONS_BACKEND_MAP = {
 };
 
 interface PlayersListProps {
-  fantasyLeague: any;
+  fantasyLeague: FantasyLeague;
   seasonYear: number;
   userTeamId: number;
 }
@@ -91,7 +92,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
 
   const playerIdToSlotId = React.useMemo(() => {
     const m = new Map<number, number>();
-    (slots ?? []).forEach((slot: any) => {
+    (slots ?? []).forEach((slot: Slot) => {
       if (slot?.player?.id != null && slot?.id != null) {
         m.set(Number(slot.player.id), Number(slot.id));
       }
@@ -316,7 +317,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
                         name: player.player_name,
                         photo: player.player_photo,
                         position: player.player_position,
-                        teamCode: player.team_short_code,
+                        teamCode: player.team_name,
                       });
                       setAddOpen(true);
                     }}

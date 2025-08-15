@@ -9,12 +9,16 @@ import { SlotCard } from './SlotCard';
 import { useMemo, useState } from 'react';
 import PlayerSelectModal from './PlayerSelectModal';
 import MovePlayerModal from './MovePlayerModal';
+import { Slot } from './userTeamRosterQueries';
+import { RosterSlotCard } from './SlotCard'
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import { UserTeam } from '../api/userTeamsQueries';
 
 interface Props {
-    userTeam: any;
+    userTeam: UserTeam;
     seasonYear: number;
     initialRound?: number;
-    fantasyLeague: any;
+    fantasyLeague: FantasyLeague;
   }
 
   export const TeamTab: React.FC<Props> = ({ userTeam, fantasyLeague, seasonYear, initialRound = 1 }) => {
@@ -30,7 +34,7 @@ interface Props {
 
     
 
-    const handleSlotClick = (slot: any) => {
+    const handleSlotClick = (slot: Slot) => {
       if (slot.player) {
         setOriginIndex(slot.index);
         setMoveOpen(true);
@@ -61,8 +65,8 @@ interface Props {
       setConfirmOpen(false);
     };
   
-    const starters = useMemo(() => slots?.filter((s: any) => s.slotType === 'starter') || [], [slots]);
-    const bench = useMemo(() => slots?.filter((s: any) => s.slotType === 'bench') || [], [slots]);
+    const starters = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'starter') || [], [slots]);
+    const bench = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'bench') || [], [slots]);
   
     const goPrev = () => setRound((r) => Math.max(1, r - 1));
     const goNext = () => setRound((r) => r + 1); // max cap later
@@ -89,12 +93,12 @@ interface Props {
           <>
             <Typography variant="h6" fontWeight="bold">Titulares</Typography>
             <Stack spacing={1}>
-              {starters.map((slot: any) => (
+              {starters.map((slot: Slot) => (
                 <Paper onClick={() => handleSlotClick(slot)} sx={{ cursor: 'pointer' }}>
                   <SlotCard
                     key={slot.index}
                     slotType={slot.slotType}
-                    allowedPositions={slot.allowedPositions}
+                    allowedPositions={slot.allowedPositions as RosterSlotCard[]}
                     player={slot.player}
                     onRemovePlayer={() => confirmRemovePlayer(slot.id, slot.player?.name)}
                     slot={slot}
@@ -105,12 +109,12 @@ interface Props {
   
             <Typography variant="h6" fontWeight="bold" mt={3}>Reservas</Typography>
             <Stack spacing={1}>
-              {bench.map((slot: any) => (
+              {bench.map((slot: Slot) => (
                 <Paper onClick={() => handleSlotClick(slot)} sx={{ cursor: 'pointer' }}>
                   <SlotCard
                     key={slot.index}
                     slotType={slot.slotType}
-                    allowedPositions={slot.allowedPositions}
+                    allowedPositions={slot.allowedPositions as RosterSlotCard[]}
                     player={slot.player}
                     onRemovePlayer={() => confirmRemovePlayer(slot.id, slot.player?.name)}
                     slot={slot}

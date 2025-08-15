@@ -1,9 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import { apiConfig } from './config';
+import { apiConfig } from './config'; 
+
+export interface RosterSettingsResponse {
+  id: number;
+  numberOfTeams: number;
+  playoffTeams: number;
+  tradeDeadlineRound: number;
+  irSlots: number;
+  playoffStartRound: number;
+}
 
 export const useRosterSettings = (leagueId: number) => {
-  return useQuery({
+  return useQuery<RosterSettingsResponse>({
     queryKey: ['rosterSettings', leagueId],
     queryFn: async () => {
       const res = await axios.get(

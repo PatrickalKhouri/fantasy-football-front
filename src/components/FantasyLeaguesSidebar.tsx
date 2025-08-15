@@ -34,7 +34,7 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
         justifyContent: 'flex-start',
         p: 3,
         borderRight: '1px solid #e0e0e0',
-        borderRadius: 0, // remove any rounding
+        borderRadius: 0,
         bgcolor: 'background.default',
       }}
     >

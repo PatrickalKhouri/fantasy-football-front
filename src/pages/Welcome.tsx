@@ -34,7 +34,7 @@ const acceptInviteMutation = useMutation({
 
     return res.json();
   },
-  onSuccess: (data: any) => {
+  onSuccess: () => {
     localStorage.removeItem('league_invite_token');
     window.location.reload();
   },
@@ -89,7 +89,7 @@ const acceptInviteMutation = useMutation({
           <CircularProgress />
         ) : isError ? (
           <Typography color="error">
-            {error instanceof Error ? error.message : 'Failed to load leagues'}
+            {error instanceof Error ? error.message : 'Não foi possível carregar as ligas'}
           </Typography>
         ) : (
           <>
