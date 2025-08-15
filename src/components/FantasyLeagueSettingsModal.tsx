@@ -22,7 +22,7 @@ import RosterSettingsForm from './RosterSettingsForm';
 import DraftSettingsForm from './DraftSettingsForm';
 import LeagueMembersSettings from './FantasyLegueMemberSettings';
 
-import { useGetFantasyLeague, useFantasyLeagueTeams } from '../api/fantasyLeagueQueries';
+import { useGetFantasyLeague, useFantasyLeagueTeams, FantasyLeague } from '../api/fantasyLeagueQueries';
 
 import { useRosterSettings } from '../api/useRosterSettings';
 import { useDeleteFantasyLeague } from '../api/fantasyLeagueMutations';
@@ -40,7 +40,7 @@ const SETTINGS = [
 interface Props {
   open: boolean;
   onClose: () => void;
-  fantasyLeague: any;
+  fantasyLeague: FantasyLeague;
 }
 
 const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLeague }) => {
@@ -95,7 +95,7 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
               onChange={(field, value) =>
                 setFormData((prev: any) => ({ ...prev, [field]: value }))
               }
-              id={draftSettings.id}
+              id={draftSettings?.id!}
               refetchRosterSettings={refetchRosterSettings}
               refetchDraftSettings={refetchDraftSettings}
             />
@@ -107,7 +107,7 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
             onChange={(field, value) =>
               setFormData((prev: any) => ({ ...prev, [field]: value }))
             }
-            id={draftSettings.id}
+            id={draftSettings?.id!}
             refetchDraftSettings={refetchDraftSettings}
           />
         );

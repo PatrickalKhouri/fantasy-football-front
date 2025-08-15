@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
+import { User } from './fantasyLeagueQueries';
+
+export interface UserTeam {
+  id: number;
+  name: string;
+  owner: User;
+}
 
 export const useFindUserFantasyLeagueTeam = (userId: number, fantasyLeagueId: number) => {
   return useQuery({

@@ -37,6 +37,13 @@ export interface FantasyLeague {
     playoffStartRound: number;
   }
 
+  export interface FantasyLeagueTeamsResponse {
+    id: number;
+    name: string;
+    isOwner?: boolean;
+    user: User;
+  }
+
   export const useGetMyLeagues = () => {
     return useQuery<FantasyLeague[]>({
       queryKey: ['myLeagues'],
@@ -84,7 +91,7 @@ export const useInviteUserToFantasyLeague = (id: number) => {
 
 
 export const useFantasyLeagueTeams = (id: number) => {
-  return useQuery({
+  return useQuery<FantasyLeagueTeamsResponse[]>({
     queryKey: ['league-members', id],
     queryFn: async () => {
       const res = await axios.get(apiConfig.endpoints.fantasyLeagues.getLeagueTeams(id), {

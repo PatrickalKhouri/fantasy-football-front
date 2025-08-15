@@ -9,11 +9,12 @@ import {
   useTheme,
   Avatar,
 } from '@mui/material';
-import { useFantasyLeagueTeams } from '../api/fantasyLeagueQueries';
+import { FantasyLeague, useFantasyLeagueTeams, FantasyLeagueTeamsResponse } from '../api/fantasyLeagueQueries';
 
 interface Props {
-  fantasyLeague: any;
+  fantasyLeague: FantasyLeague;
 }
+
 
 const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
   const { data: members, isLoading } = useFantasyLeagueTeams(fantasyLeague.id);
@@ -32,9 +33,9 @@ const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
       </Typography>
 
       <Stack spacing={2}>
-        {members?.map((entry: any, index: number) => (
+        {members?.map((member: FantasyLeagueTeamsResponse, index: number) => (
           <Box
-            key={entry.id}
+            key={member.id}
             sx={{
               display: 'flex',
               flexDirection: isMobile ? 'column' : 'row',
@@ -48,14 +49,14 @@ const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
             }}
           >
             <Avatar>
-              {entry.user.firstName[0]}
-              {entry.user.lastName[0]}
+              {member.user.firstName[0]}
+              {member.user.lastName[0]}
             </Avatar>
             <Typography variant="body1" fontWeight={500}>
-              {index + 1}. {entry.name}
+              {index + 1}. {member.name}
             </Typography>
 
-            {entry.isOwner && (
+            {member.isOwner && (
               <Chip
                 label="Dono"
                 color="primary"
@@ -67,7 +68,7 @@ const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
         ))}
 
         {/* Placeholder teams */}
-        {Array.from({ length: numberOfTeams - members.length }).map((_, i) => (
+        {Array.from({ length: numberOfTeams - (members?.length || 0) }).map((_, i) => (
           <Box
             key={`placeholder-${i}`}
             sx={{
@@ -85,12 +86,12 @@ const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
           >
             <Avatar sx={{ bgcolor: 'grey.300' }} />
             <Typography variant="body1" fontWeight={500} color="text.secondary">
-             Time {members.length + i + 1}
+             Time {members?.length ? members.length + i + 1 : i + 1}
             </Typography>
           </Box>
         ))}
 
-        {members.length === 0 && (
+        {members?.length === 0 && (
           <Typography variant="body2" color="text.secondary">
             Nenhum time na liga ainda.
           </Typography>

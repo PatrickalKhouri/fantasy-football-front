@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   Box,
-  Typography,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -23,8 +22,9 @@ import {
   Alert,
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
-import { usePlayers } from '../api/playersQueries';
+import { Player, usePlayers } from '../api/playersQueries';
 import { useAddPlayer } from '../api/userTeamRosterMutations';
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
 
 export const POSITIONS_TRANSLATION = {
   Defender: 'Defensor',
@@ -43,8 +43,8 @@ const POSITIONS_BACKEND_MAP = {
 interface PlayerSelectModalProps {
   open: boolean;
   onClose: () => void;
-  onSelectPlayer: (player: any) => void;
-  fantasyLeague: any;
+  onSelectPlayer: (player: Player) => void;
+  fantasyLeague: FantasyLeague;
   allowedPositions: string[];
   userTeamId: number;
   seasonYear: number;
@@ -118,7 +118,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
   });
 
   // 🔁 Cache the last successful data to prevent blinking
-  const previousDataRef = useRef<any[]>([]);
+  const previousDataRef = useRef<Player[]>([]);
   useEffect(() => {
     if (data?.data?.length) {
       previousDataRef.current = data.data;
@@ -190,7 +190,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
             </TableHead>
             <TableBody>
               {players.length > 0 ? (
-                players.map((player: any) => (
+                players.map((player: Player) => (
                   <TableRow
                     key={player.player_id}
                     hover
