@@ -11,6 +11,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useLogIn } from '../api/authQueries';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../components/Loading';
 
 const SignIn: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -61,6 +62,8 @@ const SignIn: React.FC = () => {
       }
     });
   };
+
+  if (isPending) return <Loading message="Entrando na sua conta..." fullScreen />;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

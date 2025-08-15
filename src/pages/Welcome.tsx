@@ -1,6 +1,6 @@
 // pages/Welcome.tsx
 import { useEffect, useState } from 'react';
-import { Box, Typography, CircularProgress, Button } from '@mui/material';
+import { Box, Typography, Button, Stack, Alert } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CreateLeagueModal from '../components/CreateLeagueModal';
@@ -8,6 +8,7 @@ import { UserFantasyLeaguesList } from '../components/UserFantasyLeaguesList';
 import { useGetMyLeagues } from '../api/fantasyLeagueQueries';
 import { apiConfig } from '../api/config';
 import { useMutation } from '@tanstack/react-query';
+import Loading from '../components/Loading';
 
 const Welcome = () => {
   const { user } = useAuth();
@@ -64,6 +65,37 @@ const acceptInviteMutation = useMutation({
     }
   };
 
+  if (acceptInviteMutation.isPending) {
+    return <Loading message="Aceitando convite para a liga..." fullScreen />;
+  }
+
+  if (acceptInviteMutation.isError) {
+    return (
+      <Stack spacing={2} sx={{ maxWidth: 520, mx: 'auto', mt: 6 }}>
+        <Alert severity="error">
+          {acceptInviteMutation.error instanceof Error
+            ? acceptInviteMutation.error.message
+            : 'Algo deu errado ao aceitar o convite para a liga.'}
+        </Alert>
+
+        <Button
+          variant="contained"
+          onClick={() => {
+            const token = localStorage.getItem('league_invite_token');
+            if (token) {
+              acceptInviteMutation.reset();
+              acceptInviteMutation.mutate(token);
+            } else {
+              navigate('/welcome');
+            }
+          }}
+        >
+          Tente novamente
+        </Button>
+      </Stack>
+    );
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Box sx={{
@@ -86,7 +118,7 @@ const acceptInviteMutation = useMutation({
         </Typography>
 
         {isLoading ? (
-          <CircularProgress />
+          <Loading message="Carregando as ligas..." fullScreen />
         ) : isError ? (
           <Typography color="error">
             {error instanceof Error ? error.message : 'Não foi possível carregar as ligas'}

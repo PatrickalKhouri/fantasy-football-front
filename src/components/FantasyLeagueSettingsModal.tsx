@@ -16,6 +16,7 @@ import {
   DialogContent,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import Loading from './Loading';
 
 import LeagueSettingsForm from './FantasyLeagueSettingsForm';
 import RosterSettingsForm from './RosterSettingsForm';
@@ -54,10 +55,10 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
 
   const fantasyLeagueId = fantasyLeague.id;
 
-  const { data: fantasyLeagueSettings, refetch: refetchFantasyLeagueSettings } = useGetFantasyLeague(fantasyLeague.id);
-  const { data: rosterSettings, refetch: refetchRosterSettings } = useRosterSettings(fantasyLeagueId);
-  const { data: fantasyLeagueMembers, refetch: refetchFantasyLeagueMembers } = useFantasyLeagueTeams(fantasyLeagueId);
-  const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(fantasyLeagueId);
+  const { data: fantasyLeagueSettings, refetch: refetchFantasyLeagueSettings, isLoading: isLoadingFantasyLeagueSettings } = useGetFantasyLeague(fantasyLeague.id);
+  const { data: rosterSettings, refetch: refetchRosterSettings, isLoading: isLoadingRosterSettings } = useRosterSettings(fantasyLeagueId);
+  const { data: fantasyLeagueMembers, refetch: refetchFantasyLeagueMembers, isLoading: isLoadingFantasyLeagueMembers } = useFantasyLeagueTeams(fantasyLeagueId);
+  const { data: draftSettings, refetch: refetchDraftSettings, isLoading: isLoadingDraftSettings } = useDraftSettings(fantasyLeagueId);
 
   useEffect(() => {
     if (selected === 'league' && fantasyLeagueSettings) {
@@ -72,6 +73,8 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
       setFormData(null);
     }
   }, [selected, fantasyLeagueSettings, rosterSettings, fantasyLeagueMembers, draftSettings]);
+
+  if (isLoadingFantasyLeagueSettings || isLoadingRosterSettings || isLoadingFantasyLeagueMembers || isLoadingDraftSettings) return <Loading message="Carregando..." />;
 
   const renderForm = () => {
     if (!formData) return <Typography>Carregando...</Typography>;

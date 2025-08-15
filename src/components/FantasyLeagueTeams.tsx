@@ -10,6 +10,7 @@ import {
   Avatar,
 } from '@mui/material';
 import { FantasyLeague, useFantasyLeagueTeams, FantasyLeagueTeamsResponse } from '../api/fantasyLeagueQueries';
+import Loading from './Loading';
 
 interface Props {
   fantasyLeague: FantasyLeague;
@@ -24,7 +25,7 @@ const FantasyLeagueTeams: React.FC<Props> = ({ fantasyLeague }) => {
   const numberOfTeams = fantasyLeague.numberOfTeams;
   
 
-  if (isLoading) return <p>Carregando membros...</p>;
+  if (isLoading) return <Loading message="Carregando membros..." />;
 
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>

@@ -1,5 +1,5 @@
 // src/components/MovePlayerModal.tsx
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   List, ListItemButton, ListItemText, ListItemAvatar,
@@ -8,6 +8,7 @@ import {
 import { useMovePlayer } from '../api/userTeamRosterMutations';
 import { mapPositionToSlot, RosterSlot } from '../utils/positions';
 import { POSITIONS_TRANSLATION } from './PlayerSelectModal';
+import Loading from './Loading';
 
 type SlotType = 'starter' | 'bench';
 
@@ -68,14 +69,23 @@ export default function MovePlayerModal({
 
   const [error, setError] = useState<string | null>(null);
 
-  const { mutate: movePlayer } = useMovePlayer({
+  const { mutate: movePlayer, isPending: isMovingPlayer, isError: isMovingPlayerError, error: movingPlayerError} = useMovePlayer({
     onSuccess: () => {
       refetch();
       onClose();
     },
   });
 
-  if (!originSnapshot) return null; // nothing to render safely
+  if (!originSnapshot) return null;
+
+  if (isMovingPlayer) return <Loading message="Movendo jogador..." />;
+  if (isMovingPlayerError) return (
+    <Alert severity="error">
+      {typeof movingPlayerError === 'object' && movingPlayerError !== null && 'message' in movingPlayerError
+        ? (movingPlayerError as { message: string }).message
+        : 'Algo deu errado ao mover o jogador.'}
+    </Alert>
+  );
 
   const originPos = mapPositionToSlot(originSnapshot.player.position);
 

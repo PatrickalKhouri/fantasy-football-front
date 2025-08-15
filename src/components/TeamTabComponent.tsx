@@ -1,6 +1,6 @@
 // src/components/TeamTab.tsx
 
-import { Typography, Stack, CircularProgress, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Typography, Stack, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useRoster } from './userTeamRosterQueries';
@@ -13,6 +13,7 @@ import { Slot } from './userTeamRosterQueries';
 import { RosterSlotCard } from './SlotCard'
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
 import { UserTeam } from '../api/userTeamsQueries';
+import Loading from './Loading';
 
 interface Props {
     userTeam: UserTeam;
@@ -45,9 +46,9 @@ interface Props {
     };
     const userTeamId = userTeam.id;
 
-    const { data: slots, isLoading, refetch } = useRoster({ userTeamId, seasonYear });
+    const { data: slots, isLoading, refetch, isError, error } = useRoster({ userTeamId, seasonYear });
 
-    const { mutate: removePlayer } = useRemovePlayer({
+    const { mutate: removePlayer, isPending: isRemovingPlayer,} = useRemovePlayer({
       onSuccess: refetch,
     })
 
@@ -69,8 +70,18 @@ interface Props {
     const bench = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'bench') || [], [slots]);
   
     const goPrev = () => setRound((r) => Math.max(1, r - 1));
-    const goNext = () => setRound((r) => r + 1); // max cap later
-  
+    const goNext = () => setRound((r) => r + 1);
+
+    if (isLoading) return <Loading message="Carregando time..." />;
+
+    if (isRemovingPlayer) return <Loading message="Removendo jogador..." />;
+    
+    if (isError) return (
+      <Alert severity="error">
+        {error instanceof Error ? error.message : 'Algo deu errado ao carregar o time.'}
+      </Alert>
+    );
+
     return (
       <Stack spacing={3}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -86,10 +97,6 @@ interface Props {
             </IconButton>
           </Stack>
         </Stack>
-  
-        {isLoading ? (
-          <CircularProgress />
-        ) : (
           <>
             <Typography variant="h6" fontWeight="bold">Titulares</Typography>
             <Stack spacing={1}>
@@ -123,7 +130,6 @@ interface Props {
               ))}
             </Stack>
           </>
-        )}
       <PlayerSelectModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
