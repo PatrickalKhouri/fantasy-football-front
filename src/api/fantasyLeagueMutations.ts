@@ -10,6 +10,19 @@ interface CreateFantasyLeagueData {
   draftType: string;
 }
 
+export interface UpdateFantasyLeague {
+  values: {
+    name: string;
+    numberOfTeams: number;
+    tradeReviewDays: number;
+    numberOfRounds: number;
+    tradeDeadlineRound: number | null;
+    playoffTeams: number;
+    playoffFormat: 'single_game' | 'two_leg_single_game_final' | 'two_leg_all';
+    injuredReserveSlots: number;
+  };
+}
+
 interface UpdateFantasyLeagueData {
   id: number;
   updates: Partial<{

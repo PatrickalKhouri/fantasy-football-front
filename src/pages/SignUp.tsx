@@ -15,6 +15,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { useMutation } from '@tanstack/react-query';
 import { useSignUp } from '../api/authQueries';
+import Loading from '../components/Loading';
 
 dayjs.locale('pt-br');
 
@@ -47,7 +48,7 @@ const SignUp: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const { mutate: signUp,} = useSignUp();
+  const { mutate: signUp, isPending, isError, error } = useSignUp();
 
   const signUpMutation = useMutation({
     mutationFn: async (userData: SignUpFormData) => {
@@ -106,6 +107,8 @@ const SignUp: React.FC = () => {
     });
   };
 
+  if (isPending) return <Loading message="Criando sua conta..." fullScreen />;
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -127,7 +130,7 @@ const SignUp: React.FC = () => {
             <Typography color="error" sx={{ mb: 2 }}>
               {signUpMutation.error instanceof Error 
                 ? signUpMutation.error.message 
-                : 'Registration failed'}
+                : 'Falha ao criar sua conta, tente novamente.'}
             </Typography>
           )}
           
