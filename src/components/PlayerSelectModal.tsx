@@ -25,6 +25,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { Player, usePlayers } from '../api/playersQueries';
 import { useAddPlayer } from '../api/userTeamRosterMutations';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import Loading from './Loading';
 
 export const POSITIONS_TRANSLATION = {
   Defender: 'Defensor',
@@ -80,7 +81,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     type: 'success',
   });
 
-  const { mutate: addPlayer } = useAddPlayer({
+  const { mutate: addPlayer, isPending: isAddingPlayer } = useAddPlayer({
     onSuccess: () => {
       setSnackbar({ open: true, message: 'Player added to roster!', type: 'success' });
       refetch();
@@ -105,7 +106,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     (pos) => POSITIONS_BACKEND_MAP[pos as keyof typeof POSITIONS_BACKEND_MAP]
   );
 
-  const { data, isLoading, isFetching } = usePlayers({
+  const { data, isLoading } = usePlayers({
     position: backendPosition,
     search,
     page: page + 1,
@@ -133,6 +134,9 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  if (isAddingPlayer) return <Loading message="Adicionando jogador..." />;
+  if (isLoading) return <Loading message="Carregando jogadores..." fullScreen />;
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -175,7 +179,7 @@ const PlayerSelectModal: React.FC<PlayerSelectModalProps> = ({
 
         <Box
           sx={{
-            opacity: isFetching ? 0.6 : 1,
+            opacity: isLoading ? 0.6 : 1,
             transition: 'opacity 300ms ease-in-out',
           }}
         >

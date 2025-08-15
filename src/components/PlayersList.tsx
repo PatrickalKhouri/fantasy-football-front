@@ -37,6 +37,7 @@ import AddPlayerModal from './AddPlayerModal';
 import { Slot, useRoster } from './userTeamRosterQueries';
 import { useRemovePlayer } from '../api/userTeamRosterMutations';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import Loading from './Loading';
 
 
 const POSITION_OPTIONS = [
@@ -87,7 +88,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   }>(null);
 
 
-  const { data: slots, refetch } = useRoster({ userTeamId, seasonYear });
+  const { data: slots, isLoading, refetch } = useRoster({ userTeamId, seasonYear });
   console.log(slots);
 
   const playerIdToSlotId = React.useMemo(() => {
@@ -101,7 +102,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   }, [slots]);
   
 
-  const { mutate: removePlayer } = useRemovePlayer({
+  const { mutate: removePlayer, isPending: isRemovingPlayer } = useRemovePlayer({
     onSuccess: () => {
       refetch?.();        
       refetchPlayers?.();   
@@ -121,7 +122,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
     if (selectedSlotId != null) removePlayer(selectedSlotId);
   }
 
-  const { data, isLoading, isFetching, refetch: refetchPlayers } = usePlayers({
+  const { data, isLoading: isLoadingPlayers, isFetching, refetch: refetchPlayers } = usePlayers({
     position: position === 'ALL'
       ? undefined
       : [POSITIONS_BACKEND_MAP[position as keyof typeof POSITIONS_BACKEND_MAP]],
@@ -162,7 +163,9 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
     seasonYear,
   });
   
-  
+  if (isLoading || isLoadingPlayers || loadingFilters) return <Loading message="Carregando jogadores..." fullScreen />;
+
+  if (isRemovingPlayer) return <Loading message="Removendo jogador..." />;
 
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>

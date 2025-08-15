@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useCreateFantasyLeague } from '../api/fantasyLeagueMutations';
+import Loading from './Loading';
 
 const modalStyle = {
   position: 'absolute',
@@ -59,7 +60,7 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
   const [leagueName, setLeagueName] = useState('');
   const [numberOfTeams, setNumberOfTeams] = useState(8);
   const [draftType, setDraftType] = useState('snake');
-  const { mutate: createFantasyLeague, isPending } = useCreateFantasyLeague();
+  const { mutate: createFantasyLeague, isPending, isError, error } = useCreateFantasyLeague();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +79,8 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
       }
     );
   };
+
+  if (isPending) return <Loading message="Criando liga..." fullScreen />;
 
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="create-league-modal">
@@ -163,6 +166,12 @@ const CreateLeagueModal: React.FC<CreateLeagueModalProps> = ({ open, handleClose
             </Stack>
           </Stack>
         </form>
+
+        {isError && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {error instanceof Error ? error.message : 'Algo deu errado ao criar a liga.'}
+          </Typography>
+        )}
       </Box>
     </Modal>
   );

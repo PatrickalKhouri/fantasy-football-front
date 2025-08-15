@@ -11,10 +11,11 @@ import FantasyLeagueInfo from '../components/FantasyLeagueInfo';
 import PlayersList from '../components/PlayersList';
 import { TeamTab } from '../components/TeamTabComponent';
 import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
+import Loading from '../components/Loading';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
-  const { data: fantasyLeague, isLoading, error } = useGetFantasyLeague(Number(fantasyLeagueId));
+  const { data: fantasyLeague, isLoading, isError, error } = useGetFantasyLeague(Number(fantasyLeagueId));
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -26,8 +27,8 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const { mutate: inviteUserToFantasyLeague } = useInviteUserToFantasyLeague(Number(fantasyLeagueId));
-  const { data: userTeam, isLoading: isLoadingUserTeam, error: errorUserTeam } = useFindUserFantasyLeagueTeam(currentUserId, Number(fantasyLeagueId));
+  const { mutate: inviteUserToFantasyLeague, isPending: isInvitingUser, isError: isInvitingUserError, error: invitingUserError } = useInviteUserToFantasyLeague(Number(fantasyLeagueId));
+  const { data: userTeam, isLoading: isLoadingUserTeam, isError: isLoadingUserTeamError, error: errorUserTeam } = useFindUserFantasyLeagueTeam(currentUserId, Number(fantasyLeagueId));
 
 
   const handleInvite = (email: string) => {
@@ -49,8 +50,10 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
     });
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error || !fantasyLeague) return <p>Something went wrong.</p>;
+  if (isLoading || isLoadingUserTeam) return <Loading message="Carregando a liga..." fullScreen />;
+  if (isInvitingUser) return <Loading message="Enviando convite..." />;
+  if (isInvitingUserError) return <p>Algo deu errado ao enviar o convite.</p>;
+  if (!fantasyLeague) return <p>Algo deu errado ao carregar a liga.</p>;
 
   return (
     <Box
@@ -117,6 +120,27 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {isError && (
+        <Alert severity="error">
+          {error instanceof Error ? error.message : 'Algo deu errado ao carregar a liga.'}
+        </Alert>
+      )}
+
+      {isLoadingUserTeamError && (
+        <Alert severity="error">
+          {errorUserTeam instanceof Error ? errorUserTeam.message : 'Algo deu errado ao carregar o time do usuário.'}
+        </Alert>
+      )}
+
+      {isInvitingUserError && (
+        <Alert severity="error">
+          {typeof invitingUserError === 'object' && invitingUserError !== null && 'message' in invitingUserError
+            ? (invitingUserError as { message: string }).message
+            : 'Algo deu errado ao enviar o convite.'}
+        </Alert>
+      )}
+
     </Box>
   );
 };

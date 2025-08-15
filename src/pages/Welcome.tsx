@@ -118,7 +118,7 @@ const acceptInviteMutation = useMutation({
         </Typography>
 
         {isLoading ? (
-          <CircularProgress />
+          <Loading message="Carregando as ligas..." fullScreen />
         ) : isError ? (
           <Typography color="error">
             {error instanceof Error ? error.message : 'Não foi possível carregar as ligas'}

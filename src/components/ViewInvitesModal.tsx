@@ -14,9 +14,11 @@ import {
   Box,
   useMediaQuery,
   useTheme,
+  Alert,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useGetInvitesByLeague, useCancelInvite, FantasyLeagueInvite } from '../api/fantasyLeagueInviteQueries';
+import Loading from './Loading';
 
 interface ViewInvitesModalProps {
   open: boolean;
@@ -29,8 +31,8 @@ const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, fant
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const [invites, setInvites] = useState<FantasyLeagueInvite[]>([]);
 
-  const { data: invitesData, isLoading } = useGetInvitesByLeague(fantasyLeagueId, open);
-  const { mutate: cancelInvite, isPending: isCancelling } = useCancelInvite(fantasyLeagueId);
+  const { data: invitesData, isLoading, isError, error } = useGetInvitesByLeague(fantasyLeagueId, open);
+  const { mutate: cancelInvite, isPending: isCancelling, isError: isCancellingError, error: cancellingError } = useCancelInvite(fantasyLeagueId);
 
   useEffect(() => {
     if (invitesData) {
@@ -41,6 +43,9 @@ const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, fant
   const handleCancel = (inviteId: number) => {
     cancelInvite(inviteId);
   };
+
+  if (isLoading) return <Loading message="Carregando convites..." />;
+  if (isCancelling) return <Loading message="Cancelando convite..." />;
 
   return (
     <Dialog open={open} onClose={onClose} fullScreen={fullScreen} fullWidth maxWidth="sm">
@@ -84,6 +89,20 @@ const ViewInvitesModal: React.FC<ViewInvitesModalProps> = ({ open, onClose, fant
           </List>
         )}
       </DialogContent>
+
+      {isCancellingError && (
+        <Alert severity="error">
+          {typeof cancellingError === 'object' && cancellingError !== null && 'message' in cancellingError
+            ? (cancellingError as { message: string }).message
+            : 'Algo deu errado ao cancelar o convite.'}
+        </Alert>
+      )}
+
+      {isError && (
+        <Alert severity="error">
+          {error instanceof Error ? error.message : 'Algo deu errado ao carregar os convites.'}
+        </Alert>
+      )}
     </Dialog>
   );
 };
