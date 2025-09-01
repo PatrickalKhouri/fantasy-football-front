@@ -1,25 +1,25 @@
+// FantasyLeaguesSidebar.tsx
 import React from 'react';
-import {
-  Button,
-  Stack,
-  Typography,
-  Divider,
-  Paper,
-} from '@mui/material';
+import { Button, Stack, Typography, Divider, Paper } from '@mui/material';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import SeasonStatusCard, { FantasyLeagueSeason } from '../components/SeasonStatusCard';
 
 type Props = {
   fantasyLeague: FantasyLeague;
   currentUserId: number;
+  currentSeason?: FantasyLeagueSeason | null;
   onInviteClick?: () => void;
   onViewInvitesClick?: () => void;
+  onSeasonUpdated?: () => void;
 };
 
 const FantasyLeaguesSidebar: React.FC<Props> = ({
   fantasyLeague,
   currentUserId,
+  currentSeason,
   onInviteClick,
   onViewInvitesClick,
+  onSeasonUpdated,
 }) => {
   const isOwner = currentUserId === fantasyLeague.owner?.id;
 
@@ -73,6 +73,13 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
           </Button>
         </Stack>
       )}
+
+        <SeasonStatusCard
+          season={currentSeason}
+          canManage={isOwner}
+          onUpdated={onSeasonUpdated}
+          devEnableForceOpen
+        />
     </Paper>
   );
 };
