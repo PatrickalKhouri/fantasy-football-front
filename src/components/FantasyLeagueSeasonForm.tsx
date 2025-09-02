@@ -4,24 +4,24 @@ import {
   Typography,
   Select,
   MenuItem,
-  TextField,
   FormControl,
   RadioGroup,
   FormControlLabel,
   Radio,
   Button,
 } from '@mui/material';
-import { useUpdateFantasyLeague } from '../api/fantasyLeagueMutations';
+import { useUpdateFantasyLeagueSeason } from '../api/fantasyLeagueSeasonsMutation';
 import { Snackbar, Alert } from '@mui/material';
+import { UUID } from 'crypto';
 
 interface Props {
   values: any;
   onChange: (field: string, value: any) => void;
-  id: number;
-  refetchFantasyLeagueSettings: () => void;
+  id: any;
+  refetchFantasyLeagueSeason: () => void;
 }
 
-const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refetchFantasyLeagueSettings }) => {
+const FantasyLeagueSeasonForm: React.FC<Props> = ({ values, onChange, id, refetchFantasyLeagueSeason }) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const tradeDeadlineOptions = useMemo(() => {
     const start = Math.max(1, values.numberOfRounds - 8);
@@ -29,24 +29,15 @@ const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refe
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }, [values.numberOfRounds]);
   
-  const updateFantasyLeague = useUpdateFantasyLeague({
+  const updateFantasyLeagueSeason = useUpdateFantasyLeagueSeason({
     onSuccess: () => {
       setOpenSnackbar(true);
-      refetchFantasyLeagueSettings();
+      refetchFantasyLeagueSeason();
     },
   });
 
   return (
     <>
-      <Box>
-        <Typography fontWeight={600}>Nome da Liga</Typography>
-        <TextField
-          fullWidth
-          value={values.name}
-          onChange={(e) => onChange('name', e.target.value)}
-        />
-      </Box>
-
       {/* Número de Times */}
       <Box>
         <Typography fontWeight={600}>Número de Times</Typography>
@@ -144,8 +135,8 @@ const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refe
         <Typography fontWeight={600}>Reservas por Lesão</Typography>
         <FormControl fullWidth>
           <Select
-            value={values.injuredReserveSlots ?? ''}
-            onChange={(e) => onChange('injuredReserveSlots', e.target.value)}
+            value={values.irSlots ?? ''}
+            onChange={(e) => onChange('irSlots', e.target.value)}
           >
             {Array.from({ length: 9 }, (_, i) => (
               <MenuItem key={i} value={i}>
@@ -190,8 +181,8 @@ const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refe
         >
           <Button
             variant="contained"
-            onClick={() => updateFantasyLeague.mutate({ id, updates: values })}
-            disabled={updateFantasyLeague.isPending}
+            onClick={() => updateFantasyLeagueSeason.mutate({ id, updates: values })}
+            disabled={updateFantasyLeagueSeason.isPending}
           >
             Salvar
           </Button>
@@ -205,4 +196,4 @@ const FantasyLeagueSettingsForm: React.FC<Props> = ({ values, onChange, id, refe
   );
 };
 
-export default FantasyLeagueSettingsForm;
+export default FantasyLeagueSeasonForm;

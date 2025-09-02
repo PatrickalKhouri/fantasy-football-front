@@ -116,8 +116,6 @@ export enum LeagueStatus {
     return Math.max(0, Math.ceil((date.getTime() - now.getTime()) / msPerDay));
   }
   
-  /* ---------------- component ---------------- */
-  
   export default function SeasonStatusCard({
     season,
     canManage,

@@ -22,6 +22,7 @@ const endpoints = {
     getLeagueTeams: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/teams`,
     getRosterSettings: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/roster-settings`,
     getDraftSettings: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/draft-settings`,
+    getFantasyLeagueSeasons: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}/fantasy-league-seasons`,
     delete: (id: number) => `${API_BASE_URL}/fantasy-leagues/${id}`,
   },
   fantasyLeagueInvites: {
@@ -34,6 +35,7 @@ const endpoints = {
     byLeague: (leagueId: number) => `${API_BASE_URL}/fantasy-league-seasons/by-league/${leagueId}`,
     get: (seasonId: string) => `${API_BASE_URL}/fantasy-league-seasons/${seasonId}`,
     activate: (seasonId: string) => `${API_BASE_URL}/fantasy-league-seasons/${seasonId}/activate`,
+    update: (id: number) => `${API_BASE_URL}/fantasy-league-seasons/${id}`,
   },
   rosterSettings: {
     update: (id: number) => `${API_BASE_URL}/roster-settings/${id}`,
