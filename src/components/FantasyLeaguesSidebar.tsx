@@ -2,12 +2,12 @@
 import React from 'react';
 import { Button, Stack, Typography, Divider, Paper } from '@mui/material';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
-import SeasonStatusCard, { FantasyLeagueSeason } from '../components/SeasonStatusCard';
+import SeasonStatusCard from '../components/SeasonStatusCard';
+import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 
 type Props = {
   fantasyLeague: FantasyLeague;
   currentUserId: number;
-  currentSeason?: FantasyLeagueSeason | null;
   onInviteClick?: () => void;
   onViewInvitesClick?: () => void;
   onSeasonUpdated?: () => void;
@@ -16,12 +16,13 @@ type Props = {
 const FantasyLeaguesSidebar: React.FC<Props> = ({
   fantasyLeague,
   currentUserId,
-  currentSeason,
   onInviteClick,
   onViewInvitesClick,
   onSeasonUpdated,
 }) => {
   const isOwner = currentUserId === fantasyLeague.owner?.id;
+
+  const { data: fantasyLeagueSeason, refetch: refetchFantasyLeagueSeason } = useFantasyLeagueSeasons(fantasyLeague.id);
 
   return (
     <Paper
@@ -75,10 +76,11 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
       )}
 
         <SeasonStatusCard
-          season={currentSeason}
+          season={fantasyLeagueSeason}
           canManage={isOwner}
           onUpdated={onSeasonUpdated}
           devEnableForceOpen
+          refetchSeason={refetchFantasyLeagueSeason}
         />
     </Paper>
   );

@@ -33,19 +33,29 @@ interface UpdateFantasyLeagueSeasonData {
   }>;
 }
 
-export async function activateSeasonRequest(seasonId: string, body: ActivateSeasonBody = {}) {
-  const res = await axios.post(apiConfig.endpoints.fantasyLeagueSeasons.activate(seasonId), {
-    data: body,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
-  if (res.status !== 200) {
-    const text = await res.data;
-    throw new Error(text || `HTTP ${res.status}`);
+export async function activateSeasonRequest(
+  seasonId: string,
+  body: ActivateSeasonBody = {}
+) {
+  try {
+    const res = await axios.post(
+      apiConfig.endpoints.fantasyLeagueSeasons.activate(seasonId),
+      body,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (err: any) {
+    const d = err?.response?.data;
+    const msg = Array.isArray(d?.message)
+      ? d.message.join(', ')
+      : d?.message || d?.error || err?.message || 'Erro ao ativar a temporada';
+    throw new Error(msg);
   }
-  return res.data;
 }
 
 export const useUpdateFantasyLeagueSeason = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -68,7 +78,7 @@ export function useActivateSeasonMutation(options?: {
   return useMutation({
     mutationKey: ['activateSeason'],
     mutationFn: (vars: { seasonId: string; body?: ActivateSeasonBody }) =>
-      activateSeasonRequest(vars.seasonId, vars.body ?? {}),
+      activateSeasonRequest(vars.seasonId.toString(), vars.body ?? {}),
     onSuccess: options?.onSuccess,
     onError: options?.onError,
   });

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { Box, Stack, Typography, Chip, Button, Divider } from '@mui/material';
+import { Box, Stack, Typography, Button, Divider } from '@mui/material';
 import { useActivateSeasonMutation } from '../api/fantasyLeagueSeasonsMutation';
+import { FantasyLeagueSeason } from '../api/useFantasyLeagueSeasons';
 
 /** Keep in sync with backend */
 export enum LeagueStatus {
@@ -14,35 +15,40 @@ export enum LeagueStatus {
     ARCHIVED = 'ARCHIVED',
   }
   
-  type PlayoffFormat = 'single_game' | 'two_leg_single_game_final' | 'two_leg_all';
-  
-  export type FantasyLeagueSeason = {
-    id: string;
-    seasonYear: number;
-    status: LeagueStatus;
-    numberOfTeams: number | null;
-    playoffTeams: number | null;
-    playoffStartRound: number | null;
-    numberOfRounds: number | null;
-    playoffFormat: PlayoffFormat | null;
-    seasonKickoffAt: string | null; // ISO
-    activatedAt: string | null;
-  };
-  
   type Props = {
     season?: FantasyLeagueSeason | null;
     canManage: boolean;
     onUpdated?: () => void;
     devEnableForceOpen?: boolean;
+    refetchSeason?: () => void;
   };
-  
-  /* ---------------- helpers ---------------- */
   
   function isoToDate(iso: string | null | undefined): Date | null {
     if (!iso) return null;
     const d = new Date(iso);
     return Number.isNaN(d.getTime()) ? null : d;
   }
+
+  // add this helper near the top of the file
+const getErrorMessage = (err: unknown) => {
+  // works for fetch, axios, Nest errors, or plain objects
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string') return err;
+  try {
+    const e: any = err;
+    if (e?.response?.data) {
+      const d = e.response.data;
+      if (Array.isArray(d?.message)) return d.message.join(', ');
+      return d?.message || d?.error || JSON.stringify(d);
+    }
+    if (Array.isArray(e?.message)) return e.message.join(', ');
+    if (e?.message) return e.message;
+    return JSON.stringify(e);
+  } catch {
+    return 'Erro desconhecido';
+  }
+};
+
   
   /** Dev rule: if no kickoff provided, treat as now + 2 months (mirrors backend dev logic) */
   function resolveKickoffDevFromSeason(season: FantasyLeagueSeason): Date {
@@ -121,6 +127,7 @@ export enum LeagueStatus {
     canManage,
     onUpdated,
     devEnableForceOpen = true,
+    refetchSeason,
   }: Props) {
     // Always compute a kickoff & message, even when there's no season
     const kickoff = useMemo<Date>(() => {
@@ -143,17 +150,20 @@ export enum LeagueStatus {
     const kickoffStr = kickoff.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
     const windowStr = `${windowStart.toLocaleString('pt-BR', { dateStyle: 'short' })} → ${kickoff.toLocaleString('pt-BR', { dateStyle: 'short' })}`;
   
-    const dias = daysUntil(kickoff);
+    const days = daysUntil(kickoff);
   
     const { mutate: activateMutate, isPending } = useActivateSeasonMutation({
-      onSuccess: () => onUpdated?.(),
-      onError: (e) => alert((e as any)?.message || 'Falha ao ativar a temporada'),
+      onSuccess: () => {
+        onUpdated?.();
+        refetchSeason?.();
+      },
+      onError: (e) => alert(getErrorMessage(e)),
     });
-  
+    
     function postActivate(withOverride: boolean) {
-      if (!season) return; // no actions when no season
+      if (!season) return;
       const body = withOverride
-        ? { seasonKickoffAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() } // +1h
+        ? { seasonKickoffAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() }
         : {};
       activateMutate({ seasonId: season.id, body });
     }
@@ -189,29 +199,27 @@ export enum LeagueStatus {
   
               {canManage && (
                 <Stack direction="column" spacing={1} mt={1}>
-                  {phase === 'entre-temporadas' && devEnableForceOpen && (
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      onClick={() => postActivate(true)}
-                      disabled={isPending}
-                      sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 600 }}
-                    >
-                      {/* PT-BR UI */}
-                      Abrir janela
-                    </Button>
-                  )}
-                  {phase === 'inativa' && (
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={() => postActivate(false)}
-                      disabled={isPending}
-                      sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 600 }}
-                    >
-                      {/* PT-BR UI */}
-                      Ativar temporada
-                    </Button>
+                    {phase === 'entre-temporadas' && devEnableForceOpen && (
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        onClick={() => postActivate(true)}
+                        disabled={isPending}
+                        sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 600 }}
+                      >
+                        {isPending ? 'Abrindo…' : 'Abrir janela'}
+                      </Button>
+                    )}
+                    {phase === 'inativa' && (
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={() => postActivate(false)}
+                        disabled={isPending}
+                        sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 600 }}
+                      >
+                        {isPending ? 'Ativando…' : 'Ativar temporada'}
+                      </Button>
                   )}
                 </Stack>
               )}
@@ -221,7 +229,7 @@ export enum LeagueStatus {
               {/* Removed: "Nenhuma temporada criada." */}
               <Typography variant="body2" color="text.secondary">
                 {/* PT-BR UI */}
-                Temporada começa em {dias} {dias === 1 ? 'dia' : 'dias'} • {kickoffStr}
+                Temporada começa em {days} {days === 1 ? 'dia' : 'dias'} • {kickoffStr}
               </Typography>
             </>
           )}
