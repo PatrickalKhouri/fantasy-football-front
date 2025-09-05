@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Box, Stack, Typography, Button, Divider } from '@mui/material';
 import { useActivateSeasonMutation } from '../api/fantasyLeagueSeasonsMutation';
 import { FantasyLeagueSeason } from '../api/useFantasyLeagueSeasons';
+import { DraftSettings } from '../api/useDraftSettingsMutations';
 
 /** Keep in sync with backend */
 export enum LeagueStatus {
@@ -21,6 +22,7 @@ export enum LeagueStatus {
     onUpdated?: () => void;
     devEnableForceOpen?: boolean;
     refetchSeason?: () => void;
+    draftSettings?: DraftSettings;  
   };
   
   function isoToDate(iso: string | null | undefined): Date | null {
@@ -70,7 +72,7 @@ const getErrorMessage = (err: unknown) => {
   type UiPhase =
     | 'entre-temporadas'
     | 'inativa'
-    | 'pré-temporada'
+    | 'pre-temporada'
     | 'draft'
     | 'temporada'
     | 'pós-temporada';
@@ -89,7 +91,7 @@ const getErrorMessage = (err: unknown) => {
       case LeagueStatus.DRAFT_SCHEDULED:
       case LeagueStatus.DRAFT_DONE:
       case LeagueStatus.SCHEDULED:
-        return now < kickoff ? 'pré-temporada' : 'temporada';
+        return now < kickoff ? 'pre-temporada' : 'temporada';
       case LeagueStatus.ACTIVE:
         return 'temporada';
       case LeagueStatus.ARCHIVED:
@@ -105,7 +107,7 @@ const getErrorMessage = (err: unknown) => {
         return 'default';
       case 'inativa':
         return 'warning';
-      case 'pré-temporada':
+      case 'pre-temporada':
         return 'info';
       case 'draft':
         return 'secondary';
@@ -128,6 +130,7 @@ const getErrorMessage = (err: unknown) => {
     onUpdated,
     devEnableForceOpen = true,
     refetchSeason,
+    draftSettings,
   }: Props) {
     // Always compute a kickoff & message, even when there's no season
     const kickoff = useMemo<Date>(() => {
@@ -144,9 +147,7 @@ const getErrorMessage = (err: unknown) => {
       () => (season ? computeUiPhase(season) : 'entre-temporadas'),
       [season],
     );
-  
-    const windowOpen = useMemo(() => (season ? isActivationWindowOpen(season) : false), [season]);
-  
+    
     const kickoffStr = kickoff.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
     const windowStr = `${windowStart.toLocaleString('pt-BR', { dateStyle: 'short' })} → ${kickoff.toLocaleString('pt-BR', { dateStyle: 'short' })}`;
   
@@ -167,7 +168,34 @@ const getErrorMessage = (err: unknown) => {
         : {};
       activateMutate({ seasonId: season.id, body });
     }
-  
+
+    const hasDraftDate = draftSettings?.draftDate ? new Date(draftSettings.draftDate) : null;
+
+    console.log(draftSettings);
+    console.log(hasDraftDate);
+
+    // Helper function to render draft date information
+    const renderDraftDateInfo = () => {
+      if (phase !== 'pre-temporada') return null;
+      
+      if (hasDraftDate) {
+        return (
+          <Typography variant="body2" color="text.secondary">
+            Draft marcado para {hasDraftDate.toLocaleString('pt-BR', { 
+              dateStyle: 'short', 
+              timeStyle: 'short' 
+            })}
+          </Typography>
+        );
+      }
+      
+      return (
+        <Typography variant="body2" color="text.secondary">
+          Sua liga ainda não tem data de draft. Confira as configurações da liga e defina uma data.
+        </Typography>
+      );
+    };
+
     return (
       <Box mt={2}>
         <Divider sx={{ my: 2 }} />
@@ -182,23 +210,23 @@ const getErrorMessage = (err: unknown) => {
                 minHeight: 44,
                  backgroundColor: chipColor(phase) === 'default' ? 'primary.main' : chipColor(phase) === 'warning' ? 'warning.main' : chipColor(phase) === 'info' ? 'info.main' : chipColor(phase) === 'secondary' ? 'secondary.main' : chipColor(phase) === 'success' ? 'success.main' : chipColor(phase) === 'primary' ? 'primary.main' : 'default.main' }}>{phase}</Button>
           </Stack>
-  
+
           {season ? (
             <>
               <Typography variant="body2" color="text.secondary">
                 {/* PT-BR UI */}
                 Temporada {season.seasonYear}
                 {season.numberOfTeams ? ` • ${season.numberOfTeams} times` : ''}
-                {season.playoffTeams ? ` • ${season.playoffTeams} nos playoffs` : ''}
+                {season.playoffTeams ? ` • ${season.playoffTeams}  se classificam para o mata mata` : ''}
               </Typography>
-  
+
               <Typography variant="caption" color="text.secondary">
                 {/* PT-BR UI */}
                 Janela de ativação: {windowStr}
               </Typography>
-  
+
               {canManage && (
-                <Stack direction="column" spacing={1} mt={1}>
+                <Stack direction="column" spacing={1} mt={1} alignItems='center'>
                     {phase === 'entre-temporadas' && devEnableForceOpen && (
                       <Button
                         fullWidth
@@ -233,6 +261,8 @@ const getErrorMessage = (err: unknown) => {
               </Typography>
             </>
           )}
+
+          {renderDraftDateInfo()}
         </Stack>
       </Box>
     );

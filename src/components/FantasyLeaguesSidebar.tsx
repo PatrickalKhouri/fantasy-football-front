@@ -4,6 +4,8 @@ import { Button, Stack, Typography, Divider, Paper } from '@mui/material';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
 import SeasonStatusCard from '../components/SeasonStatusCard';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
+import { useDraftSettings } from '../api/useDraftSettings';
+import Loading from './Loading';
 
 type Props = {
   fantasyLeague: FantasyLeague;
@@ -22,7 +24,10 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
 }) => {
   const isOwner = currentUserId === fantasyLeague.owner?.id;
 
-  const { data: fantasyLeagueSeason, refetch: refetchFantasyLeagueSeason } = useFantasyLeagueSeasons(fantasyLeague.id);
+  const { data: fantasyLeagueSeason,  isLoading: isLoadingFantasyLeagueSeason, refetch: refetchFantasyLeagueSeason } = useFantasyLeagueSeasons(fantasyLeague.id);
+  const { data: draftSettings, isLoading: isLoadingDraftSettings } = useDraftSettings(fantasyLeague.id);
+
+  if (isLoadingFantasyLeagueSeason || isLoadingDraftSettings) return <Loading message="Carregando..." />;
 
   return (
     <Paper
@@ -81,6 +86,7 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
           onUpdated={onSeasonUpdated}
           devEnableForceOpen
           refetchSeason={refetchFantasyLeagueSeason}
+          draftSettings={draftSettings}
         />
     </Paper>
   );
