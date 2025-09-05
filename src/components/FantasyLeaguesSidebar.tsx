@@ -1,18 +1,18 @@
+// FantasyLeaguesSidebar.tsx
 import React from 'react';
-import {
-  Button,
-  Stack,
-  Typography,
-  Divider,
-  Paper,
-} from '@mui/material';
+import { Button, Stack, Typography, Divider, Paper } from '@mui/material';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import SeasonStatusCard from '../components/SeasonStatusCard';
+import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
+import { useDraftSettings } from '../api/useDraftSettings';
+import Loading from './Loading';
 
 type Props = {
   fantasyLeague: FantasyLeague;
   currentUserId: number;
   onInviteClick?: () => void;
   onViewInvitesClick?: () => void;
+  onSeasonUpdated?: () => void;
 };
 
 const FantasyLeaguesSidebar: React.FC<Props> = ({
@@ -20,8 +20,14 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
   currentUserId,
   onInviteClick,
   onViewInvitesClick,
+  onSeasonUpdated,
 }) => {
   const isOwner = currentUserId === fantasyLeague.owner?.id;
+
+  const { data: fantasyLeagueSeason,  isLoading: isLoadingFantasyLeagueSeason, refetch: refetchFantasyLeagueSeason } = useFantasyLeagueSeasons(fantasyLeague.id);
+  const { data: draftSettings, isLoading: isLoadingDraftSettings } = useDraftSettings(fantasyLeague.id);
+
+  if (isLoadingFantasyLeagueSeason || isLoadingDraftSettings) return <Loading message="Carregando..." />;
 
   return (
     <Paper
@@ -73,6 +79,15 @@ const FantasyLeaguesSidebar: React.FC<Props> = ({
           </Button>
         </Stack>
       )}
+
+        <SeasonStatusCard
+          season={fantasyLeagueSeason}
+          canManage={isOwner}
+          onUpdated={onSeasonUpdated}
+          devEnableForceOpen
+          refetchSeason={refetchFantasyLeagueSeason}
+          draftSettings={draftSettings}
+        />
     </Paper>
   );
 };

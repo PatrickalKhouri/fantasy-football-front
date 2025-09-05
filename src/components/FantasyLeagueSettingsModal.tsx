@@ -18,21 +18,25 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import Loading from './Loading';
 
-import LeagueSettingsForm from './FantasyLeagueSettingsForm';
 import RosterSettingsForm from './RosterSettingsForm';
 import DraftSettingsForm from './DraftSettingsForm';
 import LeagueMembersSettings from './FantasyLegueMemberSettings';
+import FantasyLeagueSeasonForm from './FantasyLeagueSeasonForm';
+import FantasyLeagueForm from './FantasyLeagueForm';
 
-import { useGetFantasyLeague, useFantasyLeagueTeams, FantasyLeague } from '../api/fantasyLeagueQueries';
+import { useFantasyLeagueTeams, FantasyLeague } from '../api/fantasyLeagueQueries';
 
 import { useRosterSettings } from '../api/useRosterSettings';
 import { useDeleteFantasyLeague } from '../api/fantasyLeagueMutations';
 import { useNavigate } from 'react-router-dom';
 import { useDraftSettings } from '../api/useDraftSettings';
+import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
+
 
 
 const SETTINGS = [
   { label: 'Configurações da Liga', key: 'league' },
+  { label: 'Configurações da Temporada', key: 'season' },
   { label: 'Configurações de Elenco', key: 'roster' },
   { label: 'Configurações de Draft', key: 'draft' },
   { label: 'Configurações de Membros', key: 'members' },
@@ -55,14 +59,16 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
 
   const fantasyLeagueId = fantasyLeague.id;
 
-  const { data: fantasyLeagueSettings, refetch: refetchFantasyLeagueSettings, isLoading: isLoadingFantasyLeagueSettings } = useGetFantasyLeague(fantasyLeague.id);
+  const { data: fantasyLeagueSeason, refetch: refetchFantasyLeagueSeason, isLoading: isLoadingFantasyLeagueSeasons } = useFantasyLeagueSeasons(fantasyLeague.id);
   const { data: rosterSettings, refetch: refetchRosterSettings, isLoading: isLoadingRosterSettings } = useRosterSettings(fantasyLeagueId);
   const { data: fantasyLeagueMembers, refetch: refetchFantasyLeagueMembers, isLoading: isLoadingFantasyLeagueMembers } = useFantasyLeagueTeams(fantasyLeagueId);
   const { data: draftSettings, refetch: refetchDraftSettings, isLoading: isLoadingDraftSettings } = useDraftSettings(fantasyLeagueId);
 
   useEffect(() => {
-    if (selected === 'league' && fantasyLeagueSettings) {
-      setFormData(fantasyLeagueSettings);
+    if (selected === 'season' && fantasyLeagueSeason) {
+      setFormData(fantasyLeagueSeason);
+    } else if (selected === 'league' && fantasyLeague) {
+      setFormData(fantasyLeague);
     } else if (selected === 'roster' && rosterSettings) {
       setFormData(rosterSettings);
     } else if (selected === 'members' && fantasyLeagueMembers) {
@@ -72,9 +78,9 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
     } else {
       setFormData(null);
     }
-  }, [selected, fantasyLeagueSettings, rosterSettings, fantasyLeagueMembers, draftSettings]);
+  }, [selected, fantasyLeagueSeason, rosterSettings, fantasyLeagueMembers, draftSettings, fantasyLeague]);
 
-  if (isLoadingFantasyLeagueSettings || isLoadingRosterSettings || isLoadingFantasyLeagueMembers || isLoadingDraftSettings) return <Loading message="Carregando..." />;
+  if ( isLoadingRosterSettings || isLoadingFantasyLeagueMembers || isLoadingDraftSettings || isLoadingFantasyLeagueSeasons) return <Loading message="Carregando..." />;
 
   const renderForm = () => {
     if (!formData) return <Typography>Carregando...</Typography>;
@@ -82,13 +88,24 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
     switch (selected) {
       case 'league':
         return (
-          <LeagueSettingsForm
+          <FantasyLeagueForm
+            values={formData}
+            onChange={(field: any, value: any) =>
+              setFormData((prev: any) => ({ ...prev, [field]: value }))
+            }
+            id={fantasyLeagueId}
+            refetchFantasyLeague={refetchFantasyLeagueSeason}
+          />
+        );
+      case 'season':
+        return (
+          <FantasyLeagueSeasonForm
             values={formData}
             onChange={(field, value) =>
               setFormData((prev: any) => ({ ...prev, [field]: value }))
             }
-            id={fantasyLeagueId}
-            refetchFantasyLeagueSettings={refetchFantasyLeagueSettings}
+            id={fantasyLeagueSeason?.id!}
+            refetchFantasyLeagueSeason={refetchFantasyLeagueSeason}
           />
         );
       case 'roster':

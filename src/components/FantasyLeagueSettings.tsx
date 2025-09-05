@@ -11,7 +11,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import FantasyLeagueSettingsModal from './FantasyLeagueSettingsModal';
-import { FantasyLeague, useGetFantasyLeague } from '../api/fantasyLeagueQueries';
+import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import { useFantasyLeagueSeasons} from '../api/useFantasyLeagueSeasons';
 
 interface Props {
   isOwner?: boolean;
@@ -20,14 +21,14 @@ interface Props {
 }
 
 const FantasyLeagueSettings: React.FC<Props> = ({ isOwner = false, onEdit, fantasyLeague }) => {
-  const { data: fantasyLeagueSettings } = useGetFantasyLeague(fantasyLeague.id);
+  const { data: fantasyLeagueSeason } = useFantasyLeagueSeasons(fantasyLeague.id);
   const [modalOpen, setModalOpen] = useState(false);  
   const settings = {
-    numberOfTeams: fantasyLeagueSettings?.numberOfTeams,
-    playoffs: fantasyLeagueSettings?.playoffTeams,
-    tradeDeadline: fantasyLeagueSettings?.tradeDeadlineRound,
-    irSlots: fantasyLeagueSettings?.injuredReserveSlots,
-    playoffStartRound: fantasyLeagueSettings?.playoffStartRound,
+    numberOfTeams: fantasyLeagueSeason?.numberOfTeams,
+    playoffs: fantasyLeagueSeason?.playoffTeams,
+    tradeDeadline: fantasyLeagueSeason?.tradeDeadlineRound,
+    irSlots: fantasyLeagueSeason?.irSlots,
+    playoffStartRound: fantasyLeagueSeason?.playoffStartRound,
   };
 
   return (

@@ -4,11 +4,11 @@ import { apiConfig } from './config';
 
 export interface DraftSettingsResponse {
   id: number;
-  numberOfTeams: number;
-  playoffTeams: number;
-  tradeDeadlineRound: number;
-  irSlots: number;
-  playoffStartRound: number;
+  draftDate: string;
+  draftType: 'snake' | 'linear';
+  pickTimer: number;
+  rounds: number;
+  season: number;
 }
 
 export const useDraftSettings = (leagueId: number) => {
