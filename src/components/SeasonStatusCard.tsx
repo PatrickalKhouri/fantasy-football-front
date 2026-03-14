@@ -88,6 +88,7 @@ const getErrorMessage = (err: unknown) => {
       case LeagueStatus.DRAFT_LIVE:
         return 'draft';
       case LeagueStatus.ACTIVATED_PRESEASON:
+        return 'pre-temporada'
       case LeagueStatus.DRAFT_SCHEDULED:
       case LeagueStatus.DRAFT_DONE:
       case LeagueStatus.SCHEDULED:
