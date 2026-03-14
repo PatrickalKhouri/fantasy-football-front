@@ -27,7 +27,8 @@ import {
   DialogTitle,
   Button,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Alert,
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LockIcon from '@mui/icons-material/Lock';
@@ -37,6 +38,8 @@ import AddPlayerModal from './AddPlayerModal';
 import { Slot, useRoster } from './userTeamRosterQueries';
 import { useRemovePlayer } from '../api/userTeamRosterMutations';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
+import { LeagueStatus } from './SeasonStatusCard';
 import Loading from './Loading';
 
 
@@ -68,9 +71,19 @@ interface PlayersListProps {
   userTeamId: number;
 }
 
+const POST_DRAFT_STATUSES: LeagueStatus[] = [
+  LeagueStatus.DRAFT_DONE,
+  LeagueStatus.SCHEDULED,
+  LeagueStatus.ACTIVE,
+  LeagueStatus.ARCHIVED,
+];
+
 const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, userTeamId }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const { data: season } = useFantasyLeagueSeasons(fantasyLeague.id);
+  const draftCompleted = season ? POST_DRAFT_STATUSES.includes(season.status as LeagueStatus) : false;
 
   const [position, setPosition] = useState<string>('ALL');
   const [search, setSearch] = useState<string>('');
@@ -172,6 +185,12 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
       <Typography variant="h6" gutterBottom>
         Jogadores
       </Typography>
+
+      {!draftCompleted && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          A seleção de jogadores estará disponível após a realização do draft.
+        </Alert>
+      )}
 
       <Box
         display="flex"
@@ -308,7 +327,11 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
             </TableCell>
             <TableCell align="right">{player.goals}</TableCell>
             <TableCell align="center">
-              {!player.is_rostered ? (
+              {!draftCompleted ? (
+                <Tooltip title="Disponível após o draft">
+                  <Chip size="small" icon={<LockIcon fontSize="small" />} label="Draft pendente" variant="outlined" />
+                </Tooltip>
+              ) : !player.is_rostered ? (
                 // Free agent → Add
                 <Tooltip title="Adicionar ao elenco">
                   <IconButton
