@@ -6,6 +6,7 @@ import { useDraftSettings } from '../api/useDraftSettings';
 import SeasonStatusCard, { LeagueStatus } from './SeasonStatusCard';
 import DraftOrderPanel from './DraftOrderPanel';
 import DraftSettingsForm from './DraftSettingsForm';
+import DraftSchedulePanel from './DraftSchedulePanel';
 
 interface Props {
   fantasyLeague: FantasyLeague;
@@ -58,6 +59,19 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
                 refetchDraftSettings={refetchDraftSettings}
               />
             </Stack>
+          </>
+        )}
+
+        {seasonYear && season && draftSettings && (
+          <>
+            <Divider sx={{ my: 3 }} />
+            <DraftSchedulePanel
+              seasonId={season.id}
+              leagueId={leagueId}
+              draftSettings={draftSettings}
+              isOwner={isOwner}
+              refetchDraftSettings={refetchDraftSettings}
+            />
           </>
         )}
 
