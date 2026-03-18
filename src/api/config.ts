@@ -51,6 +51,9 @@ const endpoints = {
     getAll: `${API_BASE_URL}/players`,
     getFilters: `${API_BASE_URL}/players/filters/data`,
   },
+  drafts: {
+    get: (leagueId: number, season: number) => `${API_BASE_URL}/drafts/${leagueId}/${season}`,
+  },
   draftOrder: {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order?season=${season}`,
     set: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order`,

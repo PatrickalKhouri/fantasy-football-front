@@ -7,6 +7,7 @@ import SeasonStatusCard, { LeagueStatus } from './SeasonStatusCard';
 import DraftOrderPanel from './DraftOrderPanel';
 import DraftSettingsForm from './DraftSettingsForm';
 import DraftSchedulePanel from './DraftSchedulePanel';
+import { useDraft } from '../api/draftQueries';
 
 interface Props {
   fantasyLeague: FantasyLeague;
@@ -18,8 +19,9 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
   const leagueId = fantasyLeague.id;
 
   const { data: season, isLoading: loadingSeason, refetch: refetchSeason } = useFantasyLeagueSeasons(leagueId);
-  const { data: draftSettings, isLoading: loadingSettings, refetch: refetchDraftSettings } = useDraftSettings(leagueId);
+  const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(leagueId);
   const { data: teams, isLoading: loadingTeams } = useFantasyLeagueTeams(leagueId);
+  const { data: draft } = useDraft(leagueId, season?.seasonYear);
 
   const [draftFormValues, setDraftFormValues] = useState(draftSettings);
 
@@ -91,7 +93,7 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
     );
   }
 
-  // DRAFT_SCHEDULED: order panel (may be locked) + status card
+  // DRAFT_SCHEDULED: order panel (may be locked) + status card + enter room if draft exists
   if (status === LeagueStatus.DRAFT_SCHEDULED) {
     return (
       <Box>
@@ -101,6 +103,25 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
           refetchSeason={refetchSeason}
           draftSettings={draftSettings}
         />
+
+        {draft && (
+          <>
+            <Divider sx={{ my: 3 }} />
+            <Box display="flex" flexDirection="column" alignItems="center" gap={1} py={2}>
+              <Typography variant="body2" color="text.secondary">
+                A sala do draft está aberta. Você pode entrar e aguardar o início.
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 700, px: 4 }}
+                disabled
+              >
+                Entrar na Sala do Draft (em breve)
+              </Button>
+            </Box>
+          </>
+        )}
 
         {seasonYear && (
           <>
