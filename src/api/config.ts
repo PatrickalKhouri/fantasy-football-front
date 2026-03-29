@@ -53,6 +53,7 @@ const endpoints = {
   },
   drafts: {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/drafts/${leagueId}/${season}`,
+    presence: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/presence`,
   },
   draftOrder: {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order?season=${season}`,

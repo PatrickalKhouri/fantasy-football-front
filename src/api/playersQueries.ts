@@ -64,6 +64,7 @@ export const usePlayers = ({
 }) => {
   return useQuery<PlayerResponse>({
     queryKey: ['players', { position, search, page, limit, sortBy, order, leagueId, fantasyLeagueId, onlyFreeAgents, teamId }],
+    enabled: leagueId != null,
     queryFn: async () => {
       const response = await axios.get(`${apiConfig.endpoints.players.getAll}`, {
         params: { position, search, page, limit, sortBy, order, leagueId, fantasyLeagueId, onlyFreeAgents, teamId },
@@ -81,6 +82,7 @@ export const usePlayers = ({
 export const usePlayersFilters = (params: UsePlayersFiltersParams) => {
   return useQuery<PlayersFiltersResponse>({
     queryKey: ['players-filters', params],
+    enabled: params.leagueId != null,
     queryFn: async () => {
       const response = await axios.get(
         apiConfig.endpoints.players.getFilters,

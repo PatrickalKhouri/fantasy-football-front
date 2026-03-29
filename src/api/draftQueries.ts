@@ -17,8 +17,39 @@ export interface DraftResponse {
   currentPickDeadline: string | null;
 }
 
+export interface DraftPick {
+  id: string;
+  round: number;
+  pickPosition: number;
+  overallPick: number;
+  userTeam: { id: number; name: string; user: { id: number; firstName: string; lastName: string } } | null;
+  player: { id: number; name: string; position: string; photo: string } | null;
+  isGhost: boolean;
+  isAutoDrafted: boolean;
+  pickedAt: string | null;
+}
+
+export interface DraftFullResponse {
+  draft: DraftResponse;
+  picks: DraftPick[];
+}
+
+export const useDraftPresence = (draftId: string | undefined) => {
+  return useQuery<{ connectedUserIds: number[] }>({
+    queryKey: ['draftPresence', draftId],
+    queryFn: async () => {
+      const res = await axios.get(apiConfig.endpoints.drafts.presence(draftId!), {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      return res.data;
+    },
+    enabled: !!draftId,
+    refetchInterval: 5000,
+  });
+};
+
 export const useDraft = (leagueId: number, season: number | undefined) => {
-  return useQuery<DraftResponse | null>({
+  return useQuery<DraftFullResponse | null>({
     queryKey: ['draft', leagueId, season],
     queryFn: async () => {
       const res = await axios.get(apiConfig.endpoints.drafts.get(leagueId, season!), {
@@ -27,6 +58,6 @@ export const useDraft = (leagueId: number, season: number | undefined) => {
       return res.data ?? null;
     },
     enabled: !!leagueId && !!season,
-    refetchInterval: 30000, // poll every 30s to detect when room opens
+    refetchInterval: 30000,
   });
 };

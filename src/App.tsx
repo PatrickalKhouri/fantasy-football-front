@@ -10,6 +10,7 @@ import Welcome from './pages/Welcome';
 import FantasyLeague from './pages/FantasyLeague';
 import { useGetCurrentUser } from './api/authQueries';
 import AcceptInvite from './pages/AcceptInvite';
+import DraftRoomPage from './pages/DraftRoomPage';
 const App: React.FC = () => {
   const { data: currentUser } = useGetCurrentUser();
   return (
@@ -32,6 +33,7 @@ const App: React.FC = () => {
               } />
               <Route path="/welcome" element={<Welcome />} /> 
               <Route path="/fantasy-league/:fantasyLeagueId" element={<FantasyLeague currentUserId={currentUser?.id as number} />} />
+              <Route path="/draft/:leagueId/:season/:draftId" element={<DraftRoomPage />} />
             </Route>
 
             {/* Fallback redirect */}
