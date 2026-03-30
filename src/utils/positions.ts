@@ -1,11 +1,10 @@
 // src/utils/positions.ts
 export type RosterSlot = 'DEF' | 'MEI' | 'ATA';
 
-export function mapPositionToSlot(position: string): RosterSlot {
-  // backend sends "Defense" | "Midfielder" | "Attacker"
-  if (position === 'Defense') return 'DEF';
-  if (position === 'Midfielder') return 'MEI';
-  if (position === 'Attacker') return 'ATA';
-  // default safe fallback
-  return 'MEI';
+export function mapPositionToSlot(position: string): RosterSlot | null {
+  const n = position.toLowerCase();
+  if (n === 'defense') return 'DEF';
+  if (n === 'midfielder') return 'MEI';
+  if (['attacker', 'forward', 'striker', 'winger'].includes(n)) return 'ATA';
+  return null;
 }

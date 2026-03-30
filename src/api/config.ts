@@ -36,6 +36,7 @@ const endpoints = {
     get: (seasonId: string) => `${API_BASE_URL}/fantasy-league-seasons/${seasonId}`,
     activate: (seasonId: string) => `${API_BASE_URL}/fantasy-league-seasons/${seasonId}/activate`,
     update: (id: number) => `${API_BASE_URL}/fantasy-league-seasons/${id}`,
+    scheduleDraft: (seasonId: string) => `${API_BASE_URL}/fantasy-league-seasons/${seasonId}/schedule-draft`,
   },
   rosterSettings: {
     update: (id: number) => `${API_BASE_URL}/roster-settings/${id}`,
@@ -49,6 +50,18 @@ const endpoints = {
   players: {
     getAll: `${API_BASE_URL}/players`,
     getFilters: `${API_BASE_URL}/players/filters/data`,
+  },
+  drafts: {
+    get: (leagueId: number, season: number) => `${API_BASE_URL}/drafts/${leagueId}/${season}`,
+    presence: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/presence`,
+    resetTimer: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/reset-timer`,
+    freeze: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/freeze`,
+    unfreeze: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/unfreeze`,
+    frozen: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/frozen`,
+  },
+  draftOrder: {
+    get: (leagueId: number, season: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order?season=${season}`,
+    set: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order`,
   },
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,

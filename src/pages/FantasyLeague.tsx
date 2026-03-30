@@ -12,6 +12,7 @@ import PlayersList from '../components/PlayersList';
 import { TeamTab } from '../components/TeamTabComponent';
 import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
 import Loading from '../components/Loading';
+import DraftTab from '../components/DraftTab';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
@@ -85,7 +86,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         <LeagueTabs selected={selectedTab} onChange={setSelectedTab} />
 
         <Box mt={4}>
-          {selectedTab === 'draft' && <div>Draft content</div>}
+          {selectedTab === 'draft' && <DraftTab fantasyLeague={fantasyLeague} currentUserId={currentUserId} />}
           {selectedTab === 'team' && <TeamTab seasonYear={2023} userTeam={userTeam} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} seasonYear={2023} userTeamId={userTeam.id} />}
