@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
+
+const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
 
 export type DraftStatus = 'PENDING' | 'LIVE' | 'COMPLETED' | 'CANCELLED';
 
@@ -47,6 +49,24 @@ export const useDraftPresence = (draftId: string | undefined) => {
     refetchInterval: 5000,
   });
 };
+
+export const useResetDraftTimer = () =>
+  useMutation({
+    mutationFn: (draftId: string) =>
+      axios.post(apiConfig.endpoints.drafts.resetTimer(draftId), {}, { headers: authHeader() }),
+  });
+
+export const useFreezeDraft = () =>
+  useMutation({
+    mutationFn: (draftId: string) =>
+      axios.post(apiConfig.endpoints.drafts.freeze(draftId), {}, { headers: authHeader() }),
+  });
+
+export const useUnfreezeDraft = () =>
+  useMutation({
+    mutationFn: (draftId: string) =>
+      axios.post(apiConfig.endpoints.drafts.unfreeze(draftId), {}, { headers: authHeader() }),
+  });
 
 export const useDraft = (leagueId: number, season: number | undefined) => {
   return useQuery<DraftFullResponse | null>({

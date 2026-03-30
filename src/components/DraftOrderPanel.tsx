@@ -23,6 +23,7 @@ interface Props {
   numberOfTeams: number;
   isOwner: boolean;
   teams: FantasyLeagueTeamsResponse[];
+  connectedUserIds?: number[];
 }
 
 const getErrorMessage = (err: unknown): string => {
@@ -48,6 +49,7 @@ export default function DraftOrderPanel({
   numberOfTeams,
   isOwner,
   teams,
+  connectedUserIds,
 }: Props) {
   // picks: pickPosition (1-based) → userTeamId (0 = unassigned)
   const [picks, setPicks] = useState<Record<number, number>>({});
@@ -136,6 +138,8 @@ export default function DraftOrderPanel({
         {Array.from({ length: totalSlots }, (_, i) => i + 1).map((position) => {
           const isGhostSlot = position > joinedTeamCount;
           const assignedTeamId = picks[position] ?? 0;
+          const assignedTeam = teams.find((t) => t.id === assignedTeamId);
+          const isOnline = !isGhostSlot && assignedTeam != null && (connectedUserIds?.includes(assignedTeam.user.id) ?? false);
 
           return (
             <Stack
@@ -151,6 +155,17 @@ export default function DraftOrderPanel({
                 opacity: isGhostSlot ? 0.5 : 1,
               }}
             >
+              {connectedUserIds !== undefined && (
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: isGhostSlot ? 'transparent' : isOnline ? 'success.main' : 'grey.400',
+                    flexShrink: 0,
+                  }}
+                />
+              )}
               <Typography
                 variant="body2"
                 fontWeight={700}

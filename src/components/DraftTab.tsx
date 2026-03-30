@@ -7,7 +7,7 @@ import SeasonStatusCard, { LeagueStatus } from './SeasonStatusCard';
 import DraftOrderPanel from './DraftOrderPanel';
 import DraftSettingsForm from './DraftSettingsForm';
 import DraftSchedulePanel from './DraftSchedulePanel';
-import { useDraft } from '../api/draftQueries';
+import { useDraft, useDraftPresence } from '../api/draftQueries';
 
 interface Props {
   fantasyLeague: FantasyLeague;
@@ -21,11 +21,11 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
   const { data: season, isLoading: loadingSeason, refetch: refetchSeason } = useFantasyLeagueSeasons(leagueId);
   const { data: draftSettings, refetch: refetchDraftSettings } = useDraftSettings(leagueId);
   const { data: teams, isLoading: loadingTeams } = useFantasyLeagueTeams(leagueId);
-  const { data: draft } = useDraft(leagueId, season?.seasonYear);
+  const { data: draftData } = useDraft(leagueId, season?.seasonYear);
+  const { data: presenceData } = useDraftPresence(draftData?.draft?.id);
 
   const [draftFormValues, setDraftFormValues] = useState(draftSettings);
 
-  // Sync form values when settings load
   React.useEffect(() => {
     if (draftSettings) setDraftFormValues(draftSettings);
   }, [draftSettings]);
@@ -41,7 +41,12 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
   const status = season?.status as LeagueStatus | undefined;
   const seasonYear = season?.seasonYear;
 
-  // ACTIVATED_PRESEASON: show draft settings + draft order setup
+  const enterRoom = () => {
+    if (!draftData?.draft) return;
+    window.open(`/draft/${leagueId}/${seasonYear}/${draftData.draft.id}`, '_blank');
+  };
+
+  // ACTIVATED_PRESEASON: draft settings + order setup
   if (status === LeagueStatus.ACTIVATED_PRESEASON) {
     return (
       <Box>
@@ -93,7 +98,7 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
     );
   }
 
-  // DRAFT_SCHEDULED: order panel (may be locked) + status card + enter room if draft exists
+  // DRAFT_SCHEDULED: status card + enter room button (if room is open) + order panel
   if (status === LeagueStatus.DRAFT_SCHEDULED) {
     return (
       <Box>
@@ -104,7 +109,7 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
           draftSettings={draftSettings}
         />
 
-        {draft && (
+        {draftData?.draft && (
           <>
             <Divider sx={{ my: 3 }} />
             <Box display="flex" flexDirection="column" alignItems="center" gap={1} py={2}>
@@ -115,9 +120,9 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
                 variant="contained"
                 size="large"
                 sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 700, px: 4 }}
-                disabled
+                onClick={enterRoom}
               >
-                Entrar na Sala do Draft (em breve)
+                Entrar na Sala do Draft
               </Button>
             </Box>
           </>
@@ -139,29 +144,51 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
     );
   }
 
-  // DRAFT_LIVE: entry point to draft room (Phase 7)
+  // DRAFT_LIVE: enter button at top + order panel below
   if (status === LeagueStatus.DRAFT_LIVE) {
     return (
-      <Box display="flex" flexDirection="column" alignItems="center" py={6} gap={2}>
-        <Typography variant="h5" fontWeight={700}>
-          O Draft está ao vivo!
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Clique para entrar na sala do draft e fazer suas escolhas.
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 700, px: 4 }}
-          disabled
-        >
-          Entrar no Draft (em breve)
-        </Button>
+      <Box>
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2} py={2}>
+          <Box>
+            <Typography variant="h6" fontWeight={700}>
+              O Draft está ao vivo!
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Clique para entrar na sala e fazer suas escolhas.
+            </Typography>
+          </Box>
+          {draftData?.draft ? (
+            <Button
+              variant="contained"
+              size="large"
+              sx={{ borderRadius: 50, textTransform: 'none', fontWeight: 700, px: 4 }}
+              onClick={enterRoom}
+            >
+              Entrar no Draft
+            </Button>
+          ) : (
+            <CircularProgress size={24} />
+          )}
+        </Box>
+
+        {seasonYear && (
+          <>
+            <Divider sx={{ my: 2 }} />
+            <DraftOrderPanel
+              leagueId={leagueId}
+              season={seasonYear}
+              numberOfTeams={fantasyLeague.numberOfTeams}
+              isOwner={isOwner}
+              teams={teams ?? []}
+              connectedUserIds={presenceData?.connectedUserIds ?? []}
+            />
+          </>
+        )}
       </Box>
     );
   }
 
-  // DRAFT_DONE: confirmation + placeholder for picks history (Phase 8)
+  // DRAFT_DONE
   if (status === LeagueStatus.DRAFT_DONE) {
     return (
       <Box display="flex" flexDirection="column" alignItems="center" py={6} gap={2}>
@@ -171,6 +198,16 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
         <Typography variant="body2" color="text.secondary">
           Todos os times foram montados. Acesse a aba Time para ver seu elenco.
         </Typography>
+        {draftData?.draft && (
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: 'none', borderRadius: 4 }}
+            onClick={enterRoom}
+          >
+            Ver histórico de escolhas
+          </Button>
+        )}
       </Box>
     );
   }

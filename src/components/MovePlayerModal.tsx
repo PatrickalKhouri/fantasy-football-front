@@ -92,10 +92,11 @@ export default function MovePlayerModal({
   const legalTargets = slots
   .filter(s => s.index !== originSnapshot.index)
   .filter(s => {
+    if (!originPos) return false;
     if (!s.player) return s.allowedPositions.includes(originPos);
     const targetPos = mapPositionToSlot(s.player.position);
     const originCanGoThere = s.allowedPositions.includes(originPos);
-    const targetCanComeHere = originSnapshot.allowedPositions.includes(targetPos);
+    const targetCanComeHere = targetPos ? originSnapshot.allowedPositions.includes(targetPos) : false;
     return originCanGoThere && targetCanComeHere;
   });
 

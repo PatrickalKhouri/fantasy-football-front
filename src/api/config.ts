@@ -54,6 +54,10 @@ const endpoints = {
   drafts: {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/drafts/${leagueId}/${season}`,
     presence: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/presence`,
+    resetTimer: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/reset-timer`,
+    freeze: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/freeze`,
+    unfreeze: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/unfreeze`,
+    frozen: (draftId: string) => `${API_BASE_URL}/drafts/${draftId}/frozen`,
   },
   draftOrder: {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order?season=${season}`,

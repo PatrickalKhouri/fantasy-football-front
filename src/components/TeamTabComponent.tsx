@@ -23,6 +23,7 @@ interface Props {
   }
 
   export const TeamTab: React.FC<Props> = ({ userTeam, fantasyLeague, seasonYear, initialRound = 1 }) => {
+    console.log('[TeamTab] seasonYear:', seasonYear);
     const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [round, setRound] = useState(initialRound);

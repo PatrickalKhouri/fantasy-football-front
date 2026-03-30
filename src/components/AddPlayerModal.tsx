@@ -57,7 +57,7 @@ export default function AddPlayerModal({
   // Only empty slots that accept this player's position (or FLEX that allows it)
   const emptyLegalTargets = useMemo(
     () =>
-      slots.filter((s) => !s.player && s.allowedPositions.includes(playerSlot)),
+      playerSlot ? slots.filter((s) => !s.player && s.allowedPositions.includes(playerSlot)) : [],
     [slots, playerSlot]
   );
 
