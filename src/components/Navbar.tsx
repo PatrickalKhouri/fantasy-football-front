@@ -1,10 +1,12 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Chip } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCurrentSeason } from '../api/currentSeasonQueries';
 
 const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { data: currentSeason } = useCurrentSeason();
 
   return (
     <AppBar 
@@ -33,6 +35,15 @@ const Navbar: React.FC = () => {
           </Typography>
         </Link>
         
+        {/* Current season badge */}
+        {currentSeason && (
+          <Chip
+            label={`Temporada ${currentSeason.year}`}
+            size="small"
+            sx={{ fontWeight: 'bold', backgroundColor: '#f0f0f0', color: '#1a1a1a' }}
+          />
+        )}
+
         {/* Conditional rendering based on auth */}
         {user ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

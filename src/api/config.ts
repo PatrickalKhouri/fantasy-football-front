@@ -63,6 +63,7 @@ const endpoints = {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order?season=${season}`,
     set: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order`,
   },
+  currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,
     deletePlayer: (id: number) => `${API_BASE_URL}/user-team-rosters/${id}`,

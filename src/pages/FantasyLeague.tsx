@@ -13,6 +13,8 @@ import { TeamTab } from '../components/TeamTabComponent';
 import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
 import Loading from '../components/Loading';
 import DraftTab from '../components/DraftTab';
+import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
+import { useCurrentSeason } from '../api/currentSeasonQueries';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
@@ -30,6 +32,9 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
 
   const { mutate: inviteUserToFantasyLeague, isPending: isInvitingUser, isError: isInvitingUserError, error: invitingUserError } = useInviteUserToFantasyLeague(Number(fantasyLeagueId));
   const { data: userTeam, isLoading: isLoadingUserTeam, isError: isLoadingUserTeamError, error: errorUserTeam } = useFindUserFantasyLeagueTeam(currentUserId, Number(fantasyLeagueId));
+  const { data: fantasyLeagueSeason } = useFantasyLeagueSeasons(Number(fantasyLeagueId));
+  const { data: currentSeasonData } = useCurrentSeason();
+  const seasonYear = fantasyLeagueSeason?.seasonYear ?? currentSeasonData?.year ?? new Date().getFullYear();
 
 
   const handleInvite = (email: string) => {
@@ -87,9 +92,9 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
 
         <Box mt={4}>
           {selectedTab === 'draft' && <DraftTab fantasyLeague={fantasyLeague} currentUserId={currentUserId} />}
-          {selectedTab === 'team' && <TeamTab seasonYear={2023} userTeam={userTeam} fantasyLeague={fantasyLeague} />}
+          {selectedTab === 'team' && <TeamTab seasonYear={seasonYear} userTeam={userTeam} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
-          {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} seasonYear={2023} userTeamId={userTeam.id} />}
+          {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} seasonYear={seasonYear} userTeamId={userTeam.id} />}
           {selectedTab === 'trades' && <div>Trades UI</div>}
           {selectedTab === 'scores' && <div>Scores table</div>}
         </Box>
