@@ -1,6 +1,6 @@
 // src/components/TeamTab.tsx
 
-import { Typography, Stack, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert } from '@mui/material';
+import { Typography, Stack, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert, Chip, Box } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useRoster } from './userTeamRosterQueries';
@@ -11,7 +11,7 @@ import PlayerSelectModal from './PlayerSelectModal';
 import MovePlayerModal from './MovePlayerModal';
 import { Slot } from './userTeamRosterQueries';
 import { RosterSlotCard } from './SlotCard'
-import { FantasyLeague } from '../api/fantasyLeagueQueries';
+import { FantasyLeague, useFantasyLeagueTeams, FantasyLeagueTeamsResponse } from '../api/fantasyLeagueQueries';
 import { UserTeam } from '../api/userTeamsQueries';
 import Loading from './Loading';
 
@@ -33,10 +33,14 @@ interface Props {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
     const [selectedPlayerName, setSelectedPlayerName] = useState<string | null>(null);
+    const [selectedTeamId, setSelectedTeamId] = useState<number>(userTeam.id);
 
-    
+    const { data: leagueTeams } = useFantasyLeagueTeams(fantasyLeague.id);
+    const isViewingOwnTeam = selectedTeamId === userTeam.id;
+    const viewedTeam = leagueTeams?.find((t: FantasyLeagueTeamsResponse) => t.id === selectedTeamId);
 
     const handleSlotClick = (slot: Slot) => {
+      if (!isViewingOwnTeam) return;
       if (slot.player) {
         setOriginIndex(slot.index);
         setMoveOpen(true);
@@ -47,7 +51,7 @@ interface Props {
     };
     const userTeamId = userTeam.id;
 
-    const { data: slots, isLoading, refetch, isError, error } = useRoster({ userTeamId, seasonYear });
+    const { data: slots, isLoading, refetch, isError, error } = useRoster({ userTeamId: selectedTeamId, seasonYear });
 
     const { mutate: removePlayer, isPending: isRemovingPlayer,} = useRemovePlayer({
       onSuccess: refetch,
@@ -85,6 +89,29 @@ interface Props {
 
     return (
       <Stack spacing={3}>
+        {leagueTeams && leagueTeams.length > 1 && (
+          <Box sx={{ overflowX: 'auto', pb: 1 }}>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: 'nowrap' }}>
+              {leagueTeams.map((team: FantasyLeagueTeamsResponse) => (
+                <Chip
+                  key={team.id}
+                  label={team.id === userTeam.id ? `${team.name} (Meu Time)` : team.name}
+                  onClick={() => setSelectedTeamId(team.id)}
+                  color="primary"
+                  variant={team.id === selectedTeamId ? 'filled' : 'outlined'}
+                  sx={{ whiteSpace: 'nowrap' }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )}
+
+        {!isViewingOwnTeam && viewedTeam && (
+          <Typography variant="body2" color="text.secondary">
+            Time de {viewedTeam.user.firstName} {viewedTeam.user.lastName}
+          </Typography>
+        )}
+
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h6" fontWeight="bold">
             Rodada {round}
@@ -102,75 +129,86 @@ interface Props {
             <Typography variant="h6" fontWeight="bold">Titulares</Typography>
             <Stack spacing={1}>
               {starters.map((slot: Slot) => (
-                <Paper onClick={() => handleSlotClick(slot)} sx={{ cursor: 'pointer' }}>
+                <Paper
+                  onClick={() => handleSlotClick(slot)}
+                  sx={{ cursor: isViewingOwnTeam ? 'pointer' : 'default' }}
+                >
                   <SlotCard
                     key={slot.index}
                     slotType={slot.slotType}
                     allowedPositions={slot.allowedPositions as RosterSlotCard[]}
                     player={slot.player}
-                    onRemovePlayer={() => confirmRemovePlayer(slot.id, slot.player?.name)}
+                    onRemovePlayer={isViewingOwnTeam ? () => confirmRemovePlayer(slot.id, slot.player?.name) : undefined}
                     slot={slot}
                   />
                 </Paper>
               ))}
             </Stack>
-  
+
             <Typography variant="h6" fontWeight="bold" mt={3}>Reservas</Typography>
             <Stack spacing={1}>
               {bench.map((slot: Slot) => (
-                <Paper onClick={() => handleSlotClick(slot)} sx={{ cursor: 'pointer' }}>
+                <Paper
+                  onClick={() => handleSlotClick(slot)}
+                  sx={{ cursor: isViewingOwnTeam ? 'pointer' : 'default' }}
+                >
                   <SlotCard
                     key={slot.index}
                     slotType={slot.slotType}
                     allowedPositions={slot.allowedPositions as RosterSlotCard[]}
                     player={slot.player}
-                    onRemovePlayer={() => confirmRemovePlayer(slot.id, slot.player?.name)}
+                    onRemovePlayer={isViewingOwnTeam ? () => confirmRemovePlayer(slot.id, slot.player?.name) : undefined}
                     slot={slot}
                   />
                 </Paper>
               ))}
             </Stack>
           </>
-      <PlayerSelectModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSelectPlayer={(player) => {
-          setIsModalOpen(false);
-        }}
-        fantasyLeague={fantasyLeague}
-        allowedPositions={selectedSlot?.allowedPositions || ['DEF', 'MEI', 'ATA']}
-        userTeamId={userTeamId}
-        seasonYear={seasonYear}
-        slot={selectedSlot?.slot}
-        slotType={selectedSlot?.slotType}
-        refetch={refetch}
-        targetSlotIndex={selectedSlot?.index}
-      />
 
-      {originIndex !== null && (
-        <MovePlayerModal
-          open={moveOpen}
-          onClose={() => setMoveOpen(false)}
-          slots={slots || []}
-          originIndex={originIndex}
-          userTeamId={userTeam.id}
-          seasonYear={seasonYear}
-          refetch={refetch}
-        />
+      {isViewingOwnTeam && (
+        <>
+          <PlayerSelectModal
+            open={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSelectPlayer={(player) => {
+              setIsModalOpen(false);
+            }}
+            fantasyLeague={fantasyLeague}
+            allowedPositions={selectedSlot?.allowedPositions || ['DEF', 'MEI', 'ATA']}
+            userTeamId={userTeamId}
+            seasonYear={seasonYear}
+            slot={selectedSlot?.slot}
+            slotType={selectedSlot?.slotType}
+            refetch={refetch}
+            targetSlotIndex={selectedSlot?.index}
+          />
+
+          {originIndex !== null && (
+            <MovePlayerModal
+              open={moveOpen}
+              onClose={() => setMoveOpen(false)}
+              slots={slots || []}
+              originIndex={originIndex}
+              userTeamId={userTeam.id}
+              seasonYear={seasonYear}
+              refetch={refetch}
+            />
+          )}
+
+          <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+            <DialogTitle>Confirmar remoção</DialogTitle>
+            <DialogContent>
+              Tem certeza que deseja liberar {selectedPlayerName || 'este jogador'}?
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
+              <Button onClick={handleConfirmRemove} color="error" variant="contained">
+                Liberar
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
       )}
-
-<Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Confirmar remoção</DialogTitle>
-        <DialogContent>
-          Tem certeza que deseja liberar {selectedPlayerName || 'este jogador'}?
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
-          <Button onClick={handleConfirmRemove} color="error" variant="contained">
-            Liberar
-          </Button>
-        </DialogActions>
-      </Dialog>
       </Stack>
     );
   };
