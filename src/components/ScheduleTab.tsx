@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import {
   Box,
   CircularProgress,
+  Divider,
   Stack,
   Typography,
   Button,
 } from '@mui/material';
 import { useScheduleBySeason } from '../api/fantasyMatchupQueries';
 import MatchupCard from './MatchupCard';
+import PlayoffBracket from './PlayoffBracket';
 
 interface Props {
   seasonId: string | undefined;
@@ -74,6 +76,13 @@ const ScheduleTab: React.FC<Props> = ({ seasonId }) => {
           ))}
         </Stack>
       </Box>
+
+      <Divider sx={{ my: 4 }} />
+
+      <Typography variant="h6" fontWeight={700} mb={2}>
+        Playoffs
+      </Typography>
+      <PlayoffBracket seasonId={seasonId} />
     </Box>
   );
 };
