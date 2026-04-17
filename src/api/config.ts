@@ -63,6 +63,13 @@ const endpoints = {
     get: (leagueId: number, season: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order?season=${season}`,
     set: (leagueId: number) => `${API_BASE_URL}/fantasy-leagues/${leagueId}/draft-order`,
   },
+  fantasyMatchups: {
+    bySeason: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}`,
+    byRound: (seasonId: string, round: number) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}/round/${round}`,
+    byTeam: (seasonId: string, teamId: number) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}/team/${teamId}`,
+    validateConfig: `${API_BASE_URL}/fantasy-matchups/validate-config`,
+    delete: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}`,
+  },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,
