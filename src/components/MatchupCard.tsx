@@ -5,9 +5,10 @@ import { FantasyMatchupDto } from '../api/fantasyMatchupQueries';
 interface Props {
   matchup: FantasyMatchupDto;
   highlighted?: boolean;
+  onClick?: () => void;
 }
 
-const MatchupCard: React.FC<Props> = ({ matchup, highlighted = false }) => {
+const MatchupCard: React.FC<Props> = ({ matchup, highlighted = false, onClick }) => {
   const homeName = matchup.homeTeamName ?? 'Ghost';
   const awayName = matchup.awayTeamName ?? 'Ghost';
 
@@ -47,6 +48,7 @@ const MatchupCard: React.FC<Props> = ({ matchup, highlighted = false }) => {
 
   return (
     <Box
+      onClick={onClick}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -57,6 +59,10 @@ const MatchupCard: React.FC<Props> = ({ matchup, highlighted = false }) => {
         border: highlighted ? '2px solid' : '1px solid',
         borderColor: highlighted ? 'primary.main' : 'divider',
         gap: 1,
+        ...(onClick && {
+          cursor: 'pointer',
+          '&:hover': { bgcolor: highlighted ? 'primary.100' : 'action.hover' },
+        }),
       }}
     >
       <Typography

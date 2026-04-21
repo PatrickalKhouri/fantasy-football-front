@@ -12,13 +12,15 @@ import {
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useScheduleBySeason, ScheduleByRoundDto } from '../api/fantasyMatchupQueries';
+import { useScheduleBySeason, ScheduleByRoundDto, FantasyMatchupDto } from '../api/fantasyMatchupQueries';
 import MatchupCard from './MatchupCard';
+import MatchupDetailModal from './MatchupDetailModal';
 import PlayoffBracket from './PlayoffBracket';
 
 interface Props {
   seasonId: string | undefined;
   userTeamId?: number;
+  seasonYear?: number;
 }
 
 function detectCurrentRound(schedule: ScheduleByRoundDto[]): number {
@@ -30,9 +32,10 @@ function detectCurrentRound(schedule: ScheduleByRoundDto[]): number {
   return active?.roundNumber ?? schedule[schedule.length - 1].roundNumber;
 }
 
-const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId }) => {
+const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId, seasonYear }) => {
   const { data: schedule, isLoading } = useScheduleBySeason(seasonId);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
+  const [selectedMatchup, setSelectedMatchup] = useState<FantasyMatchupDto | null>(null);
 
   const currentRoundNumber = useMemo(
     () => (schedule && schedule.length > 0 ? detectCurrentRound(schedule) : null),
@@ -126,7 +129,12 @@ const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId }) => {
       <Box mt={3}>
         <Stack spacing={1.5}>
           {sortedMatchups.map((matchup) => (
-            <MatchupCard key={matchup.id} matchup={matchup} highlighted={isMyMatchup(matchup)} />
+            <MatchupCard
+              key={matchup.id}
+              matchup={matchup}
+              highlighted={isMyMatchup(matchup)}
+              onClick={matchup.status !== 'bye' ? () => setSelectedMatchup(matchup) : undefined}
+            />
           ))}
         </Stack>
       </Box>
@@ -137,6 +145,13 @@ const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId }) => {
         Playoffs
       </Typography>
       <PlayoffBracket seasonId={seasonId} />
+
+      <MatchupDetailModal
+        matchup={selectedMatchup}
+        onClose={() => setSelectedMatchup(null)}
+        userTeamId={userTeamId}
+        seasonYear={seasonYear}
+      />
     </Box>
   );
 };
