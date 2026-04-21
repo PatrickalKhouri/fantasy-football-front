@@ -13,6 +13,7 @@ import { TeamTab } from '../components/TeamTabComponent';
 import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
 import Loading from '../components/Loading';
 import DraftTab from '../components/DraftTab';
+import ScheduleTab from '../components/ScheduleTab';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { useCurrentSeason } from '../api/currentSeasonQueries';
 
@@ -93,6 +94,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         <Box mt={4}>
           {selectedTab === 'draft' && <DraftTab fantasyLeague={fantasyLeague} currentUserId={currentUserId} />}
           {selectedTab === 'team' && <TeamTab seasonYear={seasonYear} userTeam={userTeam} fantasyLeague={fantasyLeague} />}
+          {selectedTab === 'schedule' && <ScheduleTab seasonId={fantasyLeagueSeason?.id} userTeamId={userTeam?.id} />}
           {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} seasonYear={seasonYear} userTeamId={userTeam.id} />}
           {selectedTab === 'trades' && <div>Trades UI</div>}

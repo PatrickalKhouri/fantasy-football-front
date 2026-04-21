@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import { useUpdateFantasyLeagueSeason } from '../api/fantasyLeagueSeasonsMutation';
 import { Snackbar, Alert } from '@mui/material';
-import { UUID } from 'crypto';
 
 interface Props {
   values: any;
@@ -46,9 +45,9 @@ const FantasyLeagueSeasonForm: React.FC<Props> = ({ values, onChange, id, refetc
             value={values.numberOfTeams ?? ''}
             onChange={(e) => onChange('numberOfTeams', e.target.value)}
           >
-            {[...Array(19)].map((_, i) => (
-              <MenuItem key={i} value={i + 2}>
-                {i + 2}
+            {Array.from({ length: 13 }, (_, i) => i + 8).map((n) => (
+              <MenuItem key={n} value={n}>
+                {n}
               </MenuItem>
             ))}
           </Select>
@@ -121,7 +120,7 @@ const FantasyLeagueSeasonForm: React.FC<Props> = ({ values, onChange, id, refetc
             value={values.playoffTeams ?? ''}
             onChange={(e) => onChange('playoffTeams', e.target.value)}
           >
-            {[4, 5, 6, 7, 8].map((n) => (
+            {[4, 6, 7, 8].map((n) => (
               <MenuItem key={n} value={n}>
                 {n}
               </MenuItem>
