@@ -72,6 +72,10 @@ const endpoints = {
     validateConfig: `${API_BASE_URL}/fantasy-matchups/validate-config`,
     delete: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}`,
   },
+  matches: {
+    byRound: (seasonYear: number, roundNumber: number) =>
+      `${API_BASE_URL}/matches/by-round?seasonYear=${seasonYear}&roundNumber=${roundNumber}`,
+  },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,

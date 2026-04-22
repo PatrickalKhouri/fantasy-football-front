@@ -14,6 +14,8 @@ import { RosterSlotCard } from './SlotCard'
 import { FantasyLeague, useFantasyLeagueTeams, FantasyLeagueTeamsResponse } from '../api/fantasyLeagueQueries';
 import { UserTeam } from '../api/userTeamsQueries';
 import Loading from './Loading';
+import { useRealMatchesByRound } from '../api/matchesQueries';
+import { getOpponentForTeam } from '../utils/matchUtils';
 
 interface Props {
     userTeam: UserTeam;
@@ -36,6 +38,7 @@ interface Props {
     const [selectedTeamId, setSelectedTeamId] = useState<number>(userTeam.id);
 
     const { data: leagueTeams } = useFantasyLeagueTeams(fantasyLeague.id);
+    const { data: realMatches } = useRealMatchesByRound(seasonYear, round);
     const isViewingOwnTeam = selectedTeamId === userTeam.id;
     const viewedTeam = leagueTeams?.find((t: FantasyLeagueTeamsResponse) => t.id === selectedTeamId);
 
@@ -140,6 +143,7 @@ interface Props {
                     player={slot.player}
                     onRemovePlayer={isViewingOwnTeam ? () => confirmRemovePlayer(slot.id, slot.player?.name) : undefined}
                     slot={slot}
+                    opponentInfo={slot.player?.team?.id != null && realMatches ? getOpponentForTeam(realMatches, slot.player.team.id) : null}
                   />
                 </Paper>
               ))}
@@ -159,6 +163,7 @@ interface Props {
                     player={slot.player}
                     onRemovePlayer={isViewingOwnTeam ? () => confirmRemovePlayer(slot.id, slot.player?.name) : undefined}
                     slot={slot}
+                    opponentInfo={slot.player?.team?.id != null && realMatches ? getOpponentForTeam(realMatches, slot.player.team.id) : null}
                   />
                 </Paper>
               ))}

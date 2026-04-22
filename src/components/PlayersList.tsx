@@ -41,6 +41,8 @@ import { FantasyLeague } from '../api/fantasyLeagueQueries';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { LeagueStatus } from './SeasonStatusCard';
 import Loading from './Loading';
+import { useRealMatchesByRound } from '../api/matchesQueries';
+import { getOpponentForTeam, formatMatchTime } from '../utils/matchUtils';
 
 
 const POSITION_OPTIONS = [
@@ -69,6 +71,7 @@ interface PlayersListProps {
   fantasyLeague: FantasyLeague;
   seasonYear: number;
   userTeamId: number;
+  currentRound?: number;
 }
 
 const POST_DRAFT_STATUSES: LeagueStatus[] = [
@@ -78,11 +81,15 @@ const POST_DRAFT_STATUSES: LeagueStatus[] = [
   LeagueStatus.ARCHIVED,
 ];
 
-const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, userTeamId }) => {
+const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, userTeamId, currentRound }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { data: season } = useFantasyLeagueSeasons(fantasyLeague.id);
+  const { data: realMatches } = useRealMatchesByRound(
+    currentRound ? seasonYear : undefined,
+    currentRound,
+  );
   const draftCompleted = season ? POST_DRAFT_STATUSES.includes(season.status as LeagueStatus) : false;
 
   const [position, setPosition] = useState<string>('ALL');
@@ -277,6 +284,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         <TableCell>Jogador</TableCell>
         <TableCell>Time</TableCell>
         <TableCell>Posição</TableCell>
+        {currentRound && <TableCell>Próx.</TableCell>}
         <TableCell align="right">Gols</TableCell>
         <TableCell align="center">Ação</TableCell>
       </TableRow>
@@ -325,6 +333,23 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
                 player.player_position as keyof typeof POSITIONS_TRANSLATION
               ]}
             </TableCell>
+            {currentRound && (
+              <TableCell>
+                {(() => {
+                  const opp = player.team_id != null && realMatches
+                    ? getOpponentForTeam(realMatches, player.team_id)
+                    : null;
+                  return opp ? (
+                    <Typography variant="caption" color="text.secondary">
+                      x {opp.code} ({opp.isHome ? 'C' : 'V'})
+                      {formatMatchTime(opp.matchDate) && <> · {formatMatchTime(opp.matchDate)}</>}
+                    </Typography>
+                  ) : (
+                    <Typography variant="caption" color="text.disabled">—</Typography>
+                  );
+                })()}
+              </TableCell>
+            )}
             <TableCell align="right">{player.goals}</TableCell>
             <TableCell align="center">
               {!draftCompleted ? (
