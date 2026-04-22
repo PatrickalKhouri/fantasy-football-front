@@ -40,7 +40,7 @@ function assignPicksToSlots(slots: Slot[], myPicks: DraftPick[]): SlotWithNullab
           name: match.player!.name,
           photo: match.player!.photo,
           position: match.player!.position,
-          team: { code: '' },
+          team: { id: 0, name: '', code: '' },
         },
       };
     }

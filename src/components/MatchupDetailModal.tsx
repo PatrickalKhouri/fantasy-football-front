@@ -14,6 +14,8 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { FantasyMatchupDto } from '../api/fantasyMatchupQueries';
 import { useRoster, Slot } from './userTeamRosterQueries';
+import { useRealMatchesByRound, RealMatchDto } from '../api/matchesQueries';
+import { getOpponentForTeam, formatMatchTime } from '../utils/matchUtils';
 
 interface Props {
   matchup: FantasyMatchupDto | null;
@@ -34,9 +36,12 @@ const STATUS_COLORS: Record<string, 'default' | 'warning' | 'success'> = {
   completed: 'success',
 };
 
-function SlotRow({ slot }: { slot: Slot }) {
+function SlotRow({ slot, realMatches }: { slot: Slot; realMatches?: RealMatchDto[] }) {
   const label = slot.allowedPositions[0] ?? '?';
   const hasPlayer = !!slot.player;
+  const opponentInfo = hasPlayer && slot.player.team?.id != null && realMatches
+    ? getOpponentForTeam(realMatches, slot.player.team.id)
+    : null;
 
   return (
     <Box display="flex" alignItems="center" gap={1} py={0.5}>
@@ -44,9 +49,19 @@ function SlotRow({ slot }: { slot: Slot }) {
       {hasPlayer ? (
         <>
           <Avatar src={slot.player.photo} sx={{ width: 24, height: 24 }} />
-          <Typography variant="body2" noWrap>
-            {slot.player.name}
-          </Typography>
+          <Box>
+            <Typography variant="body2" noWrap>
+              {slot.player.name}
+            </Typography>
+            {opponentInfo && (
+              <Typography variant="caption" color="text.disabled" noWrap>
+                x {opponentInfo.code} ({opponentInfo.isHome ? 'C' : 'V'})
+                {formatMatchTime(opponentInfo.matchDate) && (
+                  <> · {formatMatchTime(opponentInfo.matchDate)}</>
+                )}
+              </Typography>
+            )}
+          </Box>
         </>
       ) : (
         <Typography variant="body2" color="text.disabled">
@@ -61,10 +76,12 @@ function RosterColumn({
   teamName,
   teamId,
   seasonYear,
+  realMatches,
 }: {
   teamName: string | null;
   teamId: number | null;
   seasonYear?: number;
+  realMatches?: RealMatchDto[];
 }) {
   const { data: slots, isLoading } = useRoster({ userTeamId: teamId ?? undefined, seasonYear });
 
@@ -91,7 +108,7 @@ function RosterColumn({
             Titulares
           </Typography>
           {starters.map((slot) => (
-            <SlotRow key={slot.index} slot={slot} />
+            <SlotRow key={slot.index} slot={slot} realMatches={realMatches} />
           ))}
 
           <Divider sx={{ my: 1 }} />
@@ -100,7 +117,7 @@ function RosterColumn({
             Reservas
           </Typography>
           {bench.map((slot) => (
-            <SlotRow key={slot.index} slot={slot} />
+            <SlotRow key={slot.index} slot={slot} realMatches={realMatches} />
           ))}
         </>
       )}
@@ -109,6 +126,7 @@ function RosterColumn({
 }
 
 const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, seasonYear }) => {
+  const { data: realMatches } = useRealMatchesByRound(seasonYear, matchup?.roundNumber ?? undefined);
   const userIsAway = userTeamId != null && matchup?.awayTeamId === userTeamId;
 
   const leftTeamId = userIsAway ? matchup!.awayTeamId : matchup?.homeTeamId ?? null;
@@ -155,10 +173,10 @@ const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, sea
         {/* Side-by-side rosters */}
         <Box display="flex" gap={3} flexWrap="wrap">
           <Box flex={1} minWidth={200}>
-            <RosterColumn teamName={leftTeamName} teamId={leftTeamId} seasonYear={seasonYear} />
+            <RosterColumn teamName={leftTeamName} teamId={leftTeamId} seasonYear={seasonYear} realMatches={realMatches} />
           </Box>
           <Box flex={1} minWidth={200}>
-            <RosterColumn teamName={rightTeamName} teamId={rightTeamId} seasonYear={seasonYear} />
+            <RosterColumn teamName={rightTeamName} teamId={rightTeamId} seasonYear={seasonYear} realMatches={realMatches} />
           </Box>
         </Box>
       </DialogContent>

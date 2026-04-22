@@ -10,7 +10,7 @@ export type RosterPlayer = {
   name: string;
   photo: string;
   position: string;
-  team: { code: string };
+  team: { id: number; name: string; code: string };
 }
 
 export type Slot = {
