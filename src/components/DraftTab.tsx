@@ -100,6 +100,13 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
 
   // DRAFT_SCHEDULED: status card + enter room button (if room is open) + order panel
   if (status === LeagueStatus.DRAFT_SCHEDULED) {
+    const draftDateFormatted = draftSettings?.draftDate
+      ? new Date(draftSettings.draftDate).toLocaleString('pt-BR', {
+          day: '2-digit', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit',
+        })
+      : null;
+
     return (
       <Box>
         <SeasonStatusCard
@@ -108,6 +115,13 @@ export default function DraftTab({ fantasyLeague, currentUserId }: Props) {
           refetchSeason={refetchSeason}
           draftSettings={draftSettings}
         />
+
+        {draftDateFormatted && (
+          <Box sx={{ mt: 2, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+            <Typography variant="body2" color="text.secondary">Draft agendado para</Typography>
+            <Typography variant="h6" fontWeight={700}>{draftDateFormatted}</Typography>
+          </Box>
+        )}
 
         {draftData?.draft && (
           <>

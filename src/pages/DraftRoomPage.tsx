@@ -5,6 +5,7 @@ import { useGetCurrentUser } from '../api/authQueries';
 import { useFantasyLeagueTeams, useGetFantasyLeague } from '../api/fantasyLeagueQueries';
 import DraftRoom from '../components/DraftRoom';
 import { useDraft } from '../api/draftQueries';
+import { useDraftSettings } from '../api/useDraftSettings';
 
 export default function DraftRoomPage() {
   const { draftId, leagueId, season } = useParams<{
@@ -21,6 +22,7 @@ export default function DraftRoomPage() {
   const { data: teams } = useFantasyLeagueTeams(leagueIdNum);
   const { data: fantasyLeague } = useGetFantasyLeague(leagueIdNum);
   const { data: draftData, isLoading } = useDraft(leagueIdNum, seasonNum);
+  const { data: draftSettings } = useDraftSettings(leagueIdNum);
 
   if (isLoading || !currentUser) {
     return (
@@ -59,6 +61,7 @@ export default function DraftRoomPage() {
         currentUserId={currentUser.id}
         myUserTeamId={myUserTeam?.id}
         initialData={draftData}
+        draftDate={draftSettings?.draftDate ?? null}
       />
     </Box>
   );
