@@ -183,7 +183,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
     seasonYear,
   });
   
-  if (isLoading || isLoadingPlayers || loadingFilters) return <Loading message="Carregando jogadores..." fullScreen />;
+  if (isLoading || (isLoadingPlayers && !data) || loadingFilters) return <Loading message="Carregando jogadores..." fullScreen />;
 
   if (isRemovingPlayer) return <Loading message="Removendo jogador..." />;
 

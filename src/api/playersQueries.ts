@@ -65,6 +65,7 @@ export const usePlayers = ({
   return useQuery<PlayerResponse>({
     queryKey: ['players', { position, search, page, limit, sortBy, order, leagueId, fantasyLeagueId, onlyFreeAgents, teamId }],
     enabled: leagueId != null,
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const response = await axios.get(`${apiConfig.endpoints.players.getAll}`, {
         params: { position, search, page, limit, sortBy, order, leagueId, fantasyLeagueId, onlyFreeAgents, teamId },
