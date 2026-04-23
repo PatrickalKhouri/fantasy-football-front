@@ -19,6 +19,12 @@ interface Props {
   refetchDraftSettings: () => void;
 }
 
+const toLocalDatetimeValue = (isoString: string): string => {
+  const date = new Date(isoString);
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+};
+
 const DraftSettingsForm: React.FC<Props> = ({
   values,
   onChange,
@@ -56,8 +62,8 @@ const DraftSettingsForm: React.FC<Props> = ({
         <TextField
           fullWidth
           type="datetime-local"
-          value={values.draftDate ? values.draftDate.slice(0, 16) : ''}
-          onChange={(e) => onChange('draftDate', e.target.value)}
+          value={values.draftDate ? toLocalDatetimeValue(values.draftDate) : ''}
+          onChange={(e) => onChange('draftDate', new Date(e.target.value).toISOString())}
         />
       </Box>
 

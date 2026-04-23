@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -30,6 +30,26 @@ interface Props {
   currentUserId: number;
   myUserTeamId: number | undefined;
   initialData: DraftFullResponse | null;
+  draftDate: string | null;
+}
+
+function useCountdown(targetIso: string | null): string {
+  const [label, setLabel] = useState('');
+  useEffect(() => {
+    if (!targetIso) return;
+    const tick = () => {
+      const diff = new Date(targetIso).getTime() - Date.now();
+      if (diff <= 0) { setLabel('Iniciando...'); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setLabel([h > 0 ? `${h}h` : null, `${String(m).padStart(2, '0')}min`, `${String(s).padStart(2, '0')}s`].filter(Boolean).join(' '));
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [targetIso]);
+  return label;
 }
 
 export default function DraftRoom({
@@ -40,7 +60,9 @@ export default function DraftRoom({
   currentUserId,
   myUserTeamId,
   initialData,
+  draftDate,
 }: Props) {
+  const countdown = useCountdown(draftDate);
   const { draftState, isConnected, error, isComplete, connectedUserIds, submitPick } = useDraftSocket({
     draftId,
     token: localStorage.getItem('token'),
@@ -219,6 +241,19 @@ export default function DraftRoom({
               <Typography variant="h6" fontWeight={600}>
                 O draft começa em breve...
               </Typography>
+              {draftDate && (
+                <Typography variant="body2" color="text.secondary" mt={1}>
+                  {new Date(draftDate).toLocaleString('pt-BR', {
+                    day: '2-digit', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit',
+                  })}
+                </Typography>
+              )}
+              {countdown && (
+                <Typography variant="h4" fontWeight={700} color="primary" mt={2}>
+                  {countdown}
+                </Typography>
+              )}
               <Typography variant="body2" color="text.secondary" mt={1}>
                 Aguarde o início para fazer suas escolhas.
               </Typography>
