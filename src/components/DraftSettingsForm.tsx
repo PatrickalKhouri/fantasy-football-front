@@ -19,11 +19,6 @@ interface Props {
   refetchDraftSettings: () => void;
 }
 
-const toLocalDatetimeValue = (isoString: string): string => {
-  const date = new Date(isoString);
-  const offset = date.getTimezoneOffset() * 60000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-};
 
 const DraftSettingsForm: React.FC<Props> = ({
   values,
@@ -54,17 +49,6 @@ const DraftSettingsForm: React.FC<Props> = ({
             <MenuItem value="linear">Linear</MenuItem>
           </Select>
         </FormControl>
-      </Box>
-
-      {/* Draft Date */}
-      <Box>
-        <Typography fontWeight={600}>Data do Draft</Typography>
-        <TextField
-          fullWidth
-          type="datetime-local"
-          value={values.draftDate ? toLocalDatetimeValue(values.draftDate) : ''}
-          onChange={(e) => onChange('draftDate', new Date(e.target.value).toISOString())}
-        />
       </Box>
 
       {/* Pick Timer */}
