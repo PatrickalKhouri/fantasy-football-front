@@ -12,6 +12,7 @@ import {
   ListItemAvatar,
   ListItemText,
   MenuItem,
+  Pagination,
   Select,
   TextField,
   ToggleButton,
@@ -58,6 +59,7 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
   const [search, setSearch] = useState('');
   const [position, setPosition] = useState('ALL');
   const [teamId, setTeamId] = useState<number | ''>('');
+  const [page, setPage] = useState(1);
 
   const draftedIds = new Set(
     picks.filter((p) => p.player).map((p) => p.player!.id),
@@ -67,8 +69,8 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
     search: search || undefined,
     position: position === 'ALL' ? undefined : [POSITIONS_BACKEND_MAP[position]],
     teamId: teamId || undefined,
-    page: 1,
-    limit: 50,
+    page,
+    limit: 20,
     sortBy: 'name',
     order: 'asc',
     leagueId: realLeagueId,
@@ -89,7 +91,7 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
         <ToggleButtonGroup
           value={position}
           exclusive
-          onChange={(_, v) => { if (v) setPosition(v); }}
+          onChange={(_, v) => { if (v) { setPosition(v); setPage(1); } }}
           size="small"
         >
           {POSITION_OPTIONS.map((opt) => (
@@ -105,7 +107,7 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
             labelId="draft-team-label"
             label="Time"
             value={teamId}
-            onChange={(e) => setTeamId(e.target.value as number | '')}
+            onChange={(e) => { setTeamId(e.target.value as number | ''); setPage(1); }}
           >
             <MenuItem value=""><em>Todos</em></MenuItem>
             {filters?.teams?.map((t) => (
@@ -120,7 +122,7 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
         size="small"
         placeholder="Buscar jogador..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         slotProps={{
           input: {
             startAdornment: (
@@ -139,7 +141,13 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
         </Box>
       )}
 
-      <List dense disablePadding sx={{ maxHeight: 520, overflowY: 'auto' }}>
+      {data?.meta && (
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+          {data.meta.total} jogadores disponíveis
+        </Typography>
+      )}
+
+      <List dense disablePadding>
         {players.map((player) => (
           <ListItem
             key={player.player_id}
@@ -180,6 +188,16 @@ export default function DraftPlayerSearch({ leagueId, realLeagueId, picks, onPic
           </Typography>
         )}
       </List>
+
+      {(data?.meta.totalPages ?? 1) > 1 && (
+        <Pagination
+          count={data?.meta.totalPages ?? 1}
+          page={page}
+          onChange={(_, v) => setPage(v)}
+          size="small"
+          sx={{ mt: 1, display: 'flex', justifyContent: 'center' }}
+        />
+      )}
     </Box>
   );
 }

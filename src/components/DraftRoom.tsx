@@ -14,7 +14,7 @@ import axios from 'axios';
 import { useDraftSocket } from '../api/useDraftSocket';
 import DraftPickTimer from './DraftPickTimer';
 import DraftOrderDisplay from './DraftOrderDisplay';
-import DraftPicksList from './DraftPicksList';
+
 import DraftPlayerSearch from './DraftPlayerSearch';
 import DraftMyTeam from './DraftMyTeam';
 import { DraftFullResponse, useFreezeDraft, useResetDraftTimer, useUnfreezeDraft } from '../api/draftQueries';
@@ -219,20 +219,15 @@ export default function DraftRoom({
       )}
 
       <Box display="flex" gap={2} alignItems="flex-start" flexWrap="wrap">
-        {/* Left — Draft order + Picks log */}
-        <Box sx={{ flex: '0 0 280px', minWidth: 240, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <DraftOrderDisplay
-              draft={draft}
-              picks={picks}
-              currentUserId={currentUserId}
-              connectedUserIds={connectedUserIds}
-            />
-          </Paper>
-          <Paper variant="outlined" sx={{ p: 2, maxHeight: 320, overflowY: 'auto' }}>
-            <DraftPicksList picks={picks} totalRounds={draft.totalRounds} />
-          </Paper>
-        </Box>
+        {/* Left — Draft order */}
+        <Paper variant="outlined" sx={{ p: 2, flex: '0 0 280px', minWidth: 240 }}>
+          <DraftOrderDisplay
+            draft={draft}
+            picks={picks}
+            currentUserId={currentUserId}
+            connectedUserIds={connectedUserIds}
+          />
+        </Paper>
 
         {/* Center — Timer + players */}
         <Paper variant="outlined" sx={{ p: 2, flex: '1 1 200px', minWidth: 200 }}>
