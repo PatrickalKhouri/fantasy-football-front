@@ -2,9 +2,9 @@ import React, { useMemo, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   List, ListItemButton, ListItemText, ListItemAvatar,
-  Avatar, Chip, Stack, Button, Typography, Alert,
+  Avatar, Chip, Stack, Button, Typography, Alert, Divider,
 } from '@mui/material';
-import { useAddPlayer } from '../api/userTeamRosterMutations';
+import { useAddPlayer, useReplacePlayer } from '../api/userTeamRosterMutations';
 import { mapPositionToSlot, RosterSlot } from '../utils/positions';
 import { POSITIONS_TRANSLATION } from './PlayerSelectModal';
 
@@ -14,7 +14,7 @@ export type UISlot = {
   index: number;
   slot: 'DEF' | 'MEI' | 'ATA' | 'FLEX';
   slotType: SlotType;
-  allowedPositions: RosterSlot[]; // e.g. ['MEI'] or ['MEI','ATA'] for FLEX
+  allowedPositions: RosterSlot[];
   player: null | {
     id: number;
     name: string;
@@ -27,19 +27,17 @@ export type UISlot = {
 type AddPlayerModalProps = {
   open: boolean;
   onClose: () => void;
-  // roster slots of the user's fantasy team (same shape you use elsewhere)
   slots: UISlot[];
   userTeamId: number;
   seasonYear: number;
-  // player to be added (from the players table row)
   player: {
-    id: number; // <- real player id
+    id: number;
     name: string;
     photo: string;
     position: 'Defense' | 'Midfielder' | 'Attacker';
-    teamCode?: string; // optional, for UI only
+    teamCode?: string;
   };
-  refetch: () => void; // refetch roster (and optionally the players list)
+  refetch: () => void;
 };
 
 const labelFor = (slot: UISlot['slot'], allowed: RosterSlot[]) => {
@@ -51,38 +49,54 @@ export default function AddPlayerModal({
   open, onClose, slots, userTeamId, seasonYear, player, refetch,
 }: AddPlayerModalProps) {
   const [error, setError] = useState<string | null>(null);
+  const [pendingSlot, setPendingSlot] = useState<UISlot | null>(null);
 
   const playerSlot = mapPositionToSlot(player.position);
 
-  // Only empty slots that accept this player's position (or FLEX that allows it)
-  const emptyLegalTargets = useMemo(
-    () =>
-      playerSlot ? slots.filter((s) => !s.player && s.allowedPositions.includes(playerSlot)) : [],
-    [slots, playerSlot]
+  const legalTargets = useMemo(
+    () => (playerSlot ? slots.filter((s) => s.allowedPositions.includes(playerSlot)) : []),
+    [slots, playerSlot],
   );
 
-  const { mutate: addPlayer } = useAddPlayer({
-    onSuccess: () => {
-      refetch();
-      onClose();
-    },
-  });
+  const emptyTargets = useMemo(() => legalTargets.filter((s) => !s.player), [legalTargets]);
+  const occupiedTargets = useMemo(() => legalTargets.filter((s) => !!s.player), [legalTargets]);
+
+  const handleSuccess = () => {
+    setError(null);
+    setPendingSlot(null);
+    refetch();
+    onClose();
+  };
+
+  const handleError = (e: any) => {
+    setError(e?.response?.data?.message ?? 'Erro ao adicionar jogador.');
+  };
+
+  const { mutate: addPlayer } = useAddPlayer({ onSuccess: handleSuccess });
+  const { mutate: replacePlayer } = useReplacePlayer({ onSuccess: handleSuccess, onError: handleError });
 
   const handleAdd = (slot: UISlot) => {
-    addPlayer({
-      body: {
-        userTeamId,
-        seasonYear,
-        playerId: player.id,
-        targetSlotIndex: slot.index,
-        slot: slot.slot,
-        slotType: slot.slotType,
-      },
-    });
+    setError(null);
+    addPlayer(
+      { body: { userTeamId, seasonYear, playerId: player.id, targetSlotIndex: slot.index, slot: slot.slot, slotType: slot.slotType } },
+      { onError: handleError },
+    );
+  };
+
+  const handleReplaceConfirm = () => {
+    if (!pendingSlot) return;
+    setError(null);
+    replacePlayer({ body: { userTeamId, seasonYear, playerId: player.id, targetSlotIndex: pendingSlot.index } });
+  };
+
+  const handleClose = () => {
+    setError(null);
+    setPendingSlot(null);
+    onClose();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>Adicionar jogador</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2}>
@@ -103,41 +117,100 @@ export default function AddPlayerModal({
 
           {error && <Alert severity="error">{error}</Alert>}
 
-          <Typography variant="subtitle2" sx={{ mt: 1 }}>
-            Selecionar vaga
-          </Typography>
+          {pendingSlot && (
+            <Alert
+              severity="warning"
+              action={
+                <Stack direction="row" spacing={1}>
+                  <Button size="small" color="inherit" onClick={() => setPendingSlot(null)}>
+                    Cancelar
+                  </Button>
+                  <Button size="small" color="warning" variant="contained" onClick={handleReplaceConfirm}>
+                    Confirmar
+                  </Button>
+                </Stack>
+              }
+            >
+              <strong>{pendingSlot.player?.name}</strong> será liberado para o mercado.
+            </Alert>
+          )}
 
-          <List dense>
-            {emptyLegalTargets.map((slot) => (
-              <ListItemButton key={slot.index} onClick={() => handleAdd(slot)}>
-                <ListItemAvatar>
-                  <Avatar /> {/* empty slot */}
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Chip
-                        size="small"
-                        label={`${labelFor(slot.slot, slot.allowedPositions)} • ${slot.slotType === 'starter' ? 'Titular' : 'Reserva'}`}
-                      />
-                      <Typography sx={{ ml: 1 }}>Vaga vazia</Typography>
-                    </Stack>
-                  }
-                  secondary="Disponível"
-                />
-              </ListItemButton>
-            ))}
+          {legalTargets.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ px: 2, py: 1 }}>
+              Não há vagas compatíveis para este jogador.
+            </Typography>
+          ) : (
+            <>
+              {emptyTargets.length > 0 && (
+                <>
+                  <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    Selecionar vaga
+                  </Typography>
+                  <List dense>
+                    {emptyTargets.map((slot) => (
+                      <ListItemButton key={slot.index} onClick={() => handleAdd(slot)}>
+                        <ListItemAvatar>
+                          <Avatar />
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Chip
+                                size="small"
+                                label={`${labelFor(slot.slot, slot.allowedPositions)} • ${slot.slotType === 'starter' ? 'Titular' : 'Reserva'}`}
+                              />
+                              <Typography sx={{ ml: 1 }}>Vaga vazia</Typography>
+                            </Stack>
+                          }
+                          secondary="Disponível"
+                        />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </>
+              )}
 
-            {emptyLegalTargets.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ px: 2, py: 1 }}>
-                Não há vagas compatíveis para este jogador.
-              </Typography>
-            )}
-          </List>
+              {occupiedTargets.length > 0 && (
+                <>
+                  {emptyTargets.length > 0 && <Divider />}
+                  <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                    Substituir jogador
+                  </Typography>
+                  <List dense>
+                    {occupiedTargets.map((slot) => (
+                      <ListItemButton
+                        key={slot.index}
+                        onClick={() => setPendingSlot(slot)}
+                        selected={pendingSlot?.index === slot.index}
+                      >
+                        <ListItemAvatar>
+                          <Avatar src={slot.player!.photo} />
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Chip
+                                size="small"
+                                color="warning"
+                                variant="outlined"
+                                label={`${labelFor(slot.slot, slot.allowedPositions)} • ${slot.slotType === 'starter' ? 'Titular' : 'Reserva'}`}
+                              />
+                              <Typography sx={{ ml: 1 }}>{slot.player!.name}</Typography>
+                            </Stack>
+                          }
+                          secondary={`${POSITIONS_TRANSLATION[slot.player!.position as keyof typeof POSITIONS_TRANSLATION]} • ${slot.player!.team.code} — Será liberado`}
+                        />
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </>
+              )}
+            </>
+          )}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={handleClose}>Cancelar</Button>
       </DialogActions>
     </Dialog>
   );

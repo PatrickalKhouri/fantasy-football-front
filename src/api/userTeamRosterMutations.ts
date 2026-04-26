@@ -25,6 +25,27 @@ export const useAddPlayer = ({ onSuccess }: { onSuccess: () => void }) => {
 };
 
 
+export interface ReplacePlayerBody {
+  userTeamId: number;
+  seasonYear: number;
+  playerId: number;
+  targetSlotIndex: number;
+}
+
+export const useReplacePlayer = ({ onSuccess, onError }: { onSuccess: () => void; onError?: (e: any) => void }) => {
+  return useMutation({
+    mutationFn: ({ body }: { body: ReplacePlayerBody }) =>
+      axios.post(`${apiConfig.endpoints.usersTeamsRoster.replacePlayer}`, body, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }),
+    onSuccess,
+    onError,
+  });
+};
+
 export const useRemovePlayer = ({ onSuccess }: { onSuccess: () => void }) => {
     return useMutation({
       mutationFn: (rosterId: number) =>

@@ -79,6 +79,7 @@ const endpoints = {
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,
+    replacePlayer: `${API_BASE_URL}/user-team-rosters/replace`,
     deletePlayer: (id: number) => `${API_BASE_URL}/user-team-rosters/${id}`,
     movePlayer: `${API_BASE_URL}/user-team-rosters/move`,
     getRoster: (userTeamId: number, season: number) => `${API_BASE_URL}/user-team-rosters/team/${userTeamId}/season/${season}`,
