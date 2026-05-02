@@ -151,6 +151,7 @@ const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId, seasonYear }) => {
         onClose={() => setSelectedMatchup(null)}
         userTeamId={userTeamId}
         seasonYear={seasonYear}
+        seasonId={seasonId}
       />
     </Box>
   );
