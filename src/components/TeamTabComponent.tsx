@@ -1,14 +1,14 @@
 // src/components/TeamTab.tsx
 
-import { Typography, Stack, IconButton, Paper, Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert, Chip, Box } from '@mui/material';
+import { Typography, Stack, IconButton, Paper, Alert, Chip, Box } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useRoster } from './userTeamRosterQueries';
-import { useRemovePlayer } from '../api/userTeamRosterMutations';
 import { SlotCard } from './SlotCard';
 import { useMemo, useState } from 'react';
 import PlayerSelectModal from './PlayerSelectModal';
 import MovePlayerModal from './MovePlayerModal';
+import PlayerStatsModal from './PlayerStatsModal';
 import { Slot } from './userTeamRosterQueries';
 import { RosterSlotCard } from './SlotCard'
 import { FantasyLeague, useFantasyLeagueTeams, FantasyLeagueTeamsResponse } from '../api/fantasyLeagueQueries';
@@ -20,11 +20,12 @@ import { getOpponentForTeam } from '../utils/matchUtils';
 interface Props {
     userTeam: UserTeam;
     seasonYear: number;
+    seasonId?: string;
     initialRound?: number;
     fantasyLeague: FantasyLeague;
   }
 
-  export const TeamTab: React.FC<Props> = ({ userTeam, fantasyLeague, seasonYear, initialRound = 1 }) => {
+  export const TeamTab: React.FC<Props> = ({ userTeam, fantasyLeague, seasonYear, seasonId, initialRound = 1 }) => {
     console.log('[TeamTab] seasonYear:', seasonYear);
     const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,9 +33,8 @@ interface Props {
     const [moveOpen, setMoveOpen] = useState(false);
     const [originIndex, setOriginIndex] = useState<number | null>(null);
 
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
-    const [selectedPlayerName, setSelectedPlayerName] = useState<string | null>(null);
+    const [statsSlot, setStatsSlot] = useState<Slot | null>(null);
+
     const [selectedTeamId, setSelectedTeamId] = useState<number>(userTeam.id);
 
     const { data: leagueTeams } = useFantasyLeagueTeams(fantasyLeague.id);
@@ -43,11 +43,9 @@ interface Props {
     const viewedTeam = leagueTeams?.find((t: FantasyLeagueTeamsResponse) => t.id === selectedTeamId);
 
     const handleSlotClick = (slot: Slot) => {
-      if (!isViewingOwnTeam) return;
       if (slot.player) {
-        setOriginIndex(slot.index);
-        setMoveOpen(true);
-      } else {
+        setStatsSlot(slot);
+      } else if (isViewingOwnTeam) {
         setSelectedSlot(slot);
         setIsModalOpen(true);
       }
@@ -56,24 +54,6 @@ interface Props {
 
     const { data: slots, isLoading, refetch, isError, error } = useRoster({ userTeamId: selectedTeamId, seasonYear });
 
-    const { mutate: removePlayer, isPending: isRemovingPlayer,} = useRemovePlayer({
-      onSuccess: refetch,
-    })
-
-    const confirmRemovePlayer = (slotId: number, playerName?: string) => {
-      setSelectedSlotId(slotId);
-      setSelectedPlayerName(playerName || null);
-      setConfirmOpen(true);
-    };
-  
-    // Execute removal after confirmation
-    const handleConfirmRemove = () => {
-      if (selectedSlotId !== null) {
-        removePlayer(selectedSlotId);
-      }
-      setConfirmOpen(false);
-    };
-  
     const starters = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'starter') || [], [slots]);
     const bench = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'bench') || [], [slots]);
   
@@ -82,8 +62,6 @@ interface Props {
 
     if (isLoading) return <Loading message="Carregando time..." />;
 
-    if (isRemovingPlayer) return <Loading message="Removendo jogador..." />;
-    
     if (isError) return (
       <Alert severity="error">
         {error instanceof Error ? error.message : 'Algo deu errado ao carregar o time.'}
@@ -134,14 +112,13 @@ interface Props {
               {starters.map((slot: Slot) => (
                 <Paper
                   onClick={() => handleSlotClick(slot)}
-                  sx={{ cursor: isViewingOwnTeam ? 'pointer' : 'default' }}
+                  sx={{ cursor: slot.player || isViewingOwnTeam ? 'pointer' : 'default' }}
                 >
                   <SlotCard
                     key={slot.index}
                     slotType={slot.slotType}
                     allowedPositions={slot.allowedPositions as RosterSlotCard[]}
                     player={slot.player}
-                    onRemovePlayer={isViewingOwnTeam ? () => confirmRemovePlayer(slot.id, slot.player?.name) : undefined}
                     slot={slot}
                     opponentInfo={slot.player?.team?.id != null && realMatches ? getOpponentForTeam(realMatches, slot.player.team.id) : null}
                   />
@@ -154,14 +131,13 @@ interface Props {
               {bench.map((slot: Slot) => (
                 <Paper
                   onClick={() => handleSlotClick(slot)}
-                  sx={{ cursor: isViewingOwnTeam ? 'pointer' : 'default' }}
+                  sx={{ cursor: slot.player || isViewingOwnTeam ? 'pointer' : 'default' }}
                 >
                   <SlotCard
                     key={slot.index}
                     slotType={slot.slotType}
                     allowedPositions={slot.allowedPositions as RosterSlotCard[]}
                     player={slot.player}
-                    onRemovePlayer={isViewingOwnTeam ? () => confirmRemovePlayer(slot.id, slot.player?.name) : undefined}
                     slot={slot}
                     opponentInfo={slot.player?.team?.id != null && realMatches ? getOpponentForTeam(realMatches, slot.player.team.id) : null}
                   />
@@ -169,6 +145,22 @@ interface Props {
               ))}
             </Stack>
           </>
+
+      <PlayerStatsModal
+        playerId={statsSlot?.player?.id ?? null}
+        playerName={statsSlot?.player?.name}
+        playerPhoto={statsSlot?.player?.photo}
+        seasonId={seasonId}
+        onClose={() => setStatsSlot(null)}
+        slotId={isViewingOwnTeam ? statsSlot?.id : undefined}
+        isOwner={isViewingOwnTeam}
+        onMove={() => {
+          if (statsSlot) setOriginIndex(statsSlot.index);
+          setStatsSlot(null);
+          setMoveOpen(true);
+        }}
+        refetch={refetch}
+      />
 
       {isViewingOwnTeam && (
         <>
@@ -200,18 +192,6 @@ interface Props {
             />
           )}
 
-          <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-            <DialogTitle>Confirmar remoção</DialogTitle>
-            <DialogContent>
-              Tem certeza que deseja liberar {selectedPlayerName || 'este jogador'}?
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
-              <Button onClick={handleConfirmRemove} color="error" variant="contained">
-                Liberar
-              </Button>
-            </DialogActions>
-          </Dialog>
         </>
       )}
       </Stack>

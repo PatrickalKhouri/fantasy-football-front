@@ -36,6 +36,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import { usePlayers, usePlayersFilters } from '../api/playersQueries';
 import AddPlayerModal from './AddPlayerModal';
+import PlayerStatsModal from './PlayerStatsModal';
 import { Slot, useRoster } from './userTeamRosterQueries';
 import { useRemovePlayer } from '../api/userTeamRosterMutations';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
@@ -72,6 +73,7 @@ interface PlayersListProps {
   fantasyLeague: FantasyLeague;
   seasonYear: number;
   userTeamId: number;
+  seasonId?: string;
   currentRound?: number;
 }
 
@@ -82,7 +84,7 @@ const POST_DRAFT_STATUSES: LeagueStatus[] = [
   LeagueStatus.ARCHIVED,
 ];
 
-const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, userTeamId, currentRound }) => {
+const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, userTeamId, seasonId, currentRound }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -119,6 +121,8 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   const [selectedPlayer, setSelectedPlayer] = useState<null | {
   id: number; name: string; photo: string; position: 'Defense' | 'Midfielder' | 'Attacker'; teamCode?: string;
   }>(null);
+
+  const [statsPlayer, setStatsPlayer] = useState<null | { id: number; name: string; photo: string; slotId?: number; isOwner?: boolean }>(null);
 
 
   const { data: slots, isLoading, refetch } = useRoster({ userTeamId, seasonYear });
@@ -333,13 +337,23 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         players.map((player: any) => (
           <TableRow
             key={player.player_id}
-            hover={!player.is_rostered}
+            hover
+            onClick={() => {
+              const slotId = playerIdToSlotId.get(player.player_id);
+              setStatsPlayer({
+                id: player.player_id,
+                name: player.player_name,
+                photo: player.player_photo,
+                slotId,
+                isOwner: player.rostered_by_user_team_id === userTeamId,
+              });
+            }}
             sx={{
               backgroundColor: player.is_rostered
                 ? 'rgba(130,127,127,0.16)'
                 : 'transparent',
               '& > td': { backgroundColor: 'inherit' },
-              cursor: player.is_rostered ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               opacity: player.is_rostered ? 0.9 : 1,
             }}
           >
@@ -396,7 +410,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
             <TableCell align="right">
               {player.avgPoints != null ? Number(player.avgPoints).toFixed(1) : '—'}
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" onClick={(e) => e.stopPropagation()}>
               {!draftCompleted ? (
                 <Tooltip title="Disponível após o draft">
                   <Chip size="small" icon={<LockIcon fontSize="small" />} label="Draft pendente" variant="outlined" />
@@ -473,6 +487,20 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
     </TableBody>
   </Table>
 </Box>
+
+      <PlayerStatsModal
+        playerId={statsPlayer?.id ?? null}
+        playerName={statsPlayer?.name}
+        playerPhoto={statsPlayer?.photo}
+        seasonId={seasonId}
+        onClose={() => setStatsPlayer(null)}
+        slotId={statsPlayer?.slotId}
+        isOwner={statsPlayer?.isOwner}
+        refetch={() => {
+          refetchPlayers();
+          refetch();
+        }}
+      />
 
       {addOpen && selectedPlayer && (
         <AddPlayerModal

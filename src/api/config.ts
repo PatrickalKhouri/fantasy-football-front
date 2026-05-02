@@ -84,6 +84,8 @@ const endpoints = {
     computeSeason: (seasonId: string) => `${API_BASE_URL}/player-fantasy-points/compute/season/${seasonId}`,
     rankings: (seasonId: string) => `${API_BASE_URL}/player-fantasy-points/rankings/season/${seasonId}`,
     redraft: (seasonId: string) => `${API_BASE_URL}/player-fantasy-points/redraft/season/${seasonId}`,
+    playerHistory: (playerId: number, seasonId: string) => `${API_BASE_URL}/player-fantasy-points/player/${playerId}/season/${seasonId}`,
+    byRound: (seasonId: string, roundNumber: number) => `${API_BASE_URL}/player-fantasy-points/season/${seasonId}/round/${roundNumber}`,
   },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {

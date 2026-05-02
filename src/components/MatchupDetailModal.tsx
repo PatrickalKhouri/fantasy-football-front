@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Avatar,
   Box,
@@ -16,12 +16,15 @@ import { FantasyMatchupDto } from '../api/fantasyMatchupQueries';
 import { useRoster, Slot } from './userTeamRosterQueries';
 import { useRealMatchesByRound, RealMatchDto } from '../api/matchesQueries';
 import { getOpponentForTeam, formatMatchTime } from '../utils/matchUtils';
+import { usePointsByRound } from '../api/playerFantasyPointsQueries';
+import PlayerStatsModal from './PlayerStatsModal';
 
 interface Props {
   matchup: FantasyMatchupDto | null;
   onClose: () => void;
   userTeamId?: number;
   seasonYear?: number;
+  seasonId?: string;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -36,20 +39,38 @@ const STATUS_COLORS: Record<string, 'default' | 'warning' | 'success'> = {
   completed: 'success',
 };
 
-function SlotRow({ slot, realMatches }: { slot: Slot; realMatches?: RealMatchDto[] }) {
+function SlotRow({
+  slot,
+  realMatches,
+  pointsMap,
+  onPlayerClick,
+}: {
+  slot: Slot;
+  realMatches?: RealMatchDto[];
+  pointsMap?: Map<number, number>;
+  onPlayerClick?: (slot: Slot) => void;
+}) {
   const label = slot.allowedPositions[0] ?? '?';
   const hasPlayer = !!slot.player;
   const opponentInfo = hasPlayer && slot.player.team?.id != null && realMatches
     ? getOpponentForTeam(realMatches, slot.player.team.id)
     : null;
+  const points = hasPlayer && pointsMap ? pointsMap.get(slot.player.id) : undefined;
 
   return (
-    <Box display="flex" alignItems="center" gap={1} py={0.5}>
+    <Box
+      display="flex"
+      alignItems="center"
+      gap={1}
+      py={0.5}
+      onClick={() => hasPlayer && onPlayerClick?.(slot)}
+      sx={{ cursor: hasPlayer ? 'pointer' : 'default', borderRadius: 1, '&:hover': hasPlayer ? { bgcolor: 'action.hover' } : {} }}
+    >
       <Chip label={label} size="small" variant="outlined" sx={{ width: 44, fontSize: 11 }} />
       {hasPlayer ? (
         <>
           <Avatar src={slot.player.photo} sx={{ width: 24, height: 24 }} />
-          <Box>
+          <Box flex={1}>
             <Typography variant="body2" noWrap>
               {slot.player.name}
             </Typography>
@@ -62,6 +83,11 @@ function SlotRow({ slot, realMatches }: { slot: Slot; realMatches?: RealMatchDto
               </Typography>
             )}
           </Box>
+          {points != null && (
+            <Typography variant="body2" fontWeight={700} color={points >= 0 ? 'success.main' : 'error.main'} sx={{ minWidth: 36, textAlign: 'right' }}>
+              {points.toFixed(1)}
+            </Typography>
+          )}
         </>
       ) : (
         <Typography variant="body2" color="text.disabled">
@@ -77,11 +103,15 @@ function RosterColumn({
   teamId,
   seasonYear,
   realMatches,
+  pointsMap,
+  onPlayerClick,
 }: {
   teamName: string | null;
   teamId: number | null;
   seasonYear?: number;
   realMatches?: RealMatchDto[];
+  pointsMap?: Map<number, number>;
+  onPlayerClick?: (slot: Slot) => void;
 }) {
   const { data: slots, isLoading } = useRoster({ userTeamId: teamId ?? undefined, seasonYear });
 
@@ -108,7 +138,7 @@ function RosterColumn({
             Titulares
           </Typography>
           {starters.map((slot) => (
-            <SlotRow key={slot.index} slot={slot} realMatches={realMatches} />
+            <SlotRow key={slot.index} slot={slot} realMatches={realMatches} pointsMap={pointsMap} onPlayerClick={onPlayerClick} />
           ))}
 
           <Divider sx={{ my: 1 }} />
@@ -117,7 +147,7 @@ function RosterColumn({
             Reservas
           </Typography>
           {bench.map((slot) => (
-            <SlotRow key={slot.index} slot={slot} realMatches={realMatches} />
+            <SlotRow key={slot.index} slot={slot} realMatches={realMatches} pointsMap={pointsMap} onPlayerClick={onPlayerClick} />
           ))}
         </>
       )}
@@ -125,8 +155,10 @@ function RosterColumn({
   );
 }
 
-const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, seasonYear }) => {
+const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, seasonYear, seasonId }) => {
   const { data: realMatches } = useRealMatchesByRound(seasonYear, matchup?.roundNumber ?? undefined);
+  const { data: pointsMap } = usePointsByRound(seasonId, matchup?.roundNumber ?? undefined);
+  const [statsSlot, setStatsSlot] = useState<Slot | null>(null);
   const userIsAway = userTeamId != null && matchup?.awayTeamId === userTeamId;
 
   const leftTeamId = userIsAway ? matchup!.awayTeamId : matchup?.homeTeamId ?? null;
@@ -173,13 +205,36 @@ const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, sea
         {/* Side-by-side rosters */}
         <Box display="flex" gap={3} flexWrap="wrap">
           <Box flex={1} minWidth={200}>
-            <RosterColumn teamName={leftTeamName} teamId={leftTeamId} seasonYear={seasonYear} realMatches={realMatches} />
+            <RosterColumn
+              teamName={leftTeamName}
+              teamId={leftTeamId}
+              seasonYear={seasonYear}
+              realMatches={realMatches}
+              pointsMap={pointsMap}
+              onPlayerClick={(slot) => setStatsSlot(slot)}
+            />
           </Box>
           <Box flex={1} minWidth={200}>
-            <RosterColumn teamName={rightTeamName} teamId={rightTeamId} seasonYear={seasonYear} realMatches={realMatches} />
+            <RosterColumn
+              teamName={rightTeamName}
+              teamId={rightTeamId}
+              seasonYear={seasonYear}
+              realMatches={realMatches}
+              pointsMap={pointsMap}
+              onPlayerClick={(slot) => setStatsSlot(slot)}
+            />
           </Box>
         </Box>
       </DialogContent>
+
+      <PlayerStatsModal
+        playerId={statsSlot?.player?.id ?? null}
+        playerName={statsSlot?.player?.name}
+        playerPhoto={statsSlot?.player?.photo}
+        seasonId={seasonId}
+        roundFilter={matchup?.roundNumber ?? undefined}
+        onClose={() => setStatsSlot(null)}
+      />
     </Dialog>
   );
 };
