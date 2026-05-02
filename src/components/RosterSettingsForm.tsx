@@ -4,6 +4,8 @@ import {
   Typography,
   TextField,
   Button,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import { RosterSettings, useUpdateRosterSettings } from '../api/useUpdateRosterSettings';
 import { Snackbar, Alert } from '@mui/material';
@@ -167,6 +169,24 @@ const [openSnackbar, setOpenSnackbar] = useState(false);
           }}
         />
       </Box>
+      <Box sx={{ mt: 2 }}>
+        <Typography fontWeight={600} sx={{ mb: 1 }}>Tipo de Defesa</Typography>
+        <ToggleButtonGroup
+          exclusive
+          value={values.defenseType ?? 'CLOSED'}
+          onChange={(_, val) => { if (val) onChange('defenseType', val); }}
+          size="small"
+        >
+          <ToggleButton value="CLOSED">Defesa Fechada</ToggleButton>
+          <ToggleButton value="OPEN">Defesa Aberta</ToggleButton>
+        </ToggleButtonGroup>
+        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+          {values.defenseType === 'OPEN'
+            ? 'Jogadores defensores individuais de qualquer time'
+            : 'Unidade defensiva completa de um time (ex: Defesa do Flamengo)'}
+        </Typography>
+      </Box>
+
       <Box
         sx={{
           borderTop: '1px solid #eee',

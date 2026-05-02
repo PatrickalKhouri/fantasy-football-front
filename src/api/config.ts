@@ -76,6 +76,15 @@ const endpoints = {
     byRound: (seasonYear: number, roundNumber: number) =>
       `${API_BASE_URL}/matches/by-round?seasonYear=${seasonYear}&roundNumber=${roundNumber}`,
   },
+  scoringConfig: {
+    getBySeason: (seasonId: string) => `${API_BASE_URL}/scoring-config/season/${seasonId}`,
+    update: (seasonId: string) => `${API_BASE_URL}/scoring-config/season/${seasonId}`,
+  },
+  playerFantasyPoints: {
+    computeSeason: (seasonId: string) => `${API_BASE_URL}/player-fantasy-points/compute/season/${seasonId}`,
+    rankings: (seasonId: string) => `${API_BASE_URL}/player-fantasy-points/rankings/season/${seasonId}`,
+    redraft: (seasonId: string) => `${API_BASE_URL}/player-fantasy-points/redraft/season/${seasonId}`,
+  },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,

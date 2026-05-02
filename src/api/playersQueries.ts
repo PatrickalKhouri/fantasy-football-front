@@ -10,11 +10,13 @@ export interface Player {
   player_photo: string;
   team_name: string;
   goals: number;
+  totalPoints: number | null;
+  gamesPlayed: number;
+  avgPoints: number | null;
   team: { code: string };
   is_rostered: boolean;
   rostered_by_user_team_id?: number;
   rostered_by_user_team_name?: string;
-  
 }
 
 export interface PlayersFiltersResponse {

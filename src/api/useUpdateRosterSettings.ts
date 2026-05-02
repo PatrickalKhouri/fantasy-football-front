@@ -2,6 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
 
+export type DefenseType = 'OPEN' | 'CLOSED';
+
 export interface RosterSettings {
     id: number;
     starterSkillSlots: number;
@@ -12,6 +14,7 @@ export interface RosterSettings {
     minBenchMidfielders: number;
     minBenchForwards: number;
     starterDefenseSlots: number;
+    defenseType: DefenseType;
 }
 
 export const useUpdateRosterSettings = ({ onSuccess }: { onSuccess: () => void }) => {

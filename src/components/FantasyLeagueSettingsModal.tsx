@@ -23,8 +23,10 @@ import DraftSettingsForm from './DraftSettingsForm';
 import LeagueMembersSettings from './FantasyLegueMemberSettings';
 import FantasyLeagueSeasonForm from './FantasyLeagueSeasonForm';
 import FantasyLeagueForm from './FantasyLeagueForm';
+import ScoringConfigForm from './ScoringConfigForm';
 
 import { useFantasyLeagueTeams, FantasyLeague } from '../api/fantasyLeagueQueries';
+import { useAuth } from '../context/AuthContext';
 
 import { useRosterSettings } from '../api/useRosterSettings';
 import { useDeleteFantasyLeague } from '../api/fantasyLeagueMutations';
@@ -39,6 +41,7 @@ const SETTINGS = [
   { label: 'Configurações da Temporada', key: 'season' },
   { label: 'Configurações de Elenco', key: 'roster' },
   { label: 'Configurações de Draft', key: 'draft' },
+  { label: 'Configurações de Pontuação', key: 'scoring' },
   { label: 'Configurações de Membros', key: 'members' },
 ];
 
@@ -58,6 +61,8 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const fantasyLeagueId = fantasyLeague.id;
+  const { user } = useAuth();
+  const isOwner = !!user && fantasyLeague.owner?.id === Number(user.id);
 
   const { data: fantasyLeagueSeason, refetch: refetchFantasyLeagueSeason, isLoading: isLoadingFantasyLeagueSeasons } = useFantasyLeagueSeasons(fantasyLeague.id);
   const { data: rosterSettings, refetch: refetchRosterSettings, isLoading: isLoadingRosterSettings } = useRosterSettings(fantasyLeagueId);
@@ -65,7 +70,9 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
   const { data: draftSettings, refetch: refetchDraftSettings, isLoading: isLoadingDraftSettings } = useDraftSettings(fantasyLeagueId);
 
   useEffect(() => {
-    if (selected === 'season' && fantasyLeagueSeason) {
+    if (selected === 'scoring') {
+      setFormData({});
+    } else if (selected === 'season' && fantasyLeagueSeason) {
       setFormData(fantasyLeagueSeason);
     } else if (selected === 'league' && fantasyLeague) {
       setFormData(fantasyLeague);
@@ -131,13 +138,21 @@ const FantasyLeagueSettingsModal: React.FC<Props> = ({ open, onClose, fantasyLea
             refetchDraftSettings={refetchDraftSettings}
           />
         );
+      case 'scoring':
+        return (
+          <ScoringConfigForm
+            seasonId={fantasyLeagueSeason?.id}
+            seasonStatus={fantasyLeagueSeason?.status}
+            isOwner={isOwner}
+          />
+        );
       case 'members':
         return (
             <LeagueMembersSettings
               values={fantasyLeagueMembers}
               refetchFantasyLeagueMembers={refetchFantasyLeagueMembers}
             />
-          );  
+          );
       default:
         return <Typography>Configuração ainda não disponível.</Typography>;
     }

@@ -11,6 +11,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TableSortLabel,
   Avatar,
   TablePagination,
   useTheme,
@@ -98,6 +99,18 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [onlyFreeAgents, setOnlyFreeAgents] = useState(false);
   const [teamId, setTeamId] = useState<number | null>(null);
+  const [sortBy, setSortBy] = useState<string>('totalPoints');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+
+  const handleSort = (col: string) => {
+    if (sortBy === col) {
+      setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortBy(col);
+      setOrder('desc');
+    }
+    setPage(0);
+  };
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [selectedPlayerName, setSelectedPlayerName] = useState<string>('')
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -150,8 +163,8 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
     search,
     page: page + 1,
     limit: rowsPerPage,
-    sortBy: 'goals',
-    order: 'desc',
+    sortBy,
+    order,
     leagueId: fantasyLeague.league.id,
     fantasyLeagueId: fantasyLeague.id,
     onlyFreeAgents,
@@ -285,7 +298,33 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         <TableCell>Time</TableCell>
         <TableCell>Posição</TableCell>
         {currentRound && <TableCell>Próx.</TableCell>}
-        <TableCell align="right">Gols</TableCell>
+        <TableCell align="right">
+          <TableSortLabel
+            active={sortBy === 'goals'}
+            direction={sortBy === 'goals' ? order : 'desc'}
+            onClick={() => handleSort('goals')}
+          >
+            Gols
+          </TableSortLabel>
+        </TableCell>
+        <TableCell align="right">
+          <TableSortLabel
+            active={sortBy === 'totalPoints'}
+            direction={sortBy === 'totalPoints' ? order : 'desc'}
+            onClick={() => handleSort('totalPoints')}
+          >
+            Pts Total
+          </TableSortLabel>
+        </TableCell>
+        <TableCell align="right">
+          <TableSortLabel
+            active={sortBy === 'avgPoints'}
+            direction={sortBy === 'avgPoints' ? order : 'desc'}
+            onClick={() => handleSort('avgPoints')}
+          >
+            Média
+          </TableSortLabel>
+        </TableCell>
         <TableCell align="center">Ação</TableCell>
       </TableRow>
     </TableHead>
@@ -351,6 +390,12 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
               </TableCell>
             )}
             <TableCell align="right">{player.goals}</TableCell>
+            <TableCell align="right">
+              {player.totalPoints != null ? Number(player.totalPoints).toFixed(1) : '—'}
+            </TableCell>
+            <TableCell align="right">
+              {player.avgPoints != null ? Number(player.avgPoints).toFixed(1) : '—'}
+            </TableCell>
             <TableCell align="center">
               {!draftCompleted ? (
                 <Tooltip title="Disponível após o draft">
@@ -422,7 +467,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         ))
       ) : (
         <TableRow>
-          <TableCell colSpan={5}>Nenhum jogador encontrado.</TableCell>
+          <TableCell colSpan={7}>Nenhum jogador encontrado.</TableCell>
         </TableRow>
       )}
     </TableBody>
