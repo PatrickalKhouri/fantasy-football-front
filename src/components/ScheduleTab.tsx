@@ -16,6 +16,7 @@ import { useScheduleBySeason, ScheduleByRoundDto, FantasyMatchupDto } from '../a
 import MatchupCard from './MatchupCard';
 import MatchupDetailModal from './MatchupDetailModal';
 import PlayoffBracket from './PlayoffBracket';
+import StandingsTable from './StandingsTable';
 
 interface Props {
   seasonId: string | undefined;
@@ -138,6 +139,13 @@ const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId, seasonYear }) => {
           ))}
         </Stack>
       </Box>
+
+      <Divider sx={{ my: 4 }} />
+
+      <Typography variant="h6" fontWeight={700} mb={2}>
+        Classificação
+      </Typography>
+      <StandingsTable seasonId={seasonId} userTeamId={userTeamId} />
 
       <Divider sx={{ my: 4 }} />
 

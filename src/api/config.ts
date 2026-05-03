@@ -69,6 +69,8 @@ const endpoints = {
     byTeam: (seasonId: string, teamId: number) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}/team/${teamId}`,
     standings: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}/standings`,
     playoffs: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}/playoffs`,
+    rosterSnapshot: (matchupId: string) => `${API_BASE_URL}/fantasy-matchups/${matchupId}/roster-snapshot`,
+    scoreAll: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}/score-all`,
     validateConfig: `${API_BASE_URL}/fantasy-matchups/validate-config`,
     delete: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}`,
   },

@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { FantasyMatchupDto } from '../api/fantasyMatchupQueries';
+import { FantasyMatchupDto, useMatchupRosterSnapshot, SnapshotSlotDto } from '../api/fantasyMatchupQueries';
 import { useRoster, Slot } from './userTeamRosterQueries';
 import { useRealMatchesByRound, RealMatchDto } from '../api/matchesQueries';
 import { getOpponentForTeam, formatMatchTime } from '../utils/matchUtils';
@@ -38,6 +38,8 @@ const STATUS_COLORS: Record<string, 'default' | 'warning' | 'success'> = {
   live: 'warning',
   completed: 'success',
 };
+
+// ─── Live/Scheduled roster row (uses current roster) ────────────────────────
 
 function SlotRow({
   slot,
@@ -155,10 +157,120 @@ function RosterColumn({
   );
 }
 
+// ─── Historical snapshot row (uses frozen roster snapshot) ──────────────────
+
+function SnapshotSlotRow({
+  slot,
+  realMatches,
+  onPlayerClick,
+}: {
+  slot: SnapshotSlotDto;
+  realMatches?: RealMatchDto[];
+  onPlayerClick?: (playerId: number, playerName: string | null) => void;
+}) {
+  const opponentInfo = slot.playerTeamId != null && realMatches
+    ? getOpponentForTeam(realMatches, slot.playerTeamId)
+    : null;
+
+  return (
+    <Box
+      display="flex"
+      alignItems="center"
+      gap={1}
+      py={0.5}
+      onClick={() => slot.playerName && onPlayerClick?.(slot.playerId, slot.playerName)}
+      sx={{ cursor: slot.playerName ? 'pointer' : 'default', borderRadius: 1, '&:hover': slot.playerName ? { bgcolor: 'action.hover' } : {} }}
+    >
+      <Chip label={slot.rosterSlot} size="small" variant="outlined" sx={{ width: 44, fontSize: 11 }} />
+      {slot.playerName ? (
+        <>
+          <Avatar src={slot.playerPhoto ?? undefined} sx={{ width: 24, height: 24 }} />
+          <Box flex={1}>
+            <Typography variant="body2" noWrap>
+              {slot.playerName}
+            </Typography>
+            {opponentInfo && (
+              <Typography variant="caption" color="text.disabled" noWrap>
+                x {opponentInfo.code} ({opponentInfo.isHome ? 'C' : 'V'})
+              </Typography>
+            )}
+          </Box>
+          <Typography
+            variant="body2"
+            fontWeight={700}
+            color={slot.points >= 0 ? 'success.main' : 'error.main'}
+            sx={{ minWidth: 36, textAlign: 'right' }}
+          >
+            {slot.points.toFixed(1)}
+          </Typography>
+        </>
+      ) : (
+        <Typography variant="body2" color="text.disabled">
+          Vazio
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+function SnapshotColumn({
+  teamName,
+  slots,
+  realMatches,
+  onPlayerClick,
+}: {
+  teamName: string | null;
+  slots: SnapshotSlotDto[];
+  realMatches?: RealMatchDto[];
+  onPlayerClick?: (playerId: number, playerName: string | null) => void;
+}) {
+  const starters = slots.filter((s) => s.slotType === 'starter').sort((a, b) => a.slotIndex - b.slotIndex);
+  const bench = slots.filter((s) => s.slotType === 'bench').sort((a, b) => a.slotIndex - b.slotIndex);
+
+  return (
+    <Box>
+      <Typography fontWeight={700} variant="subtitle1" mb={1} noWrap>
+        {teamName ?? 'Ghost'}
+      </Typography>
+
+      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+        Titulares
+      </Typography>
+      {starters.map((slot) => (
+        <SnapshotSlotRow key={slot.slotIndex} slot={slot} realMatches={realMatches} onPlayerClick={onPlayerClick} />
+      ))}
+
+      {bench.length > 0 && (
+        <>
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Reservas
+          </Typography>
+          {bench.map((slot) => (
+            <SnapshotSlotRow key={slot.slotIndex} slot={slot} realMatches={realMatches} onPlayerClick={onPlayerClick} />
+          ))}
+        </>
+      )}
+    </Box>
+  );
+}
+
+// ─── Main modal ─────────────────────────────────────────────────────────────
+
 const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, seasonYear, seasonId }) => {
+  const isCompleted = matchup?.status === 'completed';
+
   const { data: realMatches } = useRealMatchesByRound(seasonYear, matchup?.roundNumber ?? undefined);
-  const { data: pointsMap } = usePointsByRound(seasonId, matchup?.roundNumber ?? undefined);
-  const [statsSlot, setStatsSlot] = useState<Slot | null>(null);
+  const { data: pointsMap } = usePointsByRound(
+    isCompleted ? undefined : seasonId,
+    matchup?.roundNumber ?? undefined,
+  );
+  const { data: snapshotData, isLoading: snapshotLoading } = useMatchupRosterSnapshot(
+    isCompleted ? matchup?.id : undefined,
+  );
+
+  const [statsSlot, setStatsSlot] = useState<{ id: number; name?: string; photo?: string } | null>(null);
+
   const userIsAway = userTeamId != null && matchup?.awayTeamId === userTeamId;
 
   const leftTeamId = userIsAway ? matchup!.awayTeamId : matchup?.homeTeamId ?? null;
@@ -168,6 +280,9 @@ const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, sea
   const rightTeamId = userIsAway ? matchup!.homeTeamId : matchup?.awayTeamId ?? null;
   const rightTeamName = userIsAway ? matchup!.homeTeamName : matchup?.awayTeamName ?? null;
   const rightScore = userIsAway ? matchup!.homeScore : matchup?.awayScore ?? null;
+
+  const leftSnapshot = userIsAway ? snapshotData?.awayTeam : snapshotData?.homeTeam;
+  const rightSnapshot = userIsAway ? snapshotData?.homeTeam : snapshotData?.awayTeam;
 
   const statusLabel = matchup ? (STATUS_LABELS[matchup.status] ?? matchup.status) : '';
   const statusColor = matchup ? (STATUS_COLORS[matchup.status] ?? 'default') : 'default';
@@ -193,7 +308,7 @@ const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, sea
             {leftTeamName ?? 'Ghost'}
           </Typography>
           <Typography variant="h5" fontWeight={800} color="text.secondary" sx={{ minWidth: 80, textAlign: 'center' }}>
-            {leftScore ?? '—'} – {rightScore ?? '—'}
+            {leftScore != null ? Number(leftScore).toFixed(1) : '—'} – {rightScore != null ? Number(rightScore).toFixed(1) : '—'}
           </Typography>
           <Typography variant="h6" fontWeight={700} sx={{ flex: 1 }} noWrap>
             {rightTeamName ?? 'Ghost'}
@@ -203,34 +318,61 @@ const MatchupDetailModal: React.FC<Props> = ({ matchup, onClose, userTeamId, sea
         <Divider sx={{ mb: 2 }} />
 
         {/* Side-by-side rosters */}
-        <Box display="flex" gap={3} flexWrap="wrap">
-          <Box flex={1} minWidth={200}>
-            <RosterColumn
-              teamName={leftTeamName}
-              teamId={leftTeamId}
-              seasonYear={seasonYear}
-              realMatches={realMatches}
-              pointsMap={pointsMap}
-              onPlayerClick={(slot) => setStatsSlot(slot)}
-            />
+        {isCompleted ? (
+          snapshotLoading ? (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress size={28} />
+            </Box>
+          ) : (
+            <Box display="flex" gap={3} flexWrap="wrap">
+              <Box flex={1} minWidth={200}>
+                <SnapshotColumn
+                  teamName={leftTeamName}
+                  slots={leftSnapshot?.slots ?? []}
+                  realMatches={realMatches}
+                  onPlayerClick={(id, name) => setStatsSlot({ id, name: name ?? undefined })}
+                />
+              </Box>
+              <Box flex={1} minWidth={200}>
+                <SnapshotColumn
+                  teamName={rightTeamName}
+                  slots={rightSnapshot?.slots ?? []}
+                  realMatches={realMatches}
+                  onPlayerClick={(id, name) => setStatsSlot({ id, name: name ?? undefined })}
+                />
+              </Box>
+            </Box>
+          )
+        ) : (
+          <Box display="flex" gap={3} flexWrap="wrap">
+            <Box flex={1} minWidth={200}>
+              <RosterColumn
+                teamName={leftTeamName}
+                teamId={leftTeamId}
+                seasonYear={seasonYear}
+                realMatches={realMatches}
+                pointsMap={pointsMap}
+                onPlayerClick={(slot) => setStatsSlot({ id: slot.player?.id, name: slot.player?.name, photo: slot.player?.photo })}
+              />
+            </Box>
+            <Box flex={1} minWidth={200}>
+              <RosterColumn
+                teamName={rightTeamName}
+                teamId={rightTeamId}
+                seasonYear={seasonYear}
+                realMatches={realMatches}
+                pointsMap={pointsMap}
+                onPlayerClick={(slot) => setStatsSlot({ id: slot.player?.id, name: slot.player?.name, photo: slot.player?.photo })}
+              />
+            </Box>
           </Box>
-          <Box flex={1} minWidth={200}>
-            <RosterColumn
-              teamName={rightTeamName}
-              teamId={rightTeamId}
-              seasonYear={seasonYear}
-              realMatches={realMatches}
-              pointsMap={pointsMap}
-              onPlayerClick={(slot) => setStatsSlot(slot)}
-            />
-          </Box>
-        </Box>
+        )}
       </DialogContent>
 
       <PlayerStatsModal
-        playerId={statsSlot?.player?.id ?? null}
-        playerName={statsSlot?.player?.name}
-        playerPhoto={statsSlot?.player?.photo}
+        playerId={statsSlot?.id ?? null}
+        playerName={statsSlot?.name}
+        playerPhoto={statsSlot?.photo}
         seasonId={seasonId}
         roundFilter={matchup?.roundNumber ?? undefined}
         onClose={() => setStatsSlot(null)}
