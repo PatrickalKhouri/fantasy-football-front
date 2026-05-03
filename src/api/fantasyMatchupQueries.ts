@@ -32,7 +32,8 @@ export interface StandingDto {
   draws: number;
   losses: number;
   points: number;
-  totalScore: number;
+  pointsFor: number;
+  pointsAgainst: number;
   seed: number;
 }
 
@@ -60,6 +61,44 @@ export const useStandings = (seasonId: string | undefined) =>
       return res.data;
     },
     enabled: !!seasonId,
+  });
+
+export interface SnapshotSlotDto {
+  playerId: number;
+  playerName: string | null;
+  playerPhoto: string | null;
+  playerPosition: string | null;
+  playerTeamId: number | null;
+  rosterSlot: string;
+  slotType: 'starter' | 'bench';
+  slotIndex: number;
+  points: number;
+}
+
+export interface SnapshotTeamDto {
+  teamId: number;
+  teamName: string;
+  score: number | null;
+  slots: SnapshotSlotDto[];
+}
+
+export interface MatchupRosterSnapshotDto {
+  roundNumber: number;
+  homeTeam: SnapshotTeamDto | null;
+  awayTeam: SnapshotTeamDto | null;
+}
+
+export const useMatchupRosterSnapshot = (matchupId: string | undefined) =>
+  useQuery<MatchupRosterSnapshotDto>({
+    queryKey: ['matchupRosterSnapshot', matchupId],
+    queryFn: async () => {
+      const res = await axios.get(
+        apiConfig.endpoints.fantasyMatchups.rosterSnapshot(matchupId!),
+        { headers: authHeader() },
+      );
+      return res.data;
+    },
+    enabled: !!matchupId,
   });
 
 export const usePlayoffMatchups = (seasonId: string | undefined) =>
