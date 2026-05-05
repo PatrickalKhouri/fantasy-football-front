@@ -20,6 +20,7 @@ export interface FantasyLeague {
     isActive?: boolean;
     league: {
       id: number;
+      externalId: number;
       name: string;
     };
     owner?: {

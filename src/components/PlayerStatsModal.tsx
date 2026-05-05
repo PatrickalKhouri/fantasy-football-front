@@ -15,6 +15,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -32,6 +33,7 @@ interface Props {
   onMove?: () => void;
   roundFilter?: number;
   refetch?: () => void;
+  isLocked?: boolean;
 }
 
 function buildStatRows(row: PlayerHistoryRow) {
@@ -145,6 +147,7 @@ const PlayerStatsModal: React.FC<Props> = ({
   onMove,
   roundFilter,
   refetch,
+  isLocked,
 }) => {
   const { data: history, isLoading } = usePlayerHistory(playerId, seasonId);
   const [selectedRow, setSelectedRow] = useState<PlayerHistoryRow | null>(null);
@@ -287,24 +290,33 @@ const PlayerStatsModal: React.FC<Props> = ({
             <Divider />
             <DialogActions sx={{ px: 3, py: 1.5, gap: 1 }}>
               {onMove && (
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    onClose();
-                    onMove();
-                  }}
-                >
-                  Mover
-                </Button>
+                <Tooltip title={isLocked ? 'Jogador bloqueado — partida em andamento nesta rodada' : ''}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={!!isLocked}
+                      onClick={() => {
+                        onClose();
+                        onMove();
+                      }}
+                    >
+                      Mover
+                    </Button>
+                  </span>
+                </Tooltip>
               )}
-              <Button
-                variant="outlined"
-                color="error"
-                disabled={isReleasing}
-                onClick={() => setConfirmOpen(true)}
-              >
-                Liberar jogador
-              </Button>
+              <Tooltip title={isLocked ? 'Jogador bloqueado — partida em andamento nesta rodada' : ''}>
+                <span>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    disabled={isReleasing || !!isLocked}
+                    onClick={() => setConfirmOpen(true)}
+                  >
+                    Liberar jogador
+                  </Button>
+                </span>
+              </Tooltip>
             </DialogActions>
           </>
         )}

@@ -45,6 +45,7 @@ import { LeagueStatus } from './SeasonStatusCard';
 import Loading from './Loading';
 import { useRealMatchesByRound } from '../api/matchesQueries';
 import { getOpponentForTeam, formatMatchTime } from '../utils/matchUtils';
+import { useLockedTeams } from '../api/fantasyRoundGameQueries';
 
 
 const POSITION_OPTIONS = [
@@ -89,10 +90,13 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { data: season } = useFantasyLeagueSeasons(fantasyLeague.id);
+  const activeRound = currentRound ?? season?.currentRound ?? null;
   const { data: realMatches } = useRealMatchesByRound(
-    currentRound ? seasonYear : undefined,
-    currentRound,
+    activeRound ? seasonYear : undefined,
+    activeRound ?? undefined,
   );
+  const { data: lockedTeamsData } = useLockedTeams(fantasyLeague.league.externalId, seasonYear, activeRound);
+  const lockedTeamIds = new Set<number>(lockedTeamsData?.lockedTeamIds ?? []);
   const draftCompleted = season ? POST_DRAFT_STATUSES.includes(season.status as LeagueStatus) : false;
 
   const [position, setPosition] = useState<string>('ALL');
@@ -414,6 +418,11 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
               {!draftCompleted ? (
                 <Tooltip title="Disponível após o draft">
                   <Chip size="small" icon={<LockIcon fontSize="small" />} label="Draft pendente" variant="outlined" />
+                </Tooltip>
+              ) : lockedTeamIds.has(player.team_id) ? (
+                // Player's match has started → locked for the duration of the round
+                <Tooltip title="Jogador bloqueado — partida em andamento nesta rodada">
+                  <Chip size="small" icon={<LockIcon fontSize="small" />} label="Bloqueado" color="warning" variant="outlined" />
                 </Tooltip>
               ) : !player.is_rostered ? (
                 // Free agent → Add
