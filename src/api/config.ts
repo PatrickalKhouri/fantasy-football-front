@@ -74,6 +74,16 @@ const endpoints = {
     validateConfig: `${API_BASE_URL}/fantasy-matchups/validate-config`,
     delete: (seasonId: string) => `${API_BASE_URL}/fantasy-matchups/season/${seasonId}`,
   },
+  fantasyRoundGames: {
+    lockedTeams: (leagueExternalId: number, seasonYear: number, roundNumber: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/locked-teams`,
+    syncFromRealRound: (leagueExternalId: number, seasonYear: number, roundNumber: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/sync`,
+    listMatches: (leagueExternalId: number, seasonYear: number, roundNumber: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/matches`,
+    removeMatch: (leagueExternalId: number, seasonYear: number, roundNumber: number, matchId: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/matches/${matchId}`,
+  },
   matches: {
     byRound: (seasonYear: number, roundNumber: number) =>
       `${API_BASE_URL}/matches/by-round?seasonYear=${seasonYear}&roundNumber=${roundNumber}`,

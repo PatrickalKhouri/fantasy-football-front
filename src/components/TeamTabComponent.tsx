@@ -16,6 +16,8 @@ import { UserTeam } from '../api/userTeamsQueries';
 import Loading from './Loading';
 import { useRealMatchesByRound } from '../api/matchesQueries';
 import { getOpponentForTeam } from '../utils/matchUtils';
+import { useLockedTeams } from '../api/fantasyRoundGameQueries';
+import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 
 interface Props {
     userTeam: UserTeam;
@@ -38,7 +40,11 @@ interface Props {
     const [selectedTeamId, setSelectedTeamId] = useState<number>(userTeam.id);
 
     const { data: leagueTeams } = useFantasyLeagueTeams(fantasyLeague.id);
+    const { data: season } = useFantasyLeagueSeasons(fantasyLeague.id);
     const { data: realMatches } = useRealMatchesByRound(seasonYear, round);
+    const { data: lockedTeamsData } = useLockedTeams(fantasyLeague.league.externalId, seasonYear, season?.currentRound);
+    const lockedTeamIds = new Set<number>(lockedTeamsData?.lockedTeamIds ?? []);
+    const isCurrentRound = round === season?.currentRound;
     const isViewingOwnTeam = selectedTeamId === userTeam.id;
     const viewedTeam = leagueTeams?.find((t: FantasyLeagueTeamsResponse) => t.id === selectedTeamId);
 
@@ -154,6 +160,11 @@ interface Props {
         onClose={() => setStatsSlot(null)}
         slotId={isViewingOwnTeam ? statsSlot?.id : undefined}
         isOwner={isViewingOwnTeam}
+        isLocked={
+          isCurrentRound &&
+          statsSlot?.player?.team?.id != null &&
+          lockedTeamIds.has(statsSlot.player.team.id)
+        }
         onMove={() => {
           if (statsSlot) setOriginIndex(statsSlot.index);
           setStatsSlot(null);

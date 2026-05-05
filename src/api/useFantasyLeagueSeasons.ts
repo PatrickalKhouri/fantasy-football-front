@@ -15,6 +15,7 @@ export interface FantasyLeagueSeason {
   activatedAt: string;
   status: string;
   seasonYear: number;
+  currentRound: number | null;
 }
 
 export const useFantasyLeagueSeasons = (leagueId: number) => {

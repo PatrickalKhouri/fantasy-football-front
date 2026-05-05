@@ -22,26 +22,27 @@ interface Props {
   seasonId: string | undefined;
   userTeamId?: number;
   seasonYear?: number;
+  currentRound?: number | null;
 }
 
-function detectCurrentRound(schedule: ScheduleByRoundDto[]): number {
-  // First round where at least one matchup is not completed — that's the active round
+function detectCurrentRoundFromSchedule(schedule: ScheduleByRoundDto[]): number {
   const active = schedule.find((r) =>
     r.matchups.some((m) => m.status !== 'completed' && m.status !== 'bye'),
   );
-  // Fall back to last round if all are done
   return active?.roundNumber ?? schedule[schedule.length - 1].roundNumber;
 }
 
-const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId, seasonYear }) => {
+const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId, seasonYear, currentRound }) => {
   const { data: schedule, isLoading } = useScheduleBySeason(seasonId);
   const [selectedRound, setSelectedRound] = useState<number | null>(null);
   const [selectedMatchup, setSelectedMatchup] = useState<FantasyMatchupDto | null>(null);
 
-  const currentRoundNumber = useMemo(
-    () => (schedule && schedule.length > 0 ? detectCurrentRound(schedule) : null),
-    [schedule],
-  );
+  // Prefer currentRound from the backend (set by lifecycle cron); fall back to schedule derivation
+  const currentRoundNumber = useMemo(() => {
+    if (currentRound != null) return currentRound;
+    if (schedule && schedule.length > 0) return detectCurrentRoundFromSchedule(schedule);
+    return null;
+  }, [currentRound, schedule]);
 
   if (!seasonId) {
     return (
@@ -70,13 +71,13 @@ const ScheduleTab: React.FC<Props> = ({ seasonId, userTeamId, seasonYear }) => {
   const rounds = schedule.map((r) => r.roundNumber);
   const activeRound = selectedRound ?? currentRoundNumber ?? rounds[0];
   const activeIndex = rounds.indexOf(activeRound);
-  const currentRound = schedule.find((r) => r.roundNumber === activeRound);
+  const activeRoundData = schedule.find((r) => r.roundNumber === activeRound);
 
   const isMyMatchup = (m: { homeTeamId: number | null; awayTeamId: number | null }) =>
     userTeamId != null && (m.homeTeamId === userTeamId || m.awayTeamId === userTeamId);
 
-  const sortedMatchups = currentRound
-    ? [...currentRound.matchups].sort((a, b) => (isMyMatchup(b) ? 1 : 0) - (isMyMatchup(a) ? 1 : 0))
+  const sortedMatchups = activeRoundData
+    ? [...activeRoundData.matchups].sort((a, b) => (isMyMatchup(b) ? 1 : 0) - (isMyMatchup(a) ? 1 : 0))
     : [];
 
   return (
