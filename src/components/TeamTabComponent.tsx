@@ -1,8 +1,6 @@
 // src/components/TeamTab.tsx
 
-import { Typography, Stack, IconButton, Paper, Alert, Chip, Box } from '@mui/material';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Typography, Stack, Paper, Alert, Chip, Box } from '@mui/material';
 import { useRoster } from './userTeamRosterQueries';
 import { SlotCard } from './SlotCard';
 import { useMemo, useState } from 'react';
@@ -23,15 +21,13 @@ interface Props {
     userTeam: UserTeam;
     seasonYear: number;
     seasonId?: string;
-    initialRound?: number;
     fantasyLeague: FantasyLeague;
   }
 
-  export const TeamTab: React.FC<Props> = ({ userTeam, fantasyLeague, seasonYear, seasonId, initialRound = 1 }) => {
+  export const TeamTab: React.FC<Props> = ({ userTeam, fantasyLeague, seasonYear, seasonId }) => {
     console.log('[TeamTab] seasonYear:', seasonYear);
     const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [round, setRound] = useState(initialRound);
     const [moveOpen, setMoveOpen] = useState(false);
     const [originIndex, setOriginIndex] = useState<number | null>(null);
 
@@ -41,10 +37,10 @@ interface Props {
 
     const { data: leagueTeams } = useFantasyLeagueTeams(fantasyLeague.id);
     const { data: season } = useFantasyLeagueSeasons(fantasyLeague.id);
-    const { data: realMatches } = useRealMatchesByRound(seasonYear, round);
-    const { data: lockedTeamsData } = useLockedTeams(fantasyLeague.league.externalId, seasonYear, season?.currentRound);
+    const currentRound = season?.currentRound ?? undefined;
+    const { data: realMatches } = useRealMatchesByRound(seasonYear, currentRound);
+    const { data: lockedTeamsData } = useLockedTeams(fantasyLeague.league.externalId, seasonYear, currentRound);
     const lockedTeamIds = new Set<number>(lockedTeamsData?.lockedTeamIds ?? []);
-    const isCurrentRound = round === season?.currentRound;
     const isViewingOwnTeam = selectedTeamId === userTeam.id;
     const viewedTeam = leagueTeams?.find((t: FantasyLeagueTeamsResponse) => t.id === selectedTeamId);
 
@@ -63,9 +59,6 @@ interface Props {
     const starters = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'starter') || [], [slots]);
     const bench = useMemo(() => slots?.filter((s: Slot) => s.slotType === 'bench') || [], [slots]);
   
-    const goPrev = () => setRound((r) => Math.max(1, r - 1));
-    const goNext = () => setRound((r) => r + 1);
-
     if (isLoading) return <Loading message="Carregando time..." />;
 
     if (isError) return (
@@ -99,19 +92,6 @@ interface Props {
           </Typography>
         )}
 
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h6" fontWeight="bold">
-            Rodada {round}
-          </Typography>
-          <Stack direction="row" spacing={1}>
-            <IconButton onClick={goPrev} size="small">
-              <ArrowBackIosNewIcon fontSize="small" />
-            </IconButton>
-            <IconButton onClick={goNext} size="small">
-              <ArrowForwardIosIcon fontSize="small" />
-            </IconButton>
-          </Stack>
-        </Stack>
           <>
             <Typography variant="h6" fontWeight="bold">Titulares</Typography>
             <Stack spacing={1}>
@@ -157,11 +137,11 @@ interface Props {
         playerName={statsSlot?.player?.name}
         playerPhoto={statsSlot?.player?.photo}
         seasonId={seasonId}
+        numberOfRounds={season?.numberOfRounds ?? undefined}
         onClose={() => setStatsSlot(null)}
         slotId={isViewingOwnTeam ? statsSlot?.id : undefined}
         isOwner={isViewingOwnTeam}
         isLocked={
-          isCurrentRound &&
           statsSlot?.player?.team?.id != null &&
           lockedTeamIds.has(statsSlot.player.team.id)
         }
