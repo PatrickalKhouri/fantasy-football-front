@@ -126,7 +126,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   id: number; name: string; photo: string; position: 'Defense' | 'Midfielder' | 'Attacker'; teamCode?: string;
   }>(null);
 
-  const [statsPlayer, setStatsPlayer] = useState<null | { id: number; name: string; photo: string; slotId?: number; isOwner?: boolean }>(null);
+  const [statsPlayer, setStatsPlayer] = useState<null | { id: number; name: string; photo: string; slotId?: number; isOwner?: boolean; fantasyTeamName?: string }>(null);
 
 
   const { data: slots, isLoading, refetch } = useRoster({ userTeamId, seasonYear });
@@ -305,6 +305,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         <TableCell>Jogador</TableCell>
         <TableCell>Time</TableCell>
         <TableCell>Posição</TableCell>
+        <TableCell>Escalado</TableCell>
         {currentRound && <TableCell>Próx.</TableCell>}
         <TableCell align="right">
           <TableSortLabel
@@ -350,6 +351,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
                 photo: player.player_photo,
                 slotId,
                 isOwner: player.rostered_by_user_team_id === userTeamId,
+                fantasyTeamName: player.rostered_by_user_team_name ?? undefined,
               });
             }}
             sx={{
@@ -389,6 +391,15 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
               {POSITIONS_TRANSLATION[
                 player.player_position as keyof typeof POSITIONS_TRANSLATION
               ]}
+            </TableCell>
+            <TableCell>
+              {player.rostered_by_user_team_name ? (
+                <Typography variant="caption" color="text.secondary">
+                  {player.rostered_by_user_team_name}
+                </Typography>
+              ) : (
+                <Typography variant="caption" color="text.disabled">Livre</Typography>
+              )}
             </TableCell>
             {currentRound && (
               <TableCell>
@@ -490,7 +501,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         ))
       ) : (
         <TableRow>
-          <TableCell colSpan={7}>Nenhum jogador encontrado.</TableCell>
+          <TableCell colSpan={currentRound ? 9 : 8}>Nenhum jogador encontrado.</TableCell>
         </TableRow>
       )}
     </TableBody>
@@ -502,6 +513,8 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         playerName={statsPlayer?.name}
         playerPhoto={statsPlayer?.photo}
         seasonId={seasonId}
+        numberOfRounds={season?.numberOfRounds ?? undefined}
+        fantasyTeamName={statsPlayer?.fantasyTeamName}
         onClose={() => setStatsPlayer(null)}
         slotId={statsPlayer?.slotId}
         isOwner={statsPlayer?.isOwner}

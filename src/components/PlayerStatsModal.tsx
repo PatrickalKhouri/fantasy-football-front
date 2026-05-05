@@ -34,6 +34,8 @@ interface Props {
   roundFilter?: number;
   refetch?: () => void;
   isLocked?: boolean;
+  numberOfRounds?: number;
+  fantasyTeamName?: string;
 }
 
 function buildStatRows(row: PlayerHistoryRow) {
@@ -148,6 +150,8 @@ const PlayerStatsModal: React.FC<Props> = ({
   roundFilter,
   refetch,
   isLocked,
+  numberOfRounds,
+  fantasyTeamName,
 }) => {
   const { data: history, isLoading } = usePlayerHistory(playerId, seasonId);
   const [selectedRow, setSelectedRow] = useState<PlayerHistoryRow | null>(null);
@@ -174,11 +178,26 @@ const PlayerStatsModal: React.FC<Props> = ({
 
   const totalPoints = history?.reduce((sum, r) => sum + r.totalPoints, 0) ?? 0;
 
-  // What to display in the content area
-  const drillRow = roundFilter != null ? roundFilterRow : selectedRow;
+  const allRounds: (PlayerHistoryRow | null)[] = useMemo(() => {
+    if (!numberOfRounds) return history ?? [];
+    const byRound = new Map((history ?? []).map((r) => [r.roundNumber, r]));
+    return Array.from({ length: numberOfRounds }, (_, i) => byRound.get(i + 1) ?? null);
+  }, [history, numberOfRounds]);
+
+  const zeroRow: PlayerHistoryRow = useMemo(() => ({
+    roundNumber: roundFilter ?? null,
+    matchDate: null, homeTeamName: null, awayTeamName: null,
+    minutesPlayed: 0, goals: 0, assists: 0, yellowCards: 0, redCards: 0,
+    saves: 0, cleanSheet: false, goalsConceded: null, tacklesTotal: null,
+    totalPoints: 0, goalPoints: 0, assistPoints: 0, shotPoints: 0,
+    foulPoints: 0, cleanSheetPoints: 0, savePoints: 0, cardPoints: 0,
+    ownGoalPoints: 0, penaltyPoints: 0, tacklePoints: 0, goalConcededPoints: 0,
+  }), [roundFilter]);
+
+  const isMatchupMode = roundFilter != null;
+  const drillRow = isMatchupMode ? (roundFilterRow ?? zeroRow) : selectedRow;
   const showBreakdown = drillRow != null;
-  const canGoBack = showBreakdown && roundFilter == null; // back button only in history mode
-  const isMatchupMode = roundFilter != null; // opened directly from matchup
+  const canGoBack = showBreakdown && !isMatchupMode;
 
   const matchLabel = drillRow
     ? `Rodada ${drillRow.roundNumber} · ${drillRow.homeTeamName} x ${drillRow.awayTeamName}`
@@ -206,9 +225,14 @@ const PlayerStatsModal: React.FC<Props> = ({
             )}
             <Avatar src={playerPhoto} sx={{ width: 40, height: 40 }} />
             <Box>
-              <Typography fontWeight={700} variant="h6" lineHeight={1.2}>
-                {playerName ?? '—'}
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography fontWeight={700} variant="h6" lineHeight={1.2}>
+                  {playerName ?? '—'}
+                </Typography>
+                {fantasyTeamName && (
+                  <Chip label={fantasyTeamName} size="small" variant="outlined" color="primary" />
+                )}
+              </Box>
               {!showBreakdown && history && history.length > 0 && (
                 <Typography variant="caption" color="text.secondary">
                   Total: {totalPoints.toFixed(1)} pts em {history.length} jogo(s)
@@ -228,7 +252,7 @@ const PlayerStatsModal: React.FC<Props> = ({
             <Box display="flex" justifyContent="center" py={4}>
               <CircularProgress size={28} />
             </Box>
-          ) : !history || history.length === 0 ? (
+          ) : !history || (history.length === 0 && !numberOfRounds) ? (
             <Typography color="text.secondary" py={2}>
               Nenhuma estatística encontrada para esta temporada.
             </Typography>
@@ -253,7 +277,7 @@ const PlayerStatsModal: React.FC<Props> = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {history.map((row: PlayerHistoryRow, i: number) => (
+                {allRounds.map((row, i) => row ? (
                   <TableRow
                     key={i}
                     hover
@@ -278,6 +302,21 @@ const PlayerStatsModal: React.FC<Props> = ({
                     <TableCell align="right">{row.yellowCards || '—'}</TableCell>
                     <TableCell align="right">{row.redCards || '—'}</TableCell>
                     <TableCell align="right" sx={{ color: 'text.secondary' }}>{row.minutesPlayed}</TableCell>
+                  </TableRow>
+                ) : (
+                  <TableRow key={i} sx={{ opacity: 0.45 }}>
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>—</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, color: 'text.disabled' }}>0.0</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="center">—</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right">—</TableCell>
+                    <TableCell align="right" sx={{ color: 'text.secondary' }}>—</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
