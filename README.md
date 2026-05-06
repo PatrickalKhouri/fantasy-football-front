@@ -1,46 +1,96 @@
-# Getting Started with Create React App
+# Fantasy Football Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React 19 application for the fantasy soccer platform — the user-facing UI for the [`fantasy-football-api`](https://github.com/PatrickalKhouri/fantasy-football-api) backend.
 
-## Available Scripts
+## Tech Stack
 
-In the project directory, you can run:
+- React 19.0.0 + TypeScript 4.9.5
+- Material UI (MUI) 7.0.0 + Tailwind CSS
+- React Query (TanStack) 5.71.5
+- React Router DOM 7.4.1
+- Axios 1.8.4
+- date-fns / dayjs
 
-### `npm start`
+## Commands
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```bash
+npm start       # Dev server on http://localhost:3000
+npm test        # Jest watch mode
+npm run build   # Production build to ./build
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Project Structure
 
-### `npm test`
+```
+src/
+├── api/           # API client: queries, mutations, axios config
+├── components/    # Reusable React components
+├── context/       # React Context (AuthContext)
+├── pages/         # Page components, one per route
+├── utils/         # Utility functions
+├── App.tsx        # Top-level routing
+└── index.tsx      # Entry point
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Key Patterns
 
-### `npm run build`
+### API calls
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+All backend communication lives under `src/api/`. We use React Query for caching, retry, and stale-while-revalidate behavior.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **Queries:** `use*Queries.ts` — e.g., `useFantasyLeagueQueries.ts`, `usePlayerQueries.ts`.
+- **Mutations:** `use*Mutations.ts` — invalidate the relevant query keys on success.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```typescript
+// Query
+const { data, isLoading } = useQuery({
+  queryKey: ['leagues'],
+  queryFn: fetchLeagues,
+});
 
-### `npm run eject`
+// Mutation
+const mutation = useMutation({
+  mutationFn: createLeague,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leagues'] }),
+});
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Authentication
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- `AuthContext` provides `user`, `login`, `logout`.
+- JWT token stored in `localStorage`.
+- `ProtectedLayout` wraps authenticated routes; unauthenticated users are redirected to login.
+- `PublicRoute` redirects already-logged-in users away from login/signup pages.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### API configuration
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The backend URL is read from `REACT_APP_BACKEND_URL` (see [Environment Variables](#environment-variables)) and lives in `src/api/config.ts`:
 
-## Learn More
+```typescript
+export const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Component Conventions
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- **Pages** live in `src/pages/` and correspond 1:1 to routes.
+- **Modals** are separate components (e.g., `CreateLeagueModal`, `AddPlayerModal`) — not inlined into pages.
+- **Forms** use MUI components with controlled inputs.
+
+## Environment Variables
+
+Create `.env` in the repo root:
+
+```
+REACT_APP_BACKEND_URL=http://localhost:4000
+```
+
+## Testing
+
+- Jest + React Testing Library.
+- Test files: `*.test.tsx`, colocated with the component they test.
+- Setup in `src/setupTests.ts`.
+
+## Related
+
+- **API:** [`fantasy-football-api`](https://github.com/PatrickalKhouri/fantasy-football-api) — backend this UI talks to.
+- **Cross-repo docs:** [`caneta-fantasy/fantasy-docs`](https://github.com/caneta-fantasy/fantasy-docs) — vision, architecture, glossary, conventions, ADRs.
