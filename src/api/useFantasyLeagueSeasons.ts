@@ -16,6 +16,9 @@ export interface FantasyLeagueSeason {
   status: string;
   seasonYear: number;
   currentRound: number | null;
+  waiverSystem: 'AUCTION' | 'PRIORITY';
+  initialWaiverBudget: number;
+  fantasyLeague?: { league?: { externalId?: number } };
 }
 
 export const useFantasyLeagueSeasons = (leagueId: number) => {

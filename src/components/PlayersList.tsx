@@ -34,11 +34,14 @@ import {
 import ClearIcon from '@mui/icons-material/Clear';
 import LockIcon from '@mui/icons-material/Lock';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import GavelIcon from '@mui/icons-material/Gavel';
 import { usePlayers, usePlayersFilters } from '../api/playersQueries';
 import AddPlayerModal from './AddPlayerModal';
 import PlayerStatsModal from './PlayerStatsModal';
+import WaiverClaimModal from './WaiverClaimModal';
 import { Slot, useRoster } from './userTeamRosterQueries';
 import { useRemovePlayer } from '../api/userTeamRosterMutations';
+import { useWaiverBudgets, useWaiverClaims, useWaiverWindowStatus } from '../api/waiverQueries';
 import { FantasyLeague } from '../api/fantasyLeagueQueries';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { LeagueStatus } from './SeasonStatusCard';
@@ -126,6 +129,27 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   id: number; name: string; photo: string; position: 'Defense' | 'Midfielder' | 'Attacker'; teamCode?: string;
   }>(null);
 
+  const [waiverClaimOpen, setWaiverClaimOpen] = useState(false);
+  const [waiverPlayer, setWaiverPlayer] = useState<null | { id: number; name: string; photo: string; position: string }>(null);
+
+  const leagueExternalId = season?.fantasyLeague?.league?.externalId;
+  const { data: waiverWindowStatus } = useWaiverWindowStatus(leagueExternalId, season?.seasonYear);
+  const isWaiverWindowOpen = waiverWindowStatus?.isOpen ?? false;
+
+  const { data: waiverBudgets } = useWaiverBudgets(isWaiverWindowOpen ? seasonId : undefined);
+  const { data: waiverClaims } = useWaiverClaims(isWaiverWindowOpen ? seasonId : undefined);
+
+  const myBudget = waiverBudgets?.find((b) => b.userTeam.id === userTeamId);
+  const baseBudget = myBudget ? Number(myBudget.remainingBudget) : (season?.initialWaiverBudget ?? 100);
+
+  const myClaims = waiverClaims?.filter((c) => c.userTeam.id === userTeamId) ?? [];
+  const pendingClaims = myClaims.filter((c) => c.status === 'PENDING');
+  const reservedBudget = pendingClaims.reduce((sum, c) => sum + Number(c.bidAmount), 0);
+  const remainingBudget = baseBudget - reservedBudget;
+
+  const pendingClaimedPlayerIds = new Set(pendingClaims.map((c) => c.targetPlayer.id));
+  const pendingDropPlayerIds = new Set(pendingClaims.filter((c) => c.dropPlayer).map((c) => c.dropPlayer!.id));
+
   const [statsPlayer, setStatsPlayer] = useState<null | { id: number; name: string; photo: string; slotId?: number; isOwner?: boolean; fantasyTeamName?: string }>(null);
 
 
@@ -210,9 +234,18 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
 
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
-      <Typography variant="h6" gutterBottom>
-        Jogadores
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+        <Typography variant="h6">Jogadores</Typography>
+        {isWaiverWindowOpen && (
+          <Chip
+            icon={<GavelIcon />}
+            label={`Mercado aberto · R$ ${remainingBudget} disponível`}
+            color="secondary"
+            variant="outlined"
+            size="small"
+          />
+        )}
+      </Box>
 
       {!draftCompleted && (
         <Alert severity="warning" sx={{ mb: 2 }}>
@@ -436,25 +469,56 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
                   <Chip size="small" icon={<LockIcon fontSize="small" />} label="Bloqueado" color="warning" variant="outlined" />
                 </Tooltip>
               ) : !player.is_rostered ? (
-                // Free agent → Add
-                <Tooltip title="Adicionar ao elenco">
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedPlayer({
-                        id: player.player_id,
-                        name: player.player_name,
-                        photo: player.player_photo,
-                        position: player.player_position,
-                        teamCode: player.team_name,
-                      });
-                      setAddOpen(true);
-                    }}
-                  >
-                    <PersonAddAlt1Icon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                isWaiverWindowOpen ? (
+                  pendingClaimedPlayerIds.has(player.player_id) ? (
+                    <Tooltip title="Oferta já registrada — cancele para fazer outra">
+                      <span>
+                        <IconButton size="small" disabled>
+                          <GavelIcon fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  ) : (
+                  <Tooltip title="Fazer oferta no Mercado">
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setWaiverPlayer({
+                          id: player.player_id,
+                          name: player.player_name,
+                          photo: player.player_photo,
+                          position: player.player_position,
+                        });
+                        setWaiverClaimOpen(true);
+                      }}
+                    >
+                      <GavelIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  )
+                ) : (
+                  // Free agent → Add
+                  <Tooltip title="Adicionar ao elenco">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedPlayer({
+                          id: player.player_id,
+                          name: player.player_name,
+                          photo: player.player_photo,
+                          position: player.player_position,
+                          teamCode: player.team_name,
+                        });
+                        setAddOpen(true);
+                      }}
+                    >
+                      <PersonAddAlt1Icon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )
               ) : player.rostered_by_user_team_id === userTeamId ? (
                 // Rostered by ME → Drop
                 (() => {
@@ -533,6 +597,23 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
           userTeamId={userTeamId}
           seasonYear={seasonYear}
           refetch={() => {
+            refetchPlayers();
+            refetch();
+          }}
+        />
+      )}
+
+      {waiverClaimOpen && waiverPlayer && seasonId && (
+        <WaiverClaimModal
+          open={waiverClaimOpen}
+          onClose={() => setWaiverClaimOpen(false)}
+          seasonId={seasonId}
+          userTeamId={userTeamId}
+          remainingBudget={remainingBudget}
+          targetPlayer={waiverPlayer}
+          rosterSlots={slots ?? []}
+          pendingDropPlayerIds={pendingDropPlayerIds}
+          onSuccess={() => {
             refetchPlayers();
             refetch();
           }}
