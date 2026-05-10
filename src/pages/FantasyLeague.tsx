@@ -4,11 +4,13 @@ import { useGetFantasyLeague } from '../api/fantasyLeagueQueries';
 import LeagueSidebar from '../components/FantasyLeaguesSidebar';
 import InviteToLeagueModal from '../components/InviteToFantasyLeagueModal';
 import { useInviteUserToFantasyLeague } from '../api/fantasyLeagueQueries';
-import { Snackbar, Alert, Box, useMediaQuery, useTheme } from '@mui/material';
+import { Snackbar, Alert, Box, Button, useMediaQuery, useTheme } from '@mui/material';
 import LeagueTabs from '../components/FantasyLeagueTabs';
 import ViewInvitesModal from '../components/ViewInvitesModal';
 import FantasyLeagueInfo from '../components/FantasyLeagueInfo';
 import PlayersList from '../components/PlayersList';
+import WaiverClaimsPanel from '../components/WaiverClaimsPanel';
+import WaiverHistoryModal from '../components/WaiverHistoryModal';
 import { TeamTab } from '../components/TeamTabComponent';
 import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
 import Loading from '../components/Loading';
@@ -16,6 +18,7 @@ import DraftTab from '../components/DraftTab';
 import ScheduleTab from '../components/ScheduleTab';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { useCurrentSeason } from '../api/currentSeasonQueries';
+import { useWaiverClaims, useWaiverBudgets, useWaiverWindowStatus, useWaiverHistory } from '../api/waiverQueries';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
@@ -28,6 +31,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   });
   const [selectedTab, setSelectedTab] = useState('draft');
   const [viewInvitesModalOpen, setViewInvitesModalOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -36,6 +40,23 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { data: fantasyLeagueSeason } = useFantasyLeagueSeasons(Number(fantasyLeagueId));
   const { data: currentSeasonData } = useCurrentSeason();
   const seasonYear = fantasyLeagueSeason?.seasonYear ?? currentSeasonData?.year ?? new Date().getFullYear();
+
+  const leagueExternalId = fantasyLeagueSeason?.fantasyLeague?.league?.externalId;
+  const { data: waiverWindowStatus } = useWaiverWindowStatus(
+    selectedTab === 'players' ? leagueExternalId : null,
+    selectedTab === 'players' ? fantasyLeagueSeason?.seasonYear : null,
+  );
+  const isWaiverWindowOpen = waiverWindowStatus?.isOpen ?? false;
+
+  const { data: waiverClaims } = useWaiverClaims(
+    selectedTab === 'players' && fantasyLeagueSeason?.id ? fantasyLeagueSeason.id : undefined,
+  );
+  const { data: waiverBudgets } = useWaiverBudgets(
+    selectedTab === 'players' && fantasyLeagueSeason?.id ? fantasyLeagueSeason.id : undefined,
+  );
+  const { data: waiverHistory = [], isLoading: isHistoryLoading } = useWaiverHistory(
+    selectedTab === 'players' ? fantasyLeagueSeason?.id : undefined,
+  );
 
 
   const handleInvite = (email: string) => {
@@ -96,11 +117,38 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
           {selectedTab === 'team' && <TeamTab seasonYear={seasonYear} seasonId={fantasyLeagueSeason?.id} userTeam={userTeam} fantasyLeague={fantasyLeague} />}
           {selectedTab === 'schedule' && <ScheduleTab seasonId={fantasyLeagueSeason?.id} userTeamId={userTeam?.id} seasonYear={seasonYear} currentRound={fantasyLeagueSeason?.currentRound ?? null} />}
           {selectedTab === 'league' && <FantasyLeagueInfo currentUserId={currentUserId} fantasyLeague={fantasyLeague} />}
-          {selectedTab === 'players' && <PlayersList fantasyLeague={fantasyLeague} seasonYear={seasonYear} userTeamId={userTeam.id} seasonId={fantasyLeagueSeason?.id} />}
+          {selectedTab === 'players' && (
+            <Box display="flex" flexDirection="column" gap={2}>
+              {fantasyLeagueSeason?.id && (
+                <Box display="flex" justifyContent="flex-end">
+                  <Button variant="outlined" size="small" onClick={() => setHistoryOpen(true)}>
+                    Histórico do Mercado
+                  </Button>
+                </Box>
+              )}
+              {isWaiverWindowOpen && fantasyLeagueSeason?.id && (
+                <WaiverClaimsPanel
+                  seasonId={fantasyLeagueSeason.id}
+                  currentUserId={currentUserId}
+                  claims={waiverClaims ?? []}
+                  budgets={waiverBudgets ?? []}
+                  isWindowOpen={isWaiverWindowOpen}
+                />
+              )}
+              <PlayersList fantasyLeague={fantasyLeague} seasonYear={seasonYear} userTeamId={userTeam.id} seasonId={fantasyLeagueSeason?.id} />
+            </Box>
+          )}
           {selectedTab === 'trades' && <div>Trades UI</div>}
           {selectedTab === 'scores' && <div>Scores table</div>}
         </Box>
       </Box>
+
+      <WaiverHistoryModal
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        claims={waiverHistory}
+        isLoading={isHistoryLoading}
+      />
 
       <InviteToLeagueModal
         open={inviteModalOpen}

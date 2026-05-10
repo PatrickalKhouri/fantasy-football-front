@@ -99,6 +99,14 @@ const endpoints = {
     playerHistory: (playerId: number, seasonId: string) => `${API_BASE_URL}/player-fantasy-points/player/${playerId}/season/${seasonId}`,
     byRound: (seasonId: string, roundNumber: number) => `${API_BASE_URL}/player-fantasy-points/season/${seasonId}/round/${roundNumber}`,
   },
+  waiver: {
+    placeClaim: `${API_BASE_URL}/waiver/claims`,
+    cancelClaim: (claimId: string) => `${API_BASE_URL}/waiver/claims/${claimId}`,
+    claimsBySeason: (seasonId: string) => `${API_BASE_URL}/waiver/claims/season/${seasonId}`,
+    historyBySeason: (seasonId: string) => `${API_BASE_URL}/waiver/claims/season/${seasonId}/history`,
+    budgetsBySeason: (seasonId: string) => `${API_BASE_URL}/waiver/budgets/season/${seasonId}`,
+    windowStatus: (leagueExternalId: number, seasonYear: number) => `${API_BASE_URL}/round-lifecycle/waiver/status/${leagueExternalId}/${seasonYear}`,
+  },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,
