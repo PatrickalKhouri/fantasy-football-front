@@ -10,6 +10,7 @@ export interface User {
   lastName: string;
   email: string;
   birthDate: string;
+  isAdmin?: boolean;
 }
 
 export interface FantasyLeague {
