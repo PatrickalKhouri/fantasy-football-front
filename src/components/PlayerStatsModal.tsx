@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { OpponentInfo } from '../utils/matchUtils';
 import {
   Avatar,
   Box,
@@ -36,6 +37,7 @@ interface Props {
   isLocked?: boolean;
   numberOfRounds?: number;
   fantasyTeamName?: string;
+  opponentInfo?: OpponentInfo | null;
 }
 
 function buildStatRows(row: PlayerHistoryRow) {
@@ -152,6 +154,7 @@ const PlayerStatsModal: React.FC<Props> = ({
   isLocked,
   numberOfRounds,
   fantasyTeamName,
+  opponentInfo,
 }) => {
   const { data: history, isLoading } = usePlayerHistory(playerId, seasonId);
   const [selectedRow, setSelectedRow] = useState<PlayerHistoryRow | null>(null);
@@ -200,7 +203,9 @@ const PlayerStatsModal: React.FC<Props> = ({
   const canGoBack = showBreakdown && !isMatchupMode;
 
   const matchLabel = drillRow
-    ? `Rodada ${drillRow.roundNumber} · ${drillRow.homeTeamName} x ${drillRow.awayTeamName}`
+    ? opponentInfo
+      ? `Rodada ${drillRow.roundNumber} · x ${opponentInfo.code} (${opponentInfo.isHome ? 'C' : 'V'})`
+      : `Rodada ${drillRow.roundNumber}`
     : '';
 
   return (
