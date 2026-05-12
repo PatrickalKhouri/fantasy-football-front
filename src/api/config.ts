@@ -77,12 +77,18 @@ const endpoints = {
   fantasyRoundGames: {
     lockedTeams: (leagueExternalId: number, seasonYear: number, roundNumber: number) =>
       `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/locked-teams`,
+    syncAll: (leagueExternalId: number, seasonYear: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/sync-all`,
     syncFromRealRound: (leagueExternalId: number, seasonYear: number, roundNumber: number) =>
       `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/sync`,
     listMatches: (leagueExternalId: number, seasonYear: number, roundNumber: number) =>
       `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/matches`,
+    addMatch: (leagueExternalId: number, seasonYear: number, roundNumber: number, matchId: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/matches/${matchId}`,
     removeMatch: (leagueExternalId: number, seasonYear: number, roundNumber: number, matchId: number) =>
       `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/round/${roundNumber}/matches/${matchId}`,
+    orphaned: (leagueExternalId: number, seasonYear: number) =>
+      `${API_BASE_URL}/fantasy-round-games/league/${leagueExternalId}/season/${seasonYear}/orphaned`,
   },
   matches: {
     byRound: (seasonYear: number, roundNumber: number) =>
