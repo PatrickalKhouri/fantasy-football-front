@@ -1,8 +1,26 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from './config';
 
 const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
+
+export interface RoundGameMatch {
+  matchId: number;
+  externalId: number | null;
+  homeTeam: { id: number; name: string } | null;
+  awayTeam: { id: number; name: string } | null;
+  date: string | null;
+  status: string;
+  statusLong: string | null;
+  homeGoals: number | null;
+  awayGoals: number | null;
+}
+
+export interface OrphanedMatch extends RoundGameMatch {
+  roundNumber: number | null;
+}
+
+// ─── Queries ────────────────────────────────────────────────────────────────
 
 export const useLockedTeams = (
   leagueExternalId: number | undefined,
@@ -22,3 +40,127 @@ export const useLockedTeams = (
     refetchInterval: 2 * 60 * 1000,
     staleTime: 0,
   });
+
+export const useListRoundMatches = (
+  leagueExternalId: number | undefined,
+  seasonYear: number | undefined,
+  roundNumber: number | undefined,
+) =>
+  useQuery<RoundGameMatch[]>({
+    queryKey: ['roundGameMatches', leagueExternalId, seasonYear, roundNumber],
+    queryFn: async () => {
+      const res = await axios.get(
+        apiConfig.endpoints.fantasyRoundGames.listMatches(leagueExternalId!, seasonYear!, roundNumber!),
+        { headers: authHeader() },
+      );
+      return res.data;
+    },
+    enabled: !!leagueExternalId && !!seasonYear && roundNumber != null,
+    staleTime: 0,
+  });
+
+export const useOrphanedMatches = (
+  leagueExternalId: number | undefined,
+  seasonYear: number | undefined,
+) =>
+  useQuery<OrphanedMatch[]>({
+    queryKey: ['orphanedMatches', leagueExternalId, seasonYear],
+    queryFn: async () => {
+      const res = await axios.get(
+        apiConfig.endpoints.fantasyRoundGames.orphaned(leagueExternalId!, seasonYear!),
+        { headers: authHeader() },
+      );
+      return res.data;
+    },
+    enabled: !!leagueExternalId && !!seasonYear,
+    staleTime: 0,
+  });
+
+// ─── Mutations ───────────────────────────────────────────────────────────────
+
+function invalidateRoundGames(
+  qc: ReturnType<typeof useQueryClient>,
+  leagueExternalId: number,
+  seasonYear: number,
+) {
+  qc.invalidateQueries({ queryKey: ['roundGameMatches', leagueExternalId, seasonYear] });
+  qc.invalidateQueries({ queryKey: ['orphanedMatches', leagueExternalId, seasonYear] });
+}
+
+export const useSyncAllRounds = () => {
+  const qc = useQueryClient();
+  return useMutation<
+    { rounds: number; totalAdded: number },
+    Error,
+    { leagueExternalId: number; seasonYear: number }
+  >({
+    mutationFn: async ({ leagueExternalId, seasonYear }) => {
+      const res = await axios.post(
+        apiConfig.endpoints.fantasyRoundGames.syncAll(leagueExternalId, seasonYear),
+        {},
+        { headers: authHeader() },
+      );
+      return res.data;
+    },
+    onSuccess: (_data, { leagueExternalId, seasonYear }) =>
+      invalidateRoundGames(qc, leagueExternalId, seasonYear),
+  });
+};
+
+export const useSyncRound = () => {
+  const qc = useQueryClient();
+  return useMutation<
+    { added: number },
+    Error,
+    { leagueExternalId: number; seasonYear: number; roundNumber: number }
+  >({
+    mutationFn: async ({ leagueExternalId, seasonYear, roundNumber }) => {
+      const res = await axios.post(
+        apiConfig.endpoints.fantasyRoundGames.syncFromRealRound(leagueExternalId, seasonYear, roundNumber),
+        {},
+        { headers: authHeader() },
+      );
+      return res.data;
+    },
+    onSuccess: (_data, { leagueExternalId, seasonYear }) =>
+      invalidateRoundGames(qc, leagueExternalId, seasonYear),
+  });
+};
+
+export const useAddMatch = () => {
+  const qc = useQueryClient();
+  return useMutation<
+    { added: boolean },
+    Error,
+    { leagueExternalId: number; seasonYear: number; roundNumber: number; matchId: number }
+  >({
+    mutationFn: async ({ leagueExternalId, seasonYear, roundNumber, matchId }) => {
+      const res = await axios.post(
+        apiConfig.endpoints.fantasyRoundGames.addMatch(leagueExternalId, seasonYear, roundNumber, matchId),
+        {},
+        { headers: authHeader() },
+      );
+      return res.data;
+    },
+    onSuccess: (_data, { leagueExternalId, seasonYear }) =>
+      invalidateRoundGames(qc, leagueExternalId, seasonYear),
+  });
+};
+
+export const useRemoveMatch = () => {
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { leagueExternalId: number; seasonYear: number; roundNumber: number; matchId: number }
+  >({
+    mutationFn: async ({ leagueExternalId, seasonYear, roundNumber, matchId }) => {
+      await axios.delete(
+        apiConfig.endpoints.fantasyRoundGames.removeMatch(leagueExternalId, seasonYear, roundNumber, matchId),
+        { headers: authHeader() },
+      );
+    },
+    onSuccess: (_data, { leagueExternalId, seasonYear }) =>
+      invalidateRoundGames(qc, leagueExternalId, seasonYear),
+  });
+};

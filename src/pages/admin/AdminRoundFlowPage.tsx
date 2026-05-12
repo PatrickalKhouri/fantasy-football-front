@@ -12,12 +12,14 @@ import {
   MenuItem,
   Paper,
   Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tabs,
   TextField,
   Tooltip,
   Typography,
@@ -36,6 +38,7 @@ import {
   useTriggerRoundFlowEvent,
   useUpdateRoundFlow,
 } from '../../api/roundFlowQueries';
+import RoundGamesTab from './RoundGamesTab';
 
 const STATUS_COLORS: Record<RoundFlowStatus, 'default' | 'success' | 'info' | 'warning' | 'secondary' | 'error'> = {
   PENDING: 'default',
@@ -60,6 +63,24 @@ function toLocalInput(iso: string): string {
 }
 
 const AdminRoundFlowPage: React.FC = () => {
+  const [tab, setTab] = useState(0);
+
+  return (
+    <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+      <Typography variant="h4" fontWeight="bold" sx={{ mb: 2 }}>
+        Painel Admin
+      </Typography>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
+        <Tab label="Fluxo de Rodada" />
+        <Tab label="Jogos da Rodada" />
+      </Tabs>
+      {tab === 0 && <RoundFlowTab />}
+      {tab === 1 && <RoundGamesTab />}
+    </Box>
+  );
+};
+
+const RoundFlowTab: React.FC = () => {
   const { data: roundFlows = [], isLoading } = useRoundFlows();
   const activate = useActivateRoundFlow();
   const update = useUpdateRoundFlow();
@@ -71,17 +92,17 @@ const AdminRoundFlowPage: React.FC = () => {
   const [triggerMenu, setTriggerMenu] = useState<{ rf: RoundFlow; anchor: HTMLElement } | null>(null);
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
+    <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold">
-          Round Flow
+        <Typography variant="h5" fontWeight="bold">
+          Fluxo de Rodada
         </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setActivateOpen(true)}
         >
-          Activate Round
+          Ativar Rodada
         </Button>
       </Stack>
 
@@ -90,26 +111,26 @@ const AdminRoundFlowPage: React.FC = () => {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>League</TableCell>
-                <TableCell>Season</TableCell>
-                <TableCell>Round</TableCell>
+                <TableCell>Liga</TableCell>
+                <TableCell>Temporada</TableCell>
+                <TableCell>Rodada</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>Live Start</TableCell>
-                <TableCell>Round End</TableCell>
-                <TableCell>Waiver Open</TableCell>
-                <TableCell>Waiver Resolve</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>Início Ao Vivo</TableCell>
+                <TableCell>Fim da Rodada</TableCell>
+                <TableCell>Abertura do Mercado</TableCell>
+                <TableCell>Fechamento do Mercado</TableCell>
+                <TableCell align="right">Ações</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {isLoading && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">Loading...</TableCell>
+                  <TableCell colSpan={9} align="center">Carregando...</TableCell>
                 </TableRow>
               )}
               {!isLoading && roundFlows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">No round flows yet — activate one to start.</TableCell>
+                  <TableCell colSpan={9} align="center">Nenhum fluxo de rodada ainda — ative um para começar.</TableCell>
                 </TableRow>
               )}
               {roundFlows.map((rf) => (
@@ -126,35 +147,35 @@ const AdminRoundFlowPage: React.FC = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <Tooltip title={rf.liveScoringStartedAt ? `Fired: ${formatDt(rf.liveScoringStartedAt)}` : ''}>
+                    <Tooltip title={rf.liveScoringStartedAt ? `Disparado: ${formatDt(rf.liveScoringStartedAt)}` : ''}>
                       <span style={{ textDecoration: rf.liveScoringStartedAt ? 'line-through' : 'none' }}>
                         {formatDt(rf.liveScoringStartAt)}
                       </span>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <Tooltip title={rf.scoredAt ? `Fired: ${formatDt(rf.scoredAt)}` : ''}>
+                    <Tooltip title={rf.scoredAt ? `Disparado: ${formatDt(rf.scoredAt)}` : ''}>
                       <span style={{ textDecoration: rf.scoredAt ? 'line-through' : 'none' }}>
                         {formatDt(rf.roundEndAt)}
                       </span>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <Tooltip title={rf.waiverWindowOpenedAt ? `Fired: ${formatDt(rf.waiverWindowOpenedAt)}` : ''}>
+                    <Tooltip title={rf.waiverWindowOpenedAt ? `Disparado: ${formatDt(rf.waiverWindowOpenedAt)}` : ''}>
                       <span style={{ textDecoration: rf.waiverWindowOpenedAt ? 'line-through' : 'none' }}>
                         {formatDt(rf.waiverWindowStartAt)}
                       </span>
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <Tooltip title={rf.waiverResolvedAt ? `Fired: ${formatDt(rf.waiverResolvedAt)}` : ''}>
+                    <Tooltip title={rf.waiverResolvedAt ? `Disparado: ${formatDt(rf.waiverResolvedAt)}` : ''}>
                       <span style={{ textDecoration: rf.waiverResolvedAt ? 'line-through' : 'none' }}>
                         {formatDt(rf.waiverResolveAt)}
                       </span>
                     </Tooltip>
                   </TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Edit deadlines">
+                    <Tooltip title="Editar prazos">
                       <span>
                         <IconButton
                           size="small"
@@ -165,7 +186,7 @@ const AdminRoundFlowPage: React.FC = () => {
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="Trigger event now">
+                    <Tooltip title="Disparar evento agora">
                       <span>
                         <IconButton
                           size="small"
@@ -176,7 +197,7 @@ const AdminRoundFlowPage: React.FC = () => {
                         </IconButton>
                       </span>
                     </Tooltip>
-                    <Tooltip title="Cancel">
+                    <Tooltip title="Cancelar">
                       <span>
                         <IconButton
                           size="small"
@@ -188,7 +209,7 @@ const AdminRoundFlowPage: React.FC = () => {
                             rf.status === 'CANCELED'
                           }
                           onClick={() => {
-                            if (window.confirm(`Cancel round flow #${rf.id}?`)) cancel.mutate(rf.id);
+                            if (window.confirm(`Cancelar o fluxo de rodada #${rf.id}?`)) cancel.mutate(rf.id);
                           }}
                         >
                           <CancelIcon fontSize="small" />
@@ -239,7 +260,7 @@ const AdminRoundFlowPage: React.FC = () => {
             onClick={() => {
               const rf = triggerMenu!.rf;
               setTriggerMenu(null);
-              if (window.confirm(`Trigger '${event}' for round flow #${rf.id} now?`)) {
+              if (window.confirm(`Disparar '${event}' para o fluxo de rodada #${rf.id} agora?`)) {
                 trigger.mutate({ id: rf.id, event });
               }
             }}
@@ -274,26 +295,26 @@ const ActivateRoundDialog: React.FC<{
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Activate Round Flow</DialogTitle>
+      <DialogTitle>Ativar Fluxo de Rodada</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
-            label="League External ID"
+            label="ID Externo da Liga"
             type="number"
             value={leagueExternalId}
             onChange={(e) => setLeagueExternalId(e.target.value)}
-            helperText="71 = Brasileirão Serie A"
+            helperText="71 = Brasileirão Série A"
             fullWidth
           />
           <TextField
-            label="Season Year"
+            label="Ano da Temporada"
             type="number"
             value={seasonYear}
             onChange={(e) => setSeasonYear(e.target.value)}
             fullWidth
           />
           <TextField
-            label="Round Number"
+            label="Número da Rodada"
             type="number"
             value={roundNumber}
             onChange={(e) => setRoundNumber(e.target.value)}
@@ -306,9 +327,9 @@ const ActivateRoundDialog: React.FC<{
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Cancelar</Button>
         <Button variant="contained" onClick={submit} disabled={isPending}>
-          {isPending ? 'Activating...' : 'Activate'}
+          {isPending ? 'Ativando...' : 'Ativar'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -361,43 +382,43 @@ const EditDeadlinesDialog: React.FC<{
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Edit Deadlines — Round {roundFlow.roundNumber}</DialogTitle>
+      <DialogTitle>Editar Prazos — Rodada {roundFlow.roundNumber}</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
-            label="Live Scoring Start"
+            label="Início da Pontuação Ao Vivo"
             type="datetime-local"
             value={liveStart}
             onChange={(e) => setLiveStart(e.target.value)}
             disabled={!!roundFlow.liveScoringStartedAt}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             fullWidth
           />
           <TextField
-            label="Round End (scoring)"
+            label="Fim da Rodada (pontuação)"
             type="datetime-local"
             value={roundEnd}
             onChange={(e) => setRoundEnd(e.target.value)}
             disabled={!!roundFlow.scoredAt}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             fullWidth
           />
           <TextField
-            label="Waiver Window Open"
+            label="Abertura do Mercado"
             type="datetime-local"
             value={waiverOpen}
             onChange={(e) => setWaiverOpen(e.target.value)}
             disabled={!!roundFlow.waiverWindowOpenedAt}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             fullWidth
           />
           <TextField
-            label="Waiver Resolve"
+            label="Fechamento do Mercado"
             type="datetime-local"
             value={waiverResolve}
             onChange={(e) => setWaiverResolve(e.target.value)}
             disabled={!!roundFlow.waiverResolvedAt}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             fullWidth
           />
           {errorMessage && (
@@ -406,9 +427,9 @@ const EditDeadlinesDialog: React.FC<{
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>Cancelar</Button>
         <Button variant="contained" onClick={submit} disabled={isPending}>
-          {isPending ? 'Saving...' : 'Save'}
+          {isPending ? 'Salvando...' : 'Salvar'}
         </Button>
       </DialogActions>
     </Dialog>
