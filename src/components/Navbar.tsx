@@ -50,7 +50,17 @@ const Navbar: React.FC = () => {
             <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
               Olá, {user.firstName}!
             </Typography>
-            <Button 
+            {user.isAdmin && (
+              <Button
+                component={Link}
+                to="/admin/round-flow"
+                variant="text"
+                sx={{ textTransform: 'none', fontWeight: 'bold', color: '#1a1a1a' }}
+              >
+                Admin
+              </Button>
+            )}
+            <Button
               variant="outlined"
               onClick={logout}
               sx={{
