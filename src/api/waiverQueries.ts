@@ -105,6 +105,29 @@ export function useWaiverWindowStatus(leagueExternalId: number | null | undefine
   });
 }
 
+export interface MarketTransaction {
+  id: string;
+  type: 'WAIVER_WIN' | 'FREE_AGENT_ADD' | 'DROP' | 'DRAFT_PICK';
+  transactedAt: string;
+  userTeam: { id: number; name: string };
+  playerIn: { id: number; name: string; photo: string; position: string } | null;
+  playerOut: { id: number; name: string; photo: string; position: string } | null;
+  bidAmount: string | null;
+}
+
+export function useMarketHistory(seasonId: string | undefined) {
+  return useQuery<MarketTransaction[]>({
+    queryKey: ['marketHistory', seasonId],
+    queryFn: async () => {
+      const res = await axios.get(apiConfig.endpoints.marketTransactions.bySeason(seasonId!), {
+        headers: authHeader(),
+      });
+      return res.data;
+    },
+    enabled: !!seasonId,
+  });
+}
+
 export function useCancelWaiverClaim(seasonId: string | undefined) {
   const qc = useQueryClient();
   return useMutation<void, Error, string>({

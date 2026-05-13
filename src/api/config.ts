@@ -124,6 +124,9 @@ const endpoints = {
     triggerWaiverResolve: (id: number) => `${API_BASE_URL}/round-flow/${id}/trigger-waiver-resolve`,
     cancel: (id: number) => `${API_BASE_URL}/round-flow/${id}/cancel`,
   },
+  marketTransactions: {
+    bySeason: (seasonId: string) => `${API_BASE_URL}/market-transactions/season/${seasonId}`,
+  },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,

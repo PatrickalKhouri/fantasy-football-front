@@ -18,7 +18,7 @@ import DraftTab from '../components/DraftTab';
 import ScheduleTab from '../components/ScheduleTab';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { useCurrentSeason } from '../api/currentSeasonQueries';
-import { useWaiverClaims, useWaiverBudgets, useWaiverWindowStatus, useWaiverHistory } from '../api/waiverQueries';
+import { useWaiverClaims, useWaiverBudgets, useWaiverWindowStatus, useMarketHistory } from '../api/waiverQueries';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
@@ -54,7 +54,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { data: waiverBudgets } = useWaiverBudgets(
     selectedTab === 'players' && fantasyLeagueSeason?.id ? fantasyLeagueSeason.id : undefined,
   );
-  const { data: waiverHistory = [], isLoading: isHistoryLoading } = useWaiverHistory(
+  const { data: marketHistory = [], isLoading: isHistoryLoading } = useMarketHistory(
     selectedTab === 'players' ? fantasyLeagueSeason?.id : undefined,
   );
 
@@ -146,7 +146,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
       <WaiverHistoryModal
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        claims={waiverHistory}
+        transactions={marketHistory}
         isLoading={isHistoryLoading}
       />
 
