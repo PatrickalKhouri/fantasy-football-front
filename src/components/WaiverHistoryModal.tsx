@@ -31,7 +31,83 @@ function typeLabel(type: MarketTransaction['type']): { label: string; color: 'de
     case 'FREE_AGENT_ADD': return { label: 'Mercado', color: 'success' };
     case 'DROP': return { label: 'Liberação', color: 'warning' };
     case 'DRAFT_PICK': return { label: 'Draft', color: 'default' };
+    case 'TRADE': return { label: 'Troca', color: 'primary' };
+    default: return { label: 'Transação', color: 'default' };
   }
+}
+
+interface TradeTeamEntry {
+  teamName: string;
+  received: NonNullable<MarketTransaction['playerIn']>[];
+  sent: NonNullable<MarketTransaction['playerOut']>[];
+  dropped: NonNullable<MarketTransaction['playerOut']>[];
+}
+
+interface TradeGroup {
+  tradeId: string;
+  teams: TradeTeamEntry[];
+}
+
+// Group by tradeId: one TradeGroup per trade, one TradeTeamEntry per team within it.
+function groupByTradeId(items: MarketTransaction[]): Array<MarketTransaction | TradeGroup> {
+  const tradeGroups = new Map<string, TradeGroup>();
+  const result: Array<MarketTransaction | TradeGroup> = [];
+
+  for (const t of items) {
+    if ((t.type === 'TRADE' || t.type === 'DROP') && t.tradeId) {
+      if (!tradeGroups.has(t.tradeId)) {
+        const group: TradeGroup = { tradeId: t.tradeId, teams: [] };
+        tradeGroups.set(t.tradeId, group);
+        result.push(group);
+      }
+      const group = tradeGroups.get(t.tradeId)!;
+      let entry = group.teams.find((e) => e.teamName === t.userTeam.name);
+      if (!entry) {
+        entry = { teamName: t.userTeam.name, received: [], sent: [], dropped: [] };
+        group.teams.push(entry);
+      }
+      if (t.type === 'TRADE') {
+        if (t.playerIn) entry.received.push(t.playerIn);
+        if (t.playerOut) entry.sent.push(t.playerOut);
+      } else if (t.type === 'DROP' && t.playerOut) {
+        entry.dropped.push(t.playerOut);
+      }
+    } else {
+      result.push(t);
+    }
+  }
+
+  return result;
+}
+
+function TradeGroupRow({ group }: { group: TradeGroup }) {
+  return (
+    <Box py={1}>
+      <Box display="flex" alignItems="center" gap={0.75} mb={0.5}>
+        <Chip label="Troca" color="primary" size="small" sx={{ height: 18, fontSize: 11 }} />
+      </Box>
+      {group.teams.map((entry) => (
+        <Box key={entry.teamName} display="flex" alignItems="flex-start" gap={1.5} mb={0.5}>
+          <Avatar src={entry.received[0]?.photo ?? entry.sent[0]?.photo} sx={{ width: 28, height: 28, mt: 0.25 }} />
+          <Box flex={1} minWidth={0}>
+            <Typography variant="body2" fontWeight={600}>{entry.teamName}</Typography>
+            <Typography variant="caption" color="text.secondary" component="div">
+              {entry.received.length > 0 && (
+                <span>recebeu <strong>{entry.received.map((p) => p.name).join(', ')}</strong></span>
+              )}
+              {entry.received.length > 0 && entry.sent.length > 0 && <span> · </span>}
+              {entry.sent.length > 0 && (
+                <span>enviou <strong>{entry.sent.map((p) => p.name).join(', ')}</strong></span>
+              )}
+              {entry.dropped.length > 0 && (
+                <span> · liberou <strong>{entry.dropped.map((p) => p.name).join(', ')}</strong></span>
+              )}
+            </Typography>
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
 }
 
 function TransactionRow({ t }: { t: MarketTransaction }) {
@@ -97,9 +173,13 @@ export default function WaiverHistoryModal({ open, onClose, transactions, isLoad
                 >
                   {new Date(day + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </Typography>
-                {items.map((t) => (
-                  <TransactionRow key={t.id} t={t} />
-                ))}
+                {groupByTradeId(items).map((item, idx) =>
+                  'teams' in item ? (
+                    <TradeGroupRow key={item.tradeId} group={item} />
+                  ) : (
+                    <TransactionRow key={item.id} t={item} />
+                  )
+                )}
                 {gi < groups.length - 1 && <Divider sx={{ my: 1 }} />}
               </Box>
             ))}

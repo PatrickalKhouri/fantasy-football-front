@@ -30,6 +30,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Snackbar,
 } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LockIcon from '@mui/icons-material/Lock';
@@ -123,6 +124,7 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [selectedPlayerName, setSelectedPlayerName] = useState<string>('')
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [dropError, setDropError] = useState<string | null>(null);
 
   const [addOpen, setAddOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<null | {
@@ -169,11 +171,14 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
 
   const { mutate: removePlayer, isPending: isRemovingPlayer } = useRemovePlayer({
     onSuccess: () => {
-      refetch?.();        
-      refetchPlayers?.();   
+      refetch?.();
+      refetchPlayers?.();
       setSelectedSlotId(null);
       setSelectedPlayerName('');
       setConfirmOpen(false);
+    },
+    onError: (e: any) => {
+      setDropError(e?.response?.data?.message ?? e?.message ?? 'Erro ao liberar jogador');
     },
   });
 
@@ -620,18 +625,29 @@ const PlayersList: React.FC<PlayersListProps> = ({ fantasyLeague, seasonYear, us
         />
       )}
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+      <Dialog open={confirmOpen} onClose={() => { setConfirmOpen(false); setDropError(null); }}>
         <DialogTitle>Confirmar remoção</DialogTitle>
         <DialogContent>
-          Tem certeza que deseja liberar {selectedPlayerName || 'este jogador'}?
+          {dropError && <Alert severity="error" sx={{ mb: 2 }}>{dropError}</Alert>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
-          <Button onClick={handleConfirmRemove} color="error" variant="contained">
+          <Button onClick={() => { setConfirmOpen(false); setDropError(null); }}>Cancelar</Button>
+          <Button onClick={handleConfirmRemove} color="error" variant="contained" disabled={isRemovingPlayer || !!dropError}>
             Liberar
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={!!dropError && !confirmOpen}
+        autoHideDuration={5000}
+        onClose={() => setDropError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setDropError(null)} variant="filled">
+          {dropError}
+        </Alert>
+      </Snackbar>
 
       <TablePagination
         component="div"

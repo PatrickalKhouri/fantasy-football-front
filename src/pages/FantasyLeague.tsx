@@ -16,6 +16,7 @@ import { useFindUserFantasyLeagueTeam } from '../api/userTeamsQueries';
 import Loading from '../components/Loading';
 import DraftTab from '../components/DraftTab';
 import ScheduleTab from '../components/ScheduleTab';
+import TradesTab from '../components/TradesTab';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { useCurrentSeason } from '../api/currentSeasonQueries';
 import { useWaiverClaims, useWaiverBudgets, useWaiverWindowStatus, useMarketHistory } from '../api/waiverQueries';
@@ -138,7 +139,17 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
               <PlayersList fantasyLeague={fantasyLeague} seasonYear={seasonYear} userTeamId={userTeam.id} seasonId={fantasyLeagueSeason?.id} />
             </Box>
           )}
-          {selectedTab === 'trades' && <div>Trades UI</div>}
+          {selectedTab === 'trades' && (
+            <TradesTab
+              seasonId={fantasyLeagueSeason?.id}
+              seasonYear={seasonYear}
+              userTeam={userTeam}
+              fantasyLeague={fantasyLeague}
+              currentUserId={currentUserId}
+              currentRound={fantasyLeagueSeason?.currentRound}
+              tradeDeadlineRound={fantasyLeagueSeason?.tradeDeadlineRound}
+            />
+          )}
           {selectedTab === 'scores' && <div>Scores table</div>}
         </Box>
       </Box>
