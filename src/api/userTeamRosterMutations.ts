@@ -46,18 +46,25 @@ export const useReplacePlayer = ({ onSuccess, onError }: { onSuccess: () => void
   });
 };
 
-export const useRemovePlayer = ({ onSuccess }: { onSuccess: () => void }) => {
-    return useMutation({
-      mutationFn: (rosterId: number) =>
-        axios.delete(`${apiConfig.endpoints.usersTeamsRoster.deletePlayer(rosterId)}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }),
-      onSuccess,
-    });
-  };
+export const useRemovePlayer = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess: () => void;
+  onError?: (e: any) => void;
+}) => {
+  return useMutation({
+    mutationFn: (rosterId: number) =>
+      axios.delete(`${apiConfig.endpoints.usersTeamsRoster.deletePlayer(rosterId)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }),
+    onSuccess,
+    onError,
+  });
+};
   
 
   export const useMovePlayer = ({ onSuccess }: { onSuccess: () => void }) => {

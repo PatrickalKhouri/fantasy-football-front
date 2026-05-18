@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { OpponentInfo } from '../utils/matchUtils';
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -11,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -159,12 +161,16 @@ const PlayerStatsModal: React.FC<Props> = ({
   const { data: history, isLoading } = usePlayerHistory(playerId, seasonId);
   const [selectedRow, setSelectedRow] = useState<PlayerHistoryRow | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [dropError, setDropError] = useState<string | null>(null);
 
   const { mutate: removePlayer, isPending: isReleasing } = useRemovePlayer({
     onSuccess: () => {
       setConfirmOpen(false);
       refetch?.();
       onClose();
+    },
+    onError: (e: any) => {
+      setDropError(e?.response?.data?.message ?? e?.message ?? 'Erro ao liberar jogador');
     },
   });
 
@@ -366,23 +372,34 @@ const PlayerStatsModal: React.FC<Props> = ({
         )}
       </Dialog>
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+      <Dialog open={confirmOpen} onClose={() => { setConfirmOpen(false); setDropError(null); }}>
         <DialogTitle>Confirmar remoção</DialogTitle>
         <DialogContent>
-          Tem certeza que deseja liberar {playerName || 'este jogador'}?
+          {dropError && <Alert severity="error" sx={{ mb: 2 }}>{dropError}</Alert>}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
+          <Button onClick={() => { setConfirmOpen(false); setDropError(null); }}>Cancelar</Button>
           <Button
             onClick={() => { if (slotId) removePlayer(slotId); }}
             color="error"
             variant="contained"
-            disabled={isReleasing}
+            disabled={isReleasing || !!dropError}
           >
             Liberar
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={!!dropError && !confirmOpen}
+        autoHideDuration={5000}
+        onClose={() => setDropError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setDropError(null)} variant="filled">
+          {dropError}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

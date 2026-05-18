@@ -107,7 +107,8 @@ export function useWaiverWindowStatus(leagueExternalId: number | null | undefine
 
 export interface MarketTransaction {
   id: string;
-  type: 'WAIVER_WIN' | 'FREE_AGENT_ADD' | 'DROP' | 'DRAFT_PICK';
+  type: 'WAIVER_WIN' | 'FREE_AGENT_ADD' | 'DROP' | 'DRAFT_PICK' | 'TRADE';
+  tradeId: string | null;
   transactedAt: string;
   userTeam: { id: number; name: string };
   playerIn: { id: number; name: string; photo: string; position: string } | null;

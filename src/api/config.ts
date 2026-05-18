@@ -127,6 +127,16 @@ const endpoints = {
   marketTransactions: {
     bySeason: (seasonId: string) => `${API_BASE_URL}/market-transactions/season/${seasonId}`,
   },
+  trades: {
+    bySeason: (seasonId: string) => `${API_BASE_URL}/trades/season/${seasonId}`,
+    byId: (id: string) => `${API_BASE_URL}/trades/${id}`,
+    propose: `${API_BASE_URL}/trades`,
+    accept: (id: string) => `${API_BASE_URL}/trades/${id}/accept`,
+    reject: (id: string) => `${API_BASE_URL}/trades/${id}/reject`,
+    cancel: (id: string) => `${API_BASE_URL}/trades/${id}/cancel`,
+    veto: (id: string) => `${API_BASE_URL}/trades/${id}/veto`,
+    process: (id: string) => `${API_BASE_URL}/trades/${id}/process`,
+  },
   currentSeason: `${API_BASE_URL}/current-season`,
   usersTeamsRoster: {
     addPlayer: `${API_BASE_URL}/user-team-rosters`,
