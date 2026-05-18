@@ -17,7 +17,6 @@ import {
   Avatar,
   Chip,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useFantasyLeagueTeams } from '../api/fantasyLeagueQueries';
 import { useRoster } from './userTeamRosterQueries';
@@ -38,17 +37,32 @@ interface LegDraft {
   receiverTeamId: number;
   playerId: number | '';
   receiverPlayerId: number | '';
+  dropPlayerId: number | '';
 }
 
+const positionSlotMap: Record<string, string[]> = {
+  Defense: ['DEF'],
+  Defender: ['DEF'],
+  Midfielder: ['MEI', 'FLEX'],
+  Attacker: ['ATA', 'FLEX'],
+  Forward: ['ATA', 'FLEX'],
+  Striker: ['ATA', 'FLEX'],
+  Winger: ['ATA', 'FLEX'],
+};
+
+// Sub-component: player selector from a given team's roster
 const PlayerSelectRow: React.FC<{
   teamId: number;
   seasonYear: number;
   value: number | '';
   onChange: (playerId: number | '') => void;
   label: string;
-}> = ({ teamId, seasonYear, value, onChange, label }) => {
+  excludePlayerIds?: number[];
+}> = ({ teamId, seasonYear, value, onChange, label, excludePlayerIds = [] }) => {
   const { data: roster = [] } = useRoster({ userTeamId: teamId, seasonYear });
-  const occupied = roster.filter((s: any) => s.player);
+  const occupied = roster.filter(
+    (s: any) => s.player && !excludePlayerIds.includes(s.player.id),
+  );
 
   return (
     <FormControl fullWidth size="small">
@@ -73,6 +87,154 @@ const PlayerSelectRow: React.FC<{
   );
 };
 
+// Sub-component: drop selector shown when proposer has no free slot for incoming player
+const DropSelector: React.FC<{
+  myUserTeamId: number;
+  seasonYear: number;
+  incomingPosition: string;
+  outgoingPlayerIds: number[];
+  value: number | '';
+  onChange: (id: number | '') => void;
+}> = ({ myUserTeamId, seasonYear, incomingPosition, outgoingPlayerIds, value, onChange }) => {
+  const { data: roster = [] } = useRoster({ userTeamId: myUserTeamId, seasonYear });
+
+  const compatibleSlots = positionSlotMap[incomingPosition] ?? [];
+
+  const hasOpenSlot = roster.some((s: any) => {
+    const free = !s.player || outgoingPlayerIds.includes(s.player?.id);
+    return free && s.allowedPositions?.some((p: string) => compatibleSlots.includes(p));
+  });
+
+  if (hasOpenSlot) return null;
+
+  const droppable = roster.filter(
+    (s: any) =>
+      s.player &&
+      !outgoingPlayerIds.includes(s.player.id) &&
+      s.allowedPositions?.some((p: string) => compatibleSlots.includes(p)),
+  );
+
+  return (
+    <Box mt={1}>
+      <Alert severity="warning" sx={{ mb: 1 }}>
+        Você não tem vaga disponível para este jogador. Selecione um para liberar caso a troca seja concluída.
+      </Alert>
+      <FormControl fullWidth size="small">
+        <InputLabel>Liberar ao receber</InputLabel>
+        <Select
+          value={value}
+          label="Liberar ao receber"
+          onChange={(e) => onChange(e.target.value as number | '')}
+        >
+          <MenuItem value=""><em>Selecionar jogador para liberar</em></MenuItem>
+          {droppable.map((s: any) => (
+            <MenuItem key={s.player.id} value={s.player.id}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Avatar src={s.player.photo} sx={{ width: 20, height: 20 }} />
+                <Typography variant="body2">{s.player.name}</Typography>
+                <Chip label={s.slot} size="small" sx={{ ml: 'auto' }} />
+              </Box>
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  );
+};
+
+// Tiny hook to get a player's position from the roster
+const usePlayerPosition = (teamId: number, seasonYear: number, playerId: number | '') => {
+  const { data: roster = [] } = useRoster({ userTeamId: teamId, seasonYear });
+  if (!playerId) return null;
+  const slot = roster.find((s: any) => s.player?.id === playerId);
+  return slot?.player?.position ?? null;
+};
+
+const LegRow: React.FC<{
+  leg: LegDraft;
+  index: number;
+  otherTeams: { id: number; name: string; user?: { firstName: string; lastName: string } }[];
+  myUserTeamId: number;
+  seasonYear: number;
+  allLegs: LegDraft[];
+  onChange: (patch: Partial<LegDraft>) => void;
+  onRemove: () => void;
+  showRemove: boolean;
+}> = ({ leg, index, otherTeams, myUserTeamId, seasonYear, allLegs, onChange, onRemove, showRemove }) => {
+  // outgoing player IDs from all legs (so their slots count as free)
+  const outgoingPlayerIds = allLegs
+    .map((l) => l.playerId)
+    .filter((id): id is number => !!id);
+
+  const receiverPosition = usePlayerPosition(leg.receiverTeamId || 0, seasonYear, leg.receiverPlayerId);
+
+  return (
+    <Box mb={3}>
+      {index > 0 && <Divider sx={{ mb: 2 }} />}
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+        <Typography variant="subtitle2">Troca {index + 1}</Typography>
+        {showRemove && (
+          <IconButton size="small" onClick={onRemove}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
+
+      <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+        <InputLabel>Trocar com</InputLabel>
+        <Select
+          value={leg.receiverTeamId || ''}
+          label="Trocar com"
+          onChange={(e) => onChange({ receiverTeamId: Number(e.target.value), receiverPlayerId: '', dropPlayerId: '' })}
+        >
+          {otherTeams.map((t) => (
+            <MenuItem key={t.id} value={t.id}>
+              {t.name} ({t.user?.firstName} {t.user?.lastName})
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <Box display="flex" gap={1} alignItems="center">
+        <Box flex={1}>
+          <PlayerSelectRow
+            teamId={myUserTeamId}
+            seasonYear={seasonYear}
+            value={leg.playerId}
+            onChange={(v) => onChange({ playerId: v })}
+            label="Você envia"
+          />
+        </Box>
+        <Typography sx={{ px: 1 }}>⇄</Typography>
+        <Box flex={1}>
+          {leg.receiverTeamId ? (
+            <PlayerSelectRow
+              teamId={leg.receiverTeamId}
+              seasonYear={seasonYear}
+              value={leg.receiverPlayerId}
+              onChange={(v) => onChange({ receiverPlayerId: v, dropPlayerId: '' })}
+              label="Você recebe"
+            />
+          ) : (
+            <Typography variant="body2" color="text.secondary">Selecione um time primeiro</Typography>
+          )}
+        </Box>
+      </Box>
+
+      {leg.receiverPlayerId && receiverPosition && (
+        <DropSelector
+          myUserTeamId={myUserTeamId}
+          seasonYear={seasonYear}
+          incomingPosition={receiverPosition}
+          outgoingPlayerIds={outgoingPlayerIds}
+          value={leg.dropPlayerId}
+          onChange={(v) => onChange({ dropPlayerId: v })}
+        />
+      )}
+    </Box>
+  );
+};
+
 const ProposeTradeModal: React.FC<Props> = ({
   open,
   onClose,
@@ -84,21 +246,18 @@ const ProposeTradeModal: React.FC<Props> = ({
   const { data: allTeams = [] } = useFantasyLeagueTeams(fantasyLeague.id);
   const otherTeams = allTeams.filter((t) => t.id !== myUserTeamId);
 
-  const [legs, setLegs] = useState<LegDraft[]>([
-    { senderTeamId: myUserTeamId, receiverTeamId: otherTeams[0]?.id ?? 0, playerId: '', receiverPlayerId: '' },
-  ]);
+  const emptyLeg = (): LegDraft => ({
+    senderTeamId: myUserTeamId,
+    receiverTeamId: otherTeams[0]?.id ?? 0,
+    playerId: '',
+    receiverPlayerId: '',
+    dropPlayerId: '',
+  });
+
+  const [legs, setLegs] = useState<LegDraft[]>([emptyLeg()]);
   const [error, setError] = useState<string | null>(null);
 
   const proposeTrade = useProposeTrade(seasonId);
-
-  const addLeg = () => {
-    setLegs((prev) => [
-      ...prev,
-      { senderTeamId: myUserTeamId, receiverTeamId: otherTeams[0]?.id ?? 0, playerId: '', receiverPlayerId: '' },
-    ]);
-  };
-
-  const removeLeg = (i: number) => setLegs((prev) => prev.filter((_, idx) => idx !== i));
 
   const updateLeg = (i: number, patch: Partial<LegDraft>) =>
     setLegs((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
@@ -112,15 +271,18 @@ const ProposeTradeModal: React.FC<Props> = ({
       if (!leg.receiverPlayerId) { setError('Selecione um jogador para receber em cada troca'); return; }
       if (!leg.receiverTeamId) { setError('Selecione um time para trocar em cada troca'); return; }
 
+      // My player goes to them
       tradeLegs.push({
         senderTeamId: myUserTeamId,
         receiverTeamId: leg.receiverTeamId,
         playerId: leg.playerId as number,
       });
+      // Their player comes to me — attach dropPlayerId if I need to free a slot
       tradeLegs.push({
         senderTeamId: leg.receiverTeamId,
         receiverTeamId: myUserTeamId,
         playerId: leg.receiverPlayerId as number,
+        dropPlayerId: leg.dropPlayerId ? (leg.dropPlayerId as number) : undefined,
       });
     }
 
@@ -128,7 +290,7 @@ const ProposeTradeModal: React.FC<Props> = ({
       { seasonId, proposedByUserTeamId: myUserTeamId, legs: tradeLegs },
       {
         onSuccess: () => {
-          setLegs([{ senderTeamId: myUserTeamId, receiverTeamId: otherTeams[0]?.id ?? 0, playerId: '', receiverPlayerId: '' }]);
+          setLegs([emptyLeg()]);
           onClose();
         },
         onError: (err: any) => {
@@ -145,63 +307,20 @@ const ProposeTradeModal: React.FC<Props> = ({
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
         {legs.map((leg, i) => (
-          <Box key={i} mb={3}>
-            {i > 0 && <Divider sx={{ mb: 2 }} />}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-              <Typography variant="subtitle2">Troca {i + 1}</Typography>
-              {legs.length > 1 && (
-                <IconButton size="small" onClick={() => removeLeg(i)}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
-
-            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
-              <InputLabel>Trocar com</InputLabel>
-              <Select
-                value={leg.receiverTeamId || ''}
-                label="Trocar com"
-                onChange={(e) => updateLeg(i, { receiverTeamId: Number(e.target.value), receiverPlayerId: '' })}
-              >
-                {otherTeams.map((t) => (
-                  <MenuItem key={t.id} value={t.id}>
-                    {t.name} ({t.user?.firstName} {t.user?.lastName})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <Box display="flex" gap={1} alignItems="center">
-              <Box flex={1}>
-                <PlayerSelectRow
-                  teamId={myUserTeamId}
-                  seasonYear={seasonYear}
-                  value={leg.playerId}
-                  onChange={(v) => updateLeg(i, { playerId: v })}
-                  label="Você envia"
-                />
-              </Box>
-              <Typography sx={{ px: 1 }}>⇄</Typography>
-              <Box flex={1}>
-                {leg.receiverTeamId ? (
-                  <PlayerSelectRow
-                    teamId={leg.receiverTeamId}
-                    seasonYear={seasonYear}
-                    value={leg.receiverPlayerId}
-                    onChange={(v) => updateLeg(i, { receiverPlayerId: v })}
-                    label="Você recebe"
-                  />
-                ) : (
-                  <Typography variant="body2" color="text.secondary">Selecione um time primeiro</Typography>
-                )}
-              </Box>
-            </Box>
-          </Box>
+          <LegRow
+            key={i}
+            leg={leg}
+            index={i}
+            otherTeams={otherTeams}
+            myUserTeamId={myUserTeamId}
+            seasonYear={seasonYear}
+            allLegs={legs}
+            onChange={(patch) => updateLeg(i, patch)}
+            onRemove={() => setLegs((prev) => prev.filter((_, idx) => idx !== i))}
+            showRemove={legs.length > 1}
+          />
         ))}
 
-        <Button startIcon={<AddIcon />} onClick={addLeg} size="small" sx={{ mt: 1 }}>
-          Adicionar outro par de troca
-        </Button>
       </DialogContent>
 
       <DialogActions>

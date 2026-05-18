@@ -20,6 +20,7 @@ import TradesTab from '../components/TradesTab';
 import { useFantasyLeagueSeasons } from '../api/useFantasyLeagueSeasons';
 import { useCurrentSeason } from '../api/currentSeasonQueries';
 import { useWaiverClaims, useWaiverBudgets, useWaiverWindowStatus, useMarketHistory } from '../api/waiverQueries';
+import { useTrades } from '../api/tradeQueries';
 
 const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { fantasyLeagueId } = useParams<{ fantasyLeagueId: string }>();
@@ -58,6 +59,13 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
   const { data: marketHistory = [], isLoading: isHistoryLoading } = useMarketHistory(
     selectedTab === 'players' ? fantasyLeagueSeason?.id : undefined,
   );
+
+  const { data: trades = [] } = useTrades(fantasyLeagueSeason?.id);
+  const pendingTradesCount = trades.filter(
+    (t) =>
+      t.status === 'PENDING_ACCEPTANCE' &&
+      t.participants.some((p) => p.userTeam.id === userTeam?.id && !p.accepted),
+  ).length;
 
 
   const handleInvite = (email: string) => {
@@ -111,7 +119,7 @@ const FantasyLeaguePage = ({ currentUserId }: { currentUserId: number }) => {
         px={isMobile ? 2 : 4}
         py={isMobile ? 2 : 4}
       >
-        <LeagueTabs selected={selectedTab} onChange={setSelectedTab} />
+        <LeagueTabs selected={selectedTab} onChange={setSelectedTab} pendingTradesCount={pendingTradesCount} />
 
         <Box mt={4}>
           {selectedTab === 'draft' && <DraftTab fantasyLeague={fantasyLeague} currentUserId={currentUserId} />}

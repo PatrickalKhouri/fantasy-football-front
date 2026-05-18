@@ -58,8 +58,8 @@ const StandingsTable: React.FC<Props> = ({ seasonId, userTeamId }) => {
             {headerCell('V')}
             {headerCell('E')}
             {headerCell('D')}
-            {headerCell('GP')}
-            {headerCell('GC')}
+            {headerCell('PP')}
+            {headerCell('PC')}
           </TableRow>
         </TableHead>
         <TableBody>

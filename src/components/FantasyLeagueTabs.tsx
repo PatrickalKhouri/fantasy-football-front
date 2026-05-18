@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Button, Stack } from '@mui/material';
+import React from 'react';
+import { Box, Button, Stack, Badge } from '@mui/material';
 
 const tabs = [
   { label: 'Draft', key: 'draft' },
@@ -14,31 +14,38 @@ const tabs = [
 interface FantasyLeagueTabsProps {
   selected: string;
   onChange: (key: string) => void;
+  pendingTradesCount?: number;
 }
 
-const FantasyLeagueTabs: React.FC<FantasyLeagueTabsProps> = ({ selected, onChange }) => {
+const FantasyLeagueTabs: React.FC<FantasyLeagueTabsProps> = ({ selected, onChange, pendingTradesCount = 0 }) => {
   return (
     <Box sx={{ bgcolor: 'background.paper', py: 2 }}>
       <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
         {tabs.map((tab) => (
-          <Button
+          <Badge
             key={tab.key}
-            variant={selected === tab.key ? 'contained' : 'outlined'}
-            onClick={() => onChange(tab.key)}
-            sx={{
-              borderRadius: 50,
-              px: 3,
-              textTransform: 'none',
-              fontWeight: 600,
-              bgcolor: selected === tab.key ? 'primary.main' : 'transparent',
-              color: selected === tab.key ? '#fff' : 'text.primary',
-              '&:hover': {
-                bgcolor: selected === tab.key ? 'primary.dark' : 'action.hover',
-              },
-            }}
+            badgeContent={tab.key === 'trades' ? pendingTradesCount : 0}
+            color="error"
+            overlap="rectangular"
           >
-            {tab.label}
-          </Button>
+            <Button
+              variant={selected === tab.key ? 'contained' : 'outlined'}
+              onClick={() => onChange(tab.key)}
+              sx={{
+                borderRadius: 50,
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+                bgcolor: selected === tab.key ? 'primary.main' : 'transparent',
+                color: selected === tab.key ? '#fff' : 'text.primary',
+                '&:hover': {
+                  bgcolor: selected === tab.key ? 'primary.dark' : 'action.hover',
+                },
+              }}
+            >
+              {tab.label}
+            </Button>
+          </Badge>
         ))}
       </Stack>
     </Box>

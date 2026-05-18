@@ -112,6 +112,11 @@ const TradeCard: React.FC<{
               <Typography component="span" variant="caption">
                 {leg.senderTeam.name} → {leg.receiverTeam.name}
               </Typography>
+              {leg.dropPlayer && (
+                <Typography component="span" variant="caption" color="warning.main">
+                  {' · libera '}<strong>{leg.dropPlayer.name}</strong>
+                </Typography>
+              )}
             </Typography>
           </Box>
         ))}
@@ -244,7 +249,7 @@ const TradesTab: React.FC<Props> = ({
   }
 
   const active = trades.filter((t) => t.status === 'PENDING_ACCEPTANCE' || t.status === 'ACCEPTED');
-  const archived = trades.filter((t) => t.status !== 'PENDING_ACCEPTANCE' && t.status !== 'ACCEPTED');
+  const archived = trades.filter((t) => t.status === 'COMPLETED' || t.status === 'VETOED');
 
 
   return (

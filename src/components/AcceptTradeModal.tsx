@@ -39,9 +39,13 @@ const IncomingLegRow: React.FC<{
   const { data: roster = [] } = useRoster({ userTeamId: myUserTeamId, seasonYear });
 
   const positionSlotMap: Record<string, string[]> = {
+    Defense: ['DEF'],
     Defender: ['DEF'],
     Midfielder: ['MEI', 'FLEX'],
     Attacker: ['ATA', 'FLEX'],
+    Forward: ['ATA', 'FLEX'],
+    Striker: ['ATA', 'FLEX'],
+    Winger: ['ATA', 'FLEX'],
   };
   const compatibleSlots = positionSlotMap[leg.player.position] ?? [];
 

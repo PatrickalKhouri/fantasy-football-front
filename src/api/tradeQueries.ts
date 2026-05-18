@@ -77,6 +77,7 @@ export interface TradeLegInput {
   senderTeamId: number;
   receiverTeamId: number;
   playerId: number;
+  dropPlayerId?: number;
 }
 
 export interface ProposeTradeInput {
